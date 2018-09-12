@@ -16,7 +16,7 @@ services:
     service_id: github_integrated
     parameters:
       repo_name: 'secure-file-storage'
-      repo_url: 'https://github.ibm.com/Bluemix/secure-file-storage'
+      repo_url: 'https://github.com/IBM-Cloud/secure-file-storage'
       type: clone
       has_issues: false
       enable_traceability: false
