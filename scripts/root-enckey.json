@@ -1,0 +1,14 @@
+{
+     "metadata": { 
+        "collectionType" : "application/vnd.ibm.kms.key+json",
+         "collectionTotal": 1
+    }, 
+    "resources": [
+        { 
+      "type": "application/vnd.ibm.kms.key+json", 
+      "name": "secure-file-storage-root-enckey", 
+      "description": "root key for secure file storage tutorial", 
+      "extractable": false
+        }
+    ]
+}

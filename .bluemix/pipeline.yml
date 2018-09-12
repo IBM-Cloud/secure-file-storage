@@ -1,0 +1,88 @@
+---
+stages:
+- name: BUILD
+  inputs:
+  - type: git
+    branch: ${GIT_BRANCH}
+    service: ${GIT_REPO}
+  triggers:
+  - type: commit
+  jobs:
+  - name: Build Docker image
+    type: builder
+    build_type: cr
+    # artifact_dir: output
+    target:
+      region_id: ${REGISTRY_REGION_ID}
+      api_key: ${API_KEY}
+    namespace: ${REGISTRY_NAMESPACE}
+    image_name: ${IMAGE_NAME}
+    script: |
+      #!/bin/bash
+      ./scripts/pipeline-BUILD.sh
+- name: DEPLOY
+  inputs:
+  - type: job
+    stage: BUILD
+    job: Build Docker image
+  triggers:
+  - type: stage
+  properties:
+  - name: buildprops
+    value: build.properties
+    type: file
+  - name: TARGET_NAMESPACE
+    value: ${TARGET_NAMESPACE}
+    type: text
+  - name: TARGET_RESOURCE_GROUP
+    value: ${TARGET_RESOURCE_GROUP}
+    type: text
+  - name: COS_PLAN
+    value: "lite"
+    type: text
+  - name: APP_ID_PLAN
+    value: "lite"
+    type: text
+  jobs:
+  - name: Deploy
+    type: deployer
+    target:
+      region_id: ${TARGET_REGION_ID}
+      api_key: ${API_KEY}
+      kubernetes_cluster: ${TARGET_CLUSTER_NAME}
+    script: |
+      #!/bin/bash
+      wget https://clis.ng.bluemix.net/download/bluemix-cli/0.9.0/linux64
+      tar zxvf linux64
+      chmod +x ./Bluemix_CLI/bin/* ./Bluemix_CLI/bin/cfcli/*
+      export PATH=$PWD/Bluemix_CLI/bin:$PWD/Bluemix_CLI/bin/cfcli:$PATH
+      ibmcloud -v
+      ./scripts/pipeline-DEPLOY.sh
+- name: UNINSTALL (manual)
+  inputs:
+  - type: job
+    stage: BUILD
+    job: Build Docker image
+  properties:
+  - name: buildprops
+    value: build.properties
+    type: file
+  - name: TARGET_NAMESPACE
+    value: ${TARGET_NAMESPACE}
+    type: text
+  - name: TARGET_RESOURCE_GROUP
+    value: ${TARGET_RESOURCE_GROUP}
+    type: text
+  triggers:
+  - type: stage
+    enabled: false
+  jobs:
+  - name: Uninstall
+    type: deployer
+    target:
+      region_id: ${TARGET_REGION_ID}
+      api_key: ${API_KEY}
+      kubernetes_cluster: ${TARGET_CLUSTER_NAME}
+    script: |
+      #!/bin/bash
+      ./scripts/pipeline-UNINSTALL.sh

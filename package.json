@@ -1,0 +1,26 @@
+{
+  "name": "secure-file-storage",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": ">=8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IBM-Cloud/secure-file-storage.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@cloudant/cloudant": "^2.3.0",
+    "cookie-parser": "^1.4.3",
+    "dotenv": "^6.0.0",
+    "express": "^4.16.3",
+    "formidable": "^1.2.1",
+    "ibm-cos-sdk": "^1.2.3",
+    "jsonwebtoken": "^8.3.0"
+  }
+}

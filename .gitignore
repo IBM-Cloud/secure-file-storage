@@ -1,0 +1,13 @@
+/credentials.env
+/.env
+node_modules
+artifacts
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+local_yaml
+secure-file-storage.yaml

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html class="has-navbar-fixed-top">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Secure File Storage</title>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/buefy@0.6.6/lib/buefy.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
+  <style type="text/css">
+  </style>
+  <link href="app.css" rel="stylesheet">
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <nav class="navbar is-link is-fixed-top">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="">
+          Secure File Storage
+        </a>
+        <div class="navbar-burger burger" data-target="navbarExampleTransparentExample">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
+      <div id="navbarExampleTransparentExample" class="navbar-menu">
+        <div class="navbar-start">
+        </div>
+
+        <div class="navbar-end">
+          <div class="navbar-item" v-if="user">
+            <img v-if="user.picture" :src="user.picture">
+            <i v-if="!user.picture" class="fas fa-user"></i>
+            &nbsp;&nbsp;{{user.name}}
+          </div>
+          <a class="navbar-item" href="https://github.com/IBM-Cloud/secure-file-storage">
+            <span class="icon">
+              <i class="fab fa-github"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <section class="hero is-info">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title">
+            Store and access files securely
+          </h1>
+          <h2 class="subtitle tags">
+            <span class="tag is-white is-rounded">Kubernetes</span>
+            <span class="tag is-white is-rounded">Cloud Object Storage</span>
+            <span class="tag is-white is-rounded">App ID</span>
+            <span class="tag is-white is-rounded">Key Protect</span>
+            <span class="tag is-white is-rounded">Activity Tracker</span>
+          </h2>
+        </div>
+      </div>
+    </section>
+
+    <section class="files container">
+
+      <div class="file-upload">
+        <template>
+          <b-field class="file has-addons-right">
+            <b-upload v-model="uploads" :disabled="uploading">
+              <a class="button is-link" :disabled="uploading">
+                <b-icon icon="upload"></b-icon>
+                <span>Choose a file...</span>
+              </a>
+            </b-upload>
+            <span class="file-name">
+              {{ (uploads && uploads.length) ? uploads[0].name : "No file selected" }}
+            </span>
+            <div class="control">
+              <a class="button is-info" v-bind:class='{ "is-loading": uploading }' :disabled="!uploads || uploads.length == 0" v-on:click="upload">
+                Upload
+              </a>
+            </div>
+          </b-field>
+        </template>
+      </div>
+
+      <template>
+        <b-table :data="files" :striped="false" :loading="loading" :hoverable="true" default-sort="name" default-sort-direction="asc">
+          <template slot-scope="props">
+            <b-table-column field="name" label="Name" sortable>
+              {{ props.row.name }}
+            </b-table-column>
+            <b-table-column field="createdAt" label="Created" sortable>
+              {{ new Date(props.row.createdAt).toLocaleDateString() }}
+            </b-table-column>
+            <b-table-column field="type" label="Type" sortable>
+              {{ props.row.type }}
+            </b-table-column>
+            <b-table-column field="size" label="Size" sortable numeric>
+              {{ props.row.size }}
+            </b-table-column>
+            <b-table-column label="Actions">
+              <button v-on:click="shareFile(props.row.id)" class="button is-small is-warning">Share</button>
+              <button v-bind:class='{ "is-loading": deleting[props.row.id] }'
+                      class="button is-small is-danger"
+                      v-on:click="deleteFile(props.row.id, props.row.name)"
+                      :disabled="deleting[props.row.id]">Delete</button>
+            </b-table-column>
+          </template>
+          <template slot="empty">
+            <section class="section" v-if="!loading">
+              <div class="content has-text-grey has-text-centered">
+                <p>Upload some files to start.</p>
+              </div>
+            </section>
+          </template>
+        </b-table>
+      </template>
+    </section>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js" integrity="sha256-FtWfRI+thWlNz2sB3SJbwKx5PgMyKIVgwHCTwa3biXc="
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/buefy@0.6.6/lib/index.min.js"></script>
+  <script defer src="https://use.fontawesome.com/releases/v5.2.0/js/all.js" integrity="sha384-4oV5EgaV02iISL2ban6c/RmotsABqE4yZxZLcYMAdG7FAPsyHYAPpywE9PJo+Khy"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js" integrity="sha256-+JMHsXRyeTsws/tzbIh5YHQxRdKCuNjmvNcTFtY6DLc="
+    crossorigin="anonymous"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: secure-file-storage-service
+spec:
+  ports:
+  - port: 8081
+    targetPort: 8081
+    protocol: TCP
+  type: ClusterIP
+  selector:
+    app: secure-file-storage
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secure-file-storage-deployment
+spec:
+  selector:
+    matchLabels:
+      app: secure-file-storage
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: secure-file-storage
+    spec:
+      imagePullSecrets:
+        - name: $IMAGE_PULL_SECRET
+      containers:
+      - name: secure-file-storage-container
+        image: $REGISTRY_URL/$REGISTRY_NAMESPACE/$IMAGE_NAME:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+        envFrom:
+         - secretRef:
+            name: secure-file-storage-credentials
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-for-secure-file-storage
+  annotations:
+    # protect the service with App ID
+    ingress.bluemix.net/appid-auth: "bindSecret=binding-secure-file-storage-appid namespace=$TARGET_NAMESPACE requestType=web serviceName=secure-file-storage-service"
+    # increase max upload size
+    ingress.bluemix.net/client-max-body-size: "50m"
+spec:
+  tls:
+  - hosts:
+    - secure-file-storage.$INGRESS_SUBDOMAIN
+    secretName: $INGRESS_SECRET
+  rules:
+  - host: secure-file-storage.$INGRESS_SUBDOMAIN
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: secure-file-storage-service
+          servicePort: 8081

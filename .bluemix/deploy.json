@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "messages": {
+    "$i18n": "locales.yml"
+  },
+  "title": {
+    "$ref": "#/messages/deploy.title"
+  },
+  "description": {
+    "$ref": "#/messages/deploy.description"
+  },
+  "longDescription": {
+    "$ref": "#/messages/deploy.longDescription"
+  },
+  "type": "object",
+  "properties": {
+    "api-key": {
+      "description": {
+        "$ref": "#/messages/deploy.apiKeyDescription"
+      },
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "target-region": {
+      "description": {
+        "$ref": "#/messages/deploy.regionDescription"
+      },
+      "type": "string",
+      "disabled": false
+    },
+    "target-resource-group": {
+      "description": {
+        "$ref": "#/messages/deploy.groupDescription"
+      },
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "image-name": {
+      "description": {
+        "$ref": "#/messages/deploy.imageDescription"
+      },
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "registry-namespace": {
+      "description": {
+        "$ref": "#/messages/deploy.registryDescription"
+      },
+      "type": "string",
+      "enum": [],
+      "pattern": "^[a-z0-9][a-z0-9_-]{3,29}$"
+    },
+    "target-cluster-name": {
+      "description": {
+        "$ref": "#/messages/deploy.clusterDescription"
+      },
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "target-cluster-namespace": {
+      "description": {
+        "$ref": "#/messages/deploy.namespaceDescription"
+      },
+      "type": "string",
+      "pattern": "\\S"
+    }
+  },
+  "required": [
+    "api-key",
+    "target-region",
+    "target-resource-group",
+    "image-name",
+    "registry-namespace",
+    "target-cluster-name",
+    "target-cluster-namespace"
+  ],
+  "form": [
+    {
+      "type": "validator",
+      "url": "/devops/setup/bm-helper/custom_helper.html"
+    },
+    {
+      "type": "password",
+      "readonly": false,
+      "title": {
+        "$ref": "#/messages/deploy.apiKey"
+      },
+      "key": "api-key"
+    },
+    {
+      "type": "select",
+      "key": "target-region",
+      "readonly": true,
+      "title": {
+        "$ref": "#/messages/region"
+      }
+    },
+    {
+      "type": "text",
+      "readonly": false,
+      "title": {
+        "$ref": "#/messages/deploy.groupName"
+      },
+      "key": "target-resource-group"
+    },
+    {
+      "type": "select",
+      "readonly": false,
+      "title": {
+        "$ref": "#/messages/deploy.imageRegistryNamespace"
+      },
+      "key": "registry-namespace"
+    },
+    {
+      "type": "text",
+      "readonly": false,
+      "title": {
+        "$ref": "#/messages/deploy.imageName"
+      },
+      "key": "image-name"
+    },
+    {
+      "key": "target-cluster-name",
+      "readonly": false,
+      "type": "select",
+      "title": {
+        "$ref": "#/messages/deploy.clusterName"
+      }
+    },
+    {
+      "type": "text",
+      "readonly": false,
+      "title": {
+        "$ref": "#/messages/deploy.namespaceName"
+      },
+      "key": "target-cluster-namespace"
+    }
+  ]
+}
