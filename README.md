@@ -13,6 +13,24 @@ Refer to [this tutorial](https://console.bluemix.net/docs/tutorials/cloud-e2e-se
 5. The bucket where the files are stored is using a user-provided key to encrypt the data.
 6. All activities related to managing the solution are logged by [Activity Tracker](https://console.bluemix.net/catalog/services/activity-tracker).
 
+## Deploy with a toolchain
+
+This project comes with a partially automated toolchain capable of deploying the application to IBM Cloud while provisioning all required services.
+
+### Prerequisites
+
+1. Create a **standard** Kubernetes cluster
+
+1. Create a registry namespace
+
+1. Optionally create a specific resource group for this project
+
+### And then
+
+[![Create toolchain](https://console.bluemix.net/devops/graphics/create_toolchain_button.png)](https://console.bluemix.net/devops/setup/deploy/?repository=https%3A//github.com/IBM-Cloud/secure-file-storage)
+
+Once the toolchain has completed, the application will be available at `https://secure-file-storage.<your-cluster-ingress-domain>`.
+
 ## Code Structure
 
 | File | Description |
