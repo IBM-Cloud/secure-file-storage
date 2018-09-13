@@ -48,7 +48,7 @@ The toolchain includes a stage named **UNINSTALL (manual)**. This stage can only
 1. Access the tokens with `https://secure-file-storage.<INGRESS_SUBDOMAIN>/api/tokens`. This will shows the raw App ID authorization header together with the decode JWT tokens for your session.
 1. In your local shell:
    ```
-   export TEST_AUTHORIZATION_HEADER="<value of the header attributes 'Bearer ... ...'>"
+   export TEST_AUTHORIZATION_HEADER="<value of the header attribute 'Bearer ... ...'>"
    ```
 1. npm start
 
