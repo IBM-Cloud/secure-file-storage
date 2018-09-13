@@ -31,6 +31,8 @@ This project comes with a partially automated toolchain capable of deploying the
 
 Once the toolchain has completed, the application will be available at `https://secure-file-storage.<your-cluster-ingress-domain>`.
 
+The toolchain includes a stage named **UNINSTALL (manual)**. This stage can only be triggered manually and will remove all resources created by the toolchain (app and services).
+
 ## Code Structure
 
 | File | Description |
