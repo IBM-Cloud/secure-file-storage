@@ -25,7 +25,7 @@ spec:
       labels:
         app: secure-file-storage
     spec:
-# Uncomment only if you have not deploying to the default namespace
+# Uncomment only if you are not deploying to the default namespace
 # In this case, make sure to create a Docker registry secret
 #      imagePullSecrets:
 #        - name: $IMAGE_PULL_SECRET
