@@ -366,7 +366,13 @@ fi
 #
 # Deploy the app
 #
-cat secure-file-storage.template.yaml | \
+
+# uncomment the imagePullSecrets
+cp secure-file-storage.template.yaml secure-file-storage.yaml
+sed -i 's/#      imagePullSecrets:/      imagePullSecrets:/g' secure-file-storage.yaml
+sed -i 's/#        - name: $IMAGE_PULL_SECRET/        - name: $IMAGE_PULL_SECRET/g' secure-file-storage.yaml
+
+cat secure-file-storage.yaml | \
   IMAGE_NAME=$IMAGE_NAME \
   INGRESS_SECRET=$INGRESS_SECRET \
   INGRESS_SUBDOMAIN=$INGRESS_SUBDOMAIN \
