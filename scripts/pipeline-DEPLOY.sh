@@ -222,7 +222,7 @@ check_value "$COS_IBMAUTHENDPOINT"
 # Create an authorization between Key Protect and Cloud Object Storage
 if ibmcloud iam authorization-policies | \
   grep -A 4 "Source service name:       cloud-object-storage" | \
-  grep -A 2 "All instances" | \
+  grep -A 3 "All instances" | \
   grep -A 2 "Target service name:       kms" | \
   grep -q "Reader"; then
   echo "Authorization policy exists"
