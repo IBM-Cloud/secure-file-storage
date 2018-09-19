@@ -313,12 +313,6 @@ if kubectl get namespace $TARGET_NAMESPACE; then
 else
   echo "Creating namespace $TARGET_NAMESPACE..."
   kubectl create namespace $TARGET_NAMESPACE || exit 1
-
-  # copy the Ingress TLS cert over
-  echo "Copying ingress secret from default namespace..."
-  kubectl get secret $INGRESS_SECRET -o yaml | \
-    sed 's/namespace: default/namespace: '$TARGET_NAMESPACE'/' | \
-    kubectl create -f - || exit 1
 fi
 
 #
@@ -356,11 +350,12 @@ kubectl create secret generic secure-file-storage-credentials \
 if kubectl get secret secure-file-storage-docker-registry --namespace $TARGET_NAMESPACE; then
   echo "Docker Registry secret already exists"
 else
+  REGISTRY_TOKEN=$(bx cr token-add --description "secure-file-storage-docker-registry for $TARGET_USER" --non-expiring --quiet)
   kubectl --namespace $TARGET_NAMESPACE create secret docker-registry secure-file-storage-docker-registry \
     --docker-server=${REGISTRY_URL} \
-    --docker-password=${PIPELINE_BLUEMIX_API_KEY} \
-    --docker-username=iamapikey \
-    --docker-email=devops@build.com || exit 1
+    --docker-password="${REGISTRY_TOKEN}" \
+    --docker-username=token \
+    --docker-email="${TARGET_USER}" || exit 1
 fi
 
 #
