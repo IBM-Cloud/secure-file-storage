@@ -378,3 +378,5 @@ cat secure-file-storage.yaml | \
   envsubst \
   | \
   kubectl apply --namespace $TARGET_NAMESPACE -f - || exit 1
+
+echo "Your app is available at https://secure-file-storage.$INGRESS_SUBDOMAIN/"
