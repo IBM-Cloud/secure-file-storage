@@ -41,7 +41,7 @@ services:
           TARGET_CLUSTER_NAME: '{{form.pipeline.parameters.target-cluster-name}}'
           TARGET_NAMESPACE: '{{form.pipeline.parameters.target-cluster-namespace}}'
           TARGET_RESOURCE_GROUP: '{{form.pipeline.parameters.target-resource-group}}'
-        execute: false
+        execute: true
 form:
   pipeline:
     parameters:
