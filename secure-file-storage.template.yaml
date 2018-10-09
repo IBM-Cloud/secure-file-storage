@@ -53,6 +53,10 @@ spec:
   - hosts:
     - secure-file-storage.$INGRESS_SUBDOMAIN
     secretName: $INGRESS_SECRET
+# Uncomment below if you are using a custom domain
+#  - hosts:
+#    - secure-file-storage.<your custom domain>
+#    secretName: secure-file-storage-certificate
   rules:
   - host: secure-file-storage.$INGRESS_SUBDOMAIN
     http:
@@ -61,3 +65,11 @@ spec:
         backend:
           serviceName: secure-file-storage-service
           servicePort: 8081
+# Uncomment below if you are using a custom domain
+#  - host: secure-file-storage.<your custom domain>
+#    http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: secure-file-storage-service
+#          servicePort: 8081
