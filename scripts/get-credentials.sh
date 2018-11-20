@@ -7,12 +7,12 @@ fi
 
 CLOUDANT_GUID=$(ibmcloud resource service-instance --id secure-file-storage-cloudant | awk '{print $2}')
 CLOUDANT_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-cloudant-acckey-$CLOUDANT_GUID)
-CLOUDANT_ACCOUNT=$(echo "$CLOUDANT_CREDENTIALS" | grep username | awk '{ print $2 }')
+CLOUDANT_USERNAME=$(echo "$CLOUDANT_CREDENTIALS" | grep username | awk '{ print $2 }')
 CLOUDANT_IAM_APIKEY=$(echo "$CLOUDANT_CREDENTIALS" | sort | grep apikey -m 1 | awk '{ print $2 }')
 CLOUDANT_DATABASE=secure-file-storage-metadata
 
 echo "# Cloudant Credentials
-cloudant_account=$CLOUDANT_ACCOUNT
+cloudant_username=$CLOUDANT_USERNAME
 cloudant_iam_apikey=$CLOUDANT_IAM_APIKEY
 cloudant_database=$CLOUDANT_DATABASE
 "

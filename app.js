@@ -13,7 +13,7 @@ require('dotenv').config({
 // Initialize Cloudant
 var Cloudant = require('@cloudant/cloudant');
 var cloudant = new Cloudant({
-  account: process.env.cloudant_account,
+  account: process.env.cloudant_username,
   plugins: [
     'promises',
     {
