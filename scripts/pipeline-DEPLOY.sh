@@ -149,7 +149,7 @@ else
 fi
 
 CLOUDANT_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-cloudant-acckey-$CLOUDANT_GUID)
-CLOUDANT_ACCOUNT=$(echo "$CLOUDANT_CREDENTIALS" | grep "username:" | awk '{ print $2 }')
+CLOUDANT_USERNAME=$(echo "$CLOUDANT_CREDENTIALS" | grep "username:" | awk '{ print $2 }')
 CLOUDANT_IAM_APIKEY=$(echo "$CLOUDANT_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ print $2 }')
 CLOUDANT_URL=$(echo "$CLOUDANT_CREDENTIALS" | grep "url:" -m 1 | awk '{ print $2 }')
 CLOUDANT_ACCESS_TOKEN=$(get_access_token $CLOUDANT_IAM_APIKEY)
@@ -339,7 +339,7 @@ kubectl create secret generic secure-file-storage-credentials \
   --from-literal="cos_access_key_id=$COS_ACCESS_KEY_ID" \
   --from-literal="cos_secret_access_key=$COS_SECRET_ACCESS_KEY" \
   --from-literal="cos_bucket_name=$COS_BUCKET_NAME" \
-  --from-literal="cloudant_account=$CLOUDANT_ACCOUNT" \
+  --from-literal="cloudant_username=$CLOUDANT_USERNAME" \
   --from-literal="cloudant_iam_apikey=$CLOUDANT_IAM_APIKEY" \
   --from-literal="cloudant_database=$CLOUDANT_DATABASE" \
   --namespace "$TARGET_NAMESPACE" || exit 1
