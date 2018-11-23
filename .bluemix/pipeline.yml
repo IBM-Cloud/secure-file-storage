@@ -50,6 +50,7 @@ stages:
       region_id: ${TARGET_REGION_ID}
       api_key: ${API_KEY}
       kubernetes_cluster: ${TARGET_CLUSTER_NAME}
+      resource_group: ${TARGET_RESOURCE_GROUP}
     script: |
       #!/bin/bash
       wget https://clis.ng.bluemix.net/download/bluemix-cli/0.9.0/linux64
@@ -83,6 +84,7 @@ stages:
       region_id: ${TARGET_REGION_ID}
       api_key: ${API_KEY}
       kubernetes_cluster: ${TARGET_CLUSTER_NAME}
+      resource_group: ${TARGET_RESOURCE_GROUP}
     script: |
       #!/bin/bash
       ./scripts/pipeline-UNINSTALL.sh
