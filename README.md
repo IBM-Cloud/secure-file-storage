@@ -33,6 +33,8 @@ Once the toolchain has completed, the application will be available at `https://
 
 The toolchain includes a stage named **UNINSTALL (manual)**. This stage can only be triggered manually and will remove all resources created by the toolchain (app and services).
 
+If the deploy stage fails with the error, *The account already has an instance created with the Lite plan*, configure the stage's environment variables `COS_PLAN=standard` or `APP_ID_PLAN=graduated tier` based on the failed service. You can then re-run the deploy stage (you do not need to re-create the toolchain).
+
 ## Code Structure
 
 | File | Description |
