@@ -91,11 +91,7 @@ else
     --instance-id "$KP_INSTANCE_ID" || exit 1
 fi
 
-if (ibmcloud iam service-policies $SERVICE_ID | grep -q "No policy found" ); then
-  EXISTING_POLICIES="[]"
-else
-  EXISTING_POLICIES=$(ibmcloud iam service-policies $SERVICE_ID --output json | grep -v -e "^OK")
-fi
+EXISTING_POLICIES=$(ibmcloud iam service-policies $SERVICE_ID --output json)
 echo "EXISTING_POLICIES=$EXISTING_POLICIES"
 check_value "$EXISTING_POLICIES"
 
