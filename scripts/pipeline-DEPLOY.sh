@@ -103,8 +103,8 @@ else
   ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name kms --service-instance $KP_GUID --force
 fi
 
-KP_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-kms-acckey-$KP_GUID)
-KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ print $2 }')
+KP_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-kms-acckey-$KP_GUID --output JSON)
+KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | jq -r .[0].credentials.apikey)
 KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
 KP_MANAGEMENT_URL="https://keyprotect.$REGION.bluemix.net/api/v2/keys"
 
