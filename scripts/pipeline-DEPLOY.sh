@@ -58,7 +58,7 @@ echo "TARGET_USER=$TARGET_USER"
 # Create Service ID
 #
 section "Service ID"
-if check_exists "$(ibmcloud iam service-id secure-file-storage-serviceID-$TARGET_USER)"; then
+if check_exists "$(ibmcloud iam service-id secure-file-storage-serviceID-$TARGET_USER 2>&1)"; then
   echo "Service ID already exists"
 else
   ibmcloud iam service-id-create "secure-file-storage-serviceID-$TARGET_USER" -d "serviceID for secure file storage tutorial"
@@ -71,7 +71,8 @@ check_value "$SERVICE_ID"
 # Key Protect
 #
 section "Key Protect"
-if check_exists "$(ibmcloud resource service-instance secure-file-storage-kms)"; then
+
+if check_exists "$(ibmcloud resource service-instance secure-file-storage-kms 2>&1)"; then
   echo "Key Protect service already exists"
 else
   ibmcloud resource service-instance-create secure-file-storage-kms kms tiered-pricing $REGION || exit 1
@@ -83,7 +84,7 @@ echo "KP_GUID=$KP_GUID"
 check_value "$KP_INSTANCE_ID"
 check_value "$KP_GUID"
 
-if check_exists "$(ibmcloud resource service-key secure-file-storage-kms-acckey-$KP_GUID)"; then
+if check_exists "$(ibmcloud resource service-key secure-file-storage-kms-acckey-$KP_GUID 2>&1)"; then
   echo "Key Protect key already exists"
 else
   ibmcloud resource service-key-create secure-file-storage-kms-acckey-$KP_GUID Manager \
@@ -132,7 +133,7 @@ echo "ROOT_KEY_CRN=$ROOT_KEY_CRN"
 # Cloudant instance with IAM authentication
 #
 section "Cloudant"
-if check_exists "$(ibmcloud resource service-instance secure-file-storage-cloudant)"; then
+if check_exists "$(ibmcloud resource service-instance secure-file-storage-cloudant 2>&1)"; then
   echo "Cloudant service already exists"
 else
   ibmcloud resource service-instance-create secure-file-storage-cloudant \
@@ -146,7 +147,7 @@ echo "CLOUDANT_GUID=$CLOUDANT_GUID"
 check_value "$CLOUDANT_INSTANCE_ID"
 check_value "$CLOUDANT_GUID"
 
-if check_exists "$(ibmcloud resource service-key secure-file-storage-cloudant-acckey-$CLOUDANT_GUID)"; then
+if check_exists "$(ibmcloud resource service-key secure-file-storage-cloudant-acckey-$CLOUDANT_GUID 2>&1)"; then
   echo "Cloudant key already exists"
 else
   ibmcloud resource service-key-create secure-file-storage-cloudant-acckey-$CLOUDANT_GUID Manager \
@@ -175,7 +176,7 @@ curl -X PUT \
 # Cloud Object Storage with HMAC authentication
 #
 section "Cloud Object Storage"
-if check_exists "$(ibmcloud resource service-instance secure-file-storage-cos)"; then
+if check_exists "$(ibmcloud resource service-instance secure-file-storage-cos 2>&1)"; then
   echo "Cloud Object Storage service already exists"
 else
   ibmcloud resource service-instance-create secure-file-storage-cos \
@@ -186,7 +187,7 @@ COS_GUID=$(get_guid secure-file-storage-cos)
 check_value "$COS_INSTANCE_ID"
 check_value "$COS_GUID"
 
-if check_exists "$(ibmcloud resource service-key secure-file-storage-cos-acckey-$COS_GUID)"; then
+if check_exists "$(ibmcloud resource service-key secure-file-storage-cos-acckey-$COS_GUID 2>&1)"; then
   echo "Cloud Object Storage key already exists"
 else
   ibmcloud resource service-key-create secure-file-storage-cos-acckey-$COS_GUID Manager \
@@ -267,7 +268,7 @@ ibmcloud iam service-api-key-delete secure-file-storage-serviceID-API-key $SERVI
 # App ID
 #
 section "App ID"
-if check_exists "$(ibmcloud resource service-instance secure-file-storage-appid)"; then
+if check_exists "$(ibmcloud resource service-instance secure-file-storage-appid 2>&1)"; then
   echo "App ID service already exists"
 else
   ibmcloud resource service-instance-create secure-file-storage-appid \
@@ -280,7 +281,7 @@ echo "APPID_GUID=$APPID_GUID"
 check_value "$APPID_INSTANCE_ID"
 check_value "$APPID_GUID"
 
-if check_exists "$(ibmcloud resource service-key secure-file-storage-appid-acckey-$APPID_GUID)"; then
+if check_exists "$(ibmcloud resource service-key secure-file-storage-appid-acckey-$APPID_GUID 2>&1)"; then
   echo "App ID key already exists"
 else
   ibmcloud resource service-key-create secure-file-storage-appid-acckey-$APPID_GUID Manager \
