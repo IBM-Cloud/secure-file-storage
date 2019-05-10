@@ -357,7 +357,7 @@ kubectl create secret generic secure-file-storage-credentials \
 if kubectl get secret secure-file-storage-docker-registry --namespace $TARGET_NAMESPACE; then
   echo "Docker Registry secret already exists"
 else
-  REGISTRY_TOKEN=$(bx cr token-add --description "secure-file-storage-docker-registry for $TARGET_USER" --non-expiring --quiet)
+  REGISTRY_TOKEN=$(ibmcloud cr token-add --description "secure-file-storage-docker-registry for $TARGET_USER" --non-expiring --quiet)
   kubectl --namespace $TARGET_NAMESPACE create secret docker-registry secure-file-storage-docker-registry \
     --docker-server=${REGISTRY_URL} \
     --docker-password="${REGISTRY_TOKEN}" \
