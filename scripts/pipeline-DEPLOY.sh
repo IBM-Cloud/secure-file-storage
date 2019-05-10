@@ -334,7 +334,10 @@ fi
 #
 # Create a secret in the cluster holding the credentials for Cloudant and COS
 #
+if kubectl get secret secure-file-storage-credentials --namespace "$TARGET_NAMESPACE"; then
 kubectl delete secret secure-file-storage-credentials --namespace "$TARGET_NAMESPACE"
+fi
+
 kubectl create secret generic secure-file-storage-credentials \
   --from-literal="cos_endpoint=$COS_ENDPOINT" \
   --from-literal="cos_ibmAuthEndpoint=$COS_IBMAUTHENDPOINT" \
