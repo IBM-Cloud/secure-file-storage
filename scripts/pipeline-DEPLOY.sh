@@ -37,6 +37,11 @@ if [ -z "$APP_ID_PLAN" ]; then
 fi
 echo "APP_ID_PLAN=$APP_ID_PLAN"
 
+if [ -z "$CLOUDANT_PLAN" ]; then
+  export CLOUDANT_PLAN=lite
+fi
+echo "CLOUDANT_PLAN=$CLOUDANT_PLAN"
+
 #
 # Set target
 #
@@ -131,7 +136,7 @@ if check_exists "$(ibmcloud resource service-instance secure-file-storage-clouda
   echo "Cloudant service already exists"
 else
   ibmcloud resource service-instance-create secure-file-storage-cloudant \
-    cloudantnosqldb lite $REGION \
+    cloudantnosqldb "$CLOUDANT_PLAN" $REGION \
     -p '{"legacyCredentials": false}' || exit 1
 fi
 CLOUDANT_INSTANCE_ID=$(get_instance_id secure-file-storage-cloudant)
