@@ -7,7 +7,7 @@ function get_access_token {
   --header "Accept: application/json" \
   --data-urlencode "grant_type=urn:ibm:params:oauth:grant-type:apikey" \
   --data-urlencode "apikey=$1" \
-  "https://iam.bluemix.net/identity/token")
+  "https://iam.cloud.ibm.com/identity/token")
   IAM_ACCESS_TOKEN=$(echo "$IAM_ACCESS_TOKEN_FULL" | \
     grep -Eo '"access_token":"[^"]+"' | \
     awk '{split($0,a,":"); print a[2]}' | \
@@ -17,9 +17,9 @@ function get_access_token {
 
 # Returns a service CRN given a service name
 function get_instance_id {
-  OUTPUT=$(ibmcloud resource service-instance --id $1)
+  OUTPUT=$(ibmcloud resource service-instance --output JSON $1)
   if (echo $OUTPUT | grep -q "crn:v1" >/dev/null); then
-    echo $OUTPUT | awk '{print $1}'
+    echo $OUTPUT | jq -r .[0].id
   else
     echo "Failed to get instance ID: $OUTPUT"
     exit 2
@@ -49,10 +49,10 @@ function section {
 }
 
 function check_exists {
-  if echo $1 | grep -q "not found"; then
+  if echo "$1" | grep -q "not found"; then
     return 1
   fi
-  if echo $1 | grep -q "crn:v1"; then
+  if echo "$1" | grep -q "crn:v1"; then
     return 0
   fi
   echo "Failed to check if object exists: $1"

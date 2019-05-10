@@ -1,5 +1,9 @@
 #!/bin/bash
+# fail script on error
+set -e
+
 source ./scripts/pipeline-HELPER.sh
+
 
 #
 # Set environments to good default values in case we are not running from the toolchain but interactively
@@ -37,6 +41,15 @@ if [ -z "$APP_ID_PLAN" ]; then
 fi
 echo "APP_ID_PLAN=$APP_ID_PLAN"
 
+if [ -z "$CLOUDANT_PLAN" ]; then
+  export CLOUDANT_PLAN=lite
+fi
+echo "CLOUDANT_PLAN=$CLOUDANT_PLAN"
+
+echo "REGISTRY_URL=$REGISTRY_URL"
+echo "REGISTRY_NAMESPACE=$REGISTRY_NAMESPACE"
+echo "IMAGE_NAME=$IMAGE_NAME"
+
 #
 # Set target
 #
@@ -53,7 +66,7 @@ echo "TARGET_USER=$TARGET_USER"
 # Create Service ID
 #
 section "Service ID"
-if check_exists "$(ibmcloud iam service-id secure-file-storage-serviceID-$TARGET_USER)"; then
+if check_exists "$(ibmcloud iam service-id secure-file-storage-serviceID-$TARGET_USER 2>&1)"; then
   echo "Service ID already exists"
 else
   ibmcloud iam service-id-create "secure-file-storage-serviceID-$TARGET_USER" -d "serviceID for secure file storage tutorial"
@@ -66,7 +79,8 @@ check_value "$SERVICE_ID"
 # Key Protect
 #
 section "Key Protect"
-if check_exists "$(ibmcloud resource service-instance secure-file-storage-kms)"; then
+
+if check_exists "$(ibmcloud resource service-instance secure-file-storage-kms 2>&1)"; then
   echo "Key Protect service already exists"
 else
   ibmcloud resource service-instance-create secure-file-storage-kms kms tiered-pricing $REGION || exit 1
@@ -78,33 +92,29 @@ echo "KP_GUID=$KP_GUID"
 check_value "$KP_INSTANCE_ID"
 check_value "$KP_GUID"
 
-if check_exists "$(ibmcloud resource service-key secure-file-storage-kms-acckey-$KP_GUID)"; then
+if check_exists "$(ibmcloud resource service-key secure-file-storage-kms-acckey-$KP_GUID 2>&1)"; then
   echo "Key Protect key already exists"
 else
   ibmcloud resource service-key-create secure-file-storage-kms-acckey-$KP_GUID Manager \
     --instance-id "$KP_INSTANCE_ID" || exit 1
 fi
 
-if (ibmcloud iam service-policies $SERVICE_ID | grep -q "No policy found" ); then
-  EXISTING_POLICIES="[]"
-else
-  EXISTING_POLICIES=$(ibmcloud iam service-policies $SERVICE_ID --output json | grep -v -e "^OK")
-fi
+EXISTING_POLICIES=$(ibmcloud iam service-policies $SERVICE_ID --output json)
 echo "EXISTING_POLICIES=$EXISTING_POLICIES"
 check_value "$EXISTING_POLICIES"
 
 # Create a policy to make serviceID a writer for Key Protect
 if echo "$EXISTING_POLICIES" | \
-  jq -e -r 'select(.resources[].serviceInstance=="'$KP_GUID'" and .roles[].displayName=="Writer")' > /dev/null; then
+  jq -e -r 'select(.[].resources[].attributes[].name=="serviceInstance" and .[].resources[].attributes[].value=="'$KP_GUID'" and .[].roles[].display_name=="Writer")' > /dev/null; then
   echo "Writer policy on Key Protect already exist for the Service ID"
 else
-  ibmcloud iam service-policy-create $SERVICE_ID -r Writer --service-instance $KP_GUID --force
+  ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name kms --service-instance $KP_GUID --force
 fi
 
-KP_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-kms-acckey-$KP_GUID)
-KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ print $2 }')
+KP_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-kms-acckey-$KP_GUID --output JSON)
+KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | jq -r .[0].credentials.apikey)
 KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
-KP_MANAGEMENT_URL="https://keyprotect.$REGION.bluemix.net/api/v2/keys"
+KP_MANAGEMENT_URL="https://$REGION.kms.cloud.ibm.com/api/v2/keys"
 
 # Create root key if it does not exist
 KP_KEYS=$(curl -s $KP_MANAGEMENT_URL \
@@ -127,11 +137,11 @@ echo "ROOT_KEY_CRN=$ROOT_KEY_CRN"
 # Cloudant instance with IAM authentication
 #
 section "Cloudant"
-if check_exists "$(ibmcloud resource service-instance secure-file-storage-cloudant)"; then
+if check_exists "$(ibmcloud resource service-instance secure-file-storage-cloudant 2>&1)"; then
   echo "Cloudant service already exists"
 else
   ibmcloud resource service-instance-create secure-file-storage-cloudant \
-    cloudantnosqldb lite $REGION \
+    cloudantnosqldb "$CLOUDANT_PLAN" $REGION \
     -p '{"legacyCredentials": false}' || exit 1
 fi
 CLOUDANT_INSTANCE_ID=$(get_instance_id secure-file-storage-cloudant)
@@ -141,7 +151,7 @@ echo "CLOUDANT_GUID=$CLOUDANT_GUID"
 check_value "$CLOUDANT_INSTANCE_ID"
 check_value "$CLOUDANT_GUID"
 
-if check_exists "$(ibmcloud resource service-key secure-file-storage-cloudant-acckey-$CLOUDANT_GUID)"; then
+if check_exists "$(ibmcloud resource service-key secure-file-storage-cloudant-acckey-$CLOUDANT_GUID 2>&1)"; then
   echo "Cloudant key already exists"
 else
   ibmcloud resource service-key-create secure-file-storage-cloudant-acckey-$CLOUDANT_GUID Manager \
@@ -170,18 +180,18 @@ curl -X PUT \
 # Cloud Object Storage with HMAC authentication
 #
 section "Cloud Object Storage"
-if check_exists "$(ibmcloud resource service-instance secure-file-storage-cos)"; then
+if check_exists "$(ibmcloud resource service-instance secure-file-storage-cos 2>&1)"; then
   echo "Cloud Object Storage service already exists"
 else
   ibmcloud resource service-instance-create secure-file-storage-cos \
-    cloud-object-storage $COS_PLAN global || exit 1
+    cloud-object-storage "$COS_PLAN" global || exit 1
 fi
 COS_INSTANCE_ID=$(get_instance_id secure-file-storage-cos)
 COS_GUID=$(get_guid secure-file-storage-cos)
 check_value "$COS_INSTANCE_ID"
 check_value "$COS_GUID"
 
-if check_exists "$(ibmcloud resource service-key secure-file-storage-cos-acckey-$COS_GUID)"; then
+if check_exists "$(ibmcloud resource service-key secure-file-storage-cos-acckey-$COS_GUID 2>&1)"; then
   echo "Cloud Object Storage key already exists"
 else
   ibmcloud resource service-key-create secure-file-storage-cos-acckey-$COS_GUID Manager \
@@ -238,7 +248,7 @@ fi
 if ibmcloud iam service-policies $SERVICE_ID | grep -B 4 $COS_GUID | grep Writer; then
   echo "Writer policy on Cloud Object Storage already exist for the Service ID"
 else
-  ibmcloud iam service-policy-create $SERVICE_ID -r Writer --service-instance $COS_GUID -f
+  ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name cloud-object-storage --service-instance $COS_GUID -f
 fi
 
 # Create the bucket
@@ -262,11 +272,11 @@ ibmcloud iam service-api-key-delete secure-file-storage-serviceID-API-key $SERVI
 # App ID
 #
 section "App ID"
-if check_exists "$(ibmcloud resource service-instance secure-file-storage-appid)"; then
+if check_exists "$(ibmcloud resource service-instance secure-file-storage-appid 2>&1)"; then
   echo "App ID service already exists"
 else
   ibmcloud resource service-instance-create secure-file-storage-appid \
-    appid $APP_ID_PLAN $REGION || exit 1
+    appid "$APP_ID_PLAN" $REGION || exit 1
 fi
 APPID_INSTANCE_ID=$(get_instance_id secure-file-storage-appid)
 APPID_GUID=$(get_guid secure-file-storage-appid)
@@ -275,7 +285,7 @@ echo "APPID_GUID=$APPID_GUID"
 check_value "$APPID_INSTANCE_ID"
 check_value "$APPID_GUID"
 
-if check_exists "$(ibmcloud resource service-key secure-file-storage-appid-acckey-$APPID_GUID)"; then
+if check_exists "$(ibmcloud resource service-key secure-file-storage-appid-acckey-$APPID_GUID 2>&1)"; then
   echo "App ID key already exists"
 else
   ibmcloud resource service-key-create secure-file-storage-appid-acckey-$APPID_GUID Manager \
@@ -288,7 +298,7 @@ APPID_API_KEY=$(echo "$APPID_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ 
 APPID_ACCESS_TOKEN=$(get_access_token $APPID_API_KEY)
 
 # Set the redirect URL on App ID
-INGRESS_SUBDOMAIN=$(ibmcloud cs cluster-get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r .ingressHostname)
+INGRESS_SUBDOMAIN=$(ibmcloud ks cluster-get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r .ingressHostname)
 echo "INGRESS_SUBDOMAIN=$INGRESS_SUBDOMAIN"
 check_value "$INGRESS_SUBDOMAIN"
 
@@ -304,7 +314,7 @@ curl -X PUT \
 #
 section "Kubernetes"
 
-INGRESS_SECRET=$(ibmcloud cs cluster-get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r .ingressSecretName)
+INGRESS_SECRET=$(ibmcloud ks cluster-get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r .ingressSecretName)
 echo "INGRESS_SECRET=${INGRESS_SECRET}"
 check_value "$INGRESS_SECRET"
 
@@ -321,7 +331,7 @@ fi
 if kubectl get secret binding-secure-file-storage-appid --namespace $TARGET_NAMESPACE; then
   echo "App ID service already bound to namespace"
 else
-  ibmcloud cs cluster-service-bind \
+  ibmcloud ks cluster-service-bind \
     --cluster "$PIPELINE_KUBERNETES_CLUSTER_NAME" \
     --namespace "$TARGET_NAMESPACE" \
     --service "$APPID_GUID" || exit 1
@@ -330,7 +340,10 @@ fi
 #
 # Create a secret in the cluster holding the credentials for Cloudant and COS
 #
-kubectl delete secret secure-file-storage-credentials --namespace "$TARGET_NAMESPACE"
+if kubectl get secret secure-file-storage-credentials --namespace "$TARGET_NAMESPACE"; then
+  kubectl delete secret secure-file-storage-credentials --namespace "$TARGET_NAMESPACE"
+fi
+
 kubectl create secret generic secure-file-storage-credentials \
   --from-literal="cos_endpoint=$COS_ENDPOINT" \
   --from-literal="cos_ibmAuthEndpoint=$COS_IBMAUTHENDPOINT" \
@@ -350,7 +363,7 @@ kubectl create secret generic secure-file-storage-credentials \
 if kubectl get secret secure-file-storage-docker-registry --namespace $TARGET_NAMESPACE; then
   echo "Docker Registry secret already exists"
 else
-  REGISTRY_TOKEN=$(bx cr token-add --description "secure-file-storage-docker-registry for $TARGET_USER" --non-expiring --quiet)
+  REGISTRY_TOKEN=$(ibmcloud cr token-add --description "secure-file-storage-docker-registry for $TARGET_USER" --non-expiring --quiet)
   kubectl --namespace $TARGET_NAMESPACE create secret docker-registry secure-file-storage-docker-registry \
     --docker-server=${REGISTRY_URL} \
     --docker-password="${REGISTRY_TOKEN}" \
