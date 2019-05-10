@@ -2,16 +2,16 @@
 
 The repository features a sample application that enables groups of users to upload files to a common storage pool and to provide access to those files via shareable links. The application is written in Node.js and deployed as Docker container to the IBM Cloud Kubernetes service. It leverages several security-related services and features to improve app security. It includes data encrypted with your own keys, user authentication, and security auditing.
 
-Refer to [this tutorial](https://console.bluemix.net/docs/tutorials/cloud-e2e-security.html) for instructions.
+Refer to [this tutorial](https://cloud.ibm.com/docs/tutorials?topic=solution-tutorials-cloud-e2e-security) for instructions.
 
 ![Architecture](Architecture.png)
 
 1. The user connects to the application.
-2. [App ID](https://console.bluemix.net/catalog/services/AppID) secures the application and redirects the user to the authentication page. Users can sign up from there too.
-3. The application is running in a [Kubernetes cluster](https://console.bluemix.net/containers-kubernetes/catalog/cluster) from an image stored in the [container registry](https://console.bluemix.net/containers-kubernetes/launchRegistryView). The image is automatically scanned for vulnerabilities.
-4. Files uploaded by the user are stored in [Cloud Object Storage](https://console.bluemix.net/catalog/services/cloud-object-storage).
+2. [App ID](https://cloud.ibm.com/catalog/services/AppID) secures the application and redirects the user to the authentication page. Users can sign up from there too.
+3. The application is running in a [Kubernetes cluster](https://cloud.ibm.com/containers-kubernetes/catalog/cluster) from an image stored in the [container registry](https://cloud.ibm.com/containers-kubernetes/launchRegistryView). The image is automatically scanned for vulnerabilities.
+4. Files uploaded by the user are stored in [Cloud Object Storage](https://cloud.ibm.com/catalog/services/cloud-object-storage).
 5. The bucket where the files are stored is using a user-provided key to encrypt the data.
-6. All activities related to managing the solution are logged by [Activity Tracker](https://console.bluemix.net/catalog/services/activity-tracker).
+6. All activities related to managing the solution are logged by [Cloud Activity Tracker with LogDNA](https://cloud.ibm.com/catalog/services/logdnaat).
 
 ## Deploy with a toolchain
 
@@ -27,7 +27,7 @@ This project comes with a partially automated toolchain capable of deploying the
 
 ### And then
 
-[![Create toolchain](https://console.bluemix.net/devops/graphics/create_toolchain_button.png)](https://console.bluemix.net/devops/setup/deploy/?repository=https%3A//github.com/IBM-Cloud/secure-file-storage)
+[![Create toolchain](https://cloud.ibm.com/devops/graphics/create_toolchain_button.png)](https://cloud.ibm.com/devops/setup/deploy/?repository=https%3A//github.com/IBM-Cloud/secure-file-storage)
 
 Once the toolchain has completed, the application will be available at `https://secure-file-storage.<your-cluster-ingress-domain>`.
 
