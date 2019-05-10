@@ -100,7 +100,7 @@ if echo "$EXISTING_POLICIES" | \
   jq -e -r 'select(.[].resources[].attributes[].name=="serviceInstance" and .[].resources[].attributes[].value=="'$KP_GUID'" and .[].roles[].display_name=="Writer")' > /dev/null; then
   echo "Writer policy on Key Protect already exist for the Service ID"
 else
-  ibmcloud iam service-policy-create $SERVICE_ID -r Writer --service-instance $KP_GUID --force
+  ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name kms --service-instance $KP_GUID --force
 fi
 
 KP_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-kms-acckey-$KP_GUID)
@@ -240,7 +240,7 @@ fi
 if ibmcloud iam service-policies $SERVICE_ID | grep -B 4 $COS_GUID | grep Writer; then
   echo "Writer policy on Cloud Object Storage already exist for the Service ID"
 else
-  ibmcloud iam service-policy-create $SERVICE_ID -r Writer --service-instance $COS_GUID -f
+  ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name cloud-object-storage --service-instance $COS_GUID -f
 fi
 
 # Create the bucket
