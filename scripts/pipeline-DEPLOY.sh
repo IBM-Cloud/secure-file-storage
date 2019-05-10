@@ -97,7 +97,7 @@ check_value "$EXISTING_POLICIES"
 
 # Create a policy to make serviceID a writer for Key Protect
 if echo "$EXISTING_POLICIES" | \
-  jq -e -r 'select(.resources[].serviceInstance=="'$KP_GUID'" and .roles[].displayName=="Writer")' > /dev/null; then
+  jq -e -r 'select(.[].resources[].attributes[].name=="serviceInstance" and .[].resources[].attributes[].value=="'$KP_GUID'" and .[].roles[].display_name=="Writer")' > /dev/null; then
   echo "Writer policy on Key Protect already exist for the Service ID"
 else
   ibmcloud iam service-policy-create $SERVICE_ID -r Writer --service-instance $KP_GUID --force
