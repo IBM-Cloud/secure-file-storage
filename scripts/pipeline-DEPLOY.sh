@@ -1,7 +1,9 @@
 #!/bin/bash
+# fail script on error
+set -e
+
 source ./scripts/pipeline-HELPER.sh
 
-set -xe
 
 #
 # Set environments to good default values in case we are not running from the toolchain but interactively
@@ -43,6 +45,10 @@ if [ -z "$CLOUDANT_PLAN" ]; then
   export CLOUDANT_PLAN=lite
 fi
 echo "CLOUDANT_PLAN=$CLOUDANT_PLAN"
+
+echo "REGISTRY_URL=$REGISTRY_URL"
+echo "REGISTRY_NAMESPACE=$REGISTRY_NAMESPACE"
+echo "IMAGE_NAME=$IMAGE_NAME"
 
 #
 # Set target
@@ -335,7 +341,7 @@ fi
 # Create a secret in the cluster holding the credentials for Cloudant and COS
 #
 if kubectl get secret secure-file-storage-credentials --namespace "$TARGET_NAMESPACE"; then
-kubectl delete secret secure-file-storage-credentials --namespace "$TARGET_NAMESPACE"
+  kubectl delete secret secure-file-storage-credentials --namespace "$TARGET_NAMESPACE"
 fi
 
 kubectl create secret generic secure-file-storage-credentials \
