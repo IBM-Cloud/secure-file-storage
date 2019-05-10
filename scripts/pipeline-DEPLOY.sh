@@ -1,6 +1,8 @@
 #!/bin/bash
 source ./scripts/pipeline-HELPER.sh
 
+set -xe
+
 #
 # Set environments to good default values in case we are not running from the toolchain but interactively
 #
@@ -290,7 +292,7 @@ APPID_API_KEY=$(echo "$APPID_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ 
 APPID_ACCESS_TOKEN=$(get_access_token $APPID_API_KEY)
 
 # Set the redirect URL on App ID
-INGRESS_SUBDOMAIN=$(ibmcloud cs cluster-get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r .ingressHostname)
+INGRESS_SUBDOMAIN=$(ibmcloud ks cluster-get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r .ingressHostname)
 echo "INGRESS_SUBDOMAIN=$INGRESS_SUBDOMAIN"
 check_value "$INGRESS_SUBDOMAIN"
 
@@ -306,7 +308,7 @@ curl -X PUT \
 #
 section "Kubernetes"
 
-INGRESS_SECRET=$(ibmcloud cs cluster-get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r .ingressSecretName)
+INGRESS_SECRET=$(ibmcloud ks cluster-get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r .ingressSecretName)
 echo "INGRESS_SECRET=${INGRESS_SECRET}"
 check_value "$INGRESS_SECRET"
 
@@ -323,7 +325,7 @@ fi
 if kubectl get secret binding-secure-file-storage-appid --namespace $TARGET_NAMESPACE; then
   echo "App ID service already bound to namespace"
 else
-  ibmcloud cs cluster-service-bind \
+  ibmcloud ks cluster-service-bind \
     --cluster "$PIPELINE_KUBERNETES_CLUSTER_NAME" \
     --namespace "$TARGET_NAMESPACE" \
     --service "$APPID_GUID" || exit 1
