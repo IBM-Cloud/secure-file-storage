@@ -176,7 +176,7 @@ if check_exists "$(ibmcloud resource service-instance secure-file-storage-cos 2>
   echo "Cloud Object Storage service already exists"
 else
   ibmcloud resource service-instance-create secure-file-storage-cos \
-    cloud-object-storage $COS_PLAN global || exit 1
+    cloud-object-storage "$COS_PLAN" global || exit 1
 fi
 COS_INSTANCE_ID=$(get_instance_id secure-file-storage-cos)
 COS_GUID=$(get_guid secure-file-storage-cos)
@@ -268,7 +268,7 @@ if check_exists "$(ibmcloud resource service-instance secure-file-storage-appid 
   echo "App ID service already exists"
 else
   ibmcloud resource service-instance-create secure-file-storage-appid \
-    appid $APP_ID_PLAN $REGION || exit 1
+    appid "$APP_ID_PLAN" $REGION || exit 1
 fi
 APPID_INSTANCE_ID=$(get_instance_id secure-file-storage-appid)
 APPID_GUID=$(get_guid secure-file-storage-appid)
