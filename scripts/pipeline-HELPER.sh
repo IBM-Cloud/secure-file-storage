@@ -1,11 +1,4 @@
 #!/bin/bash
-# until toolchain is updated with recent IBM Cloud CLI
-if ! which ibmcloud; then
-  echo "ibmcloud not found, redirecting to bx"
-  ibmcloud() {
-    bx "$@"
-  }
-fi
 
 # Returns an IAM access token given an API key
 function get_access_token {

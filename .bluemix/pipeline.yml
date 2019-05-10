@@ -53,11 +53,6 @@ stages:
       resource_group: ${TARGET_RESOURCE_GROUP}
     script: |
       #!/bin/bash
-      wget https://clis.ng.bluemix.net/download/bluemix-cli/0.9.0/linux64
-      tar zxvf linux64
-      chmod +x ./Bluemix_CLI/bin/* ./Bluemix_CLI/bin/cfcli/*
-      export PATH=$PWD/Bluemix_CLI/bin:$PWD/Bluemix_CLI/bin/cfcli:$PATH
-      ibmcloud -v
       ./scripts/pipeline-DEPLOY.sh
 - name: UNINSTALL (manual)
   inputs:
