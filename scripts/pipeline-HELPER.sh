@@ -17,9 +17,9 @@ function get_access_token {
 
 # Returns a service CRN given a service name
 function get_instance_id {
-  OUTPUT=$(ibmcloud resource service-instance --id $1)
+  OUTPUT=$(ibmcloud resource service-instance --output JSON $1)
   if (echo $OUTPUT | grep -q "crn:v1" >/dev/null); then
-    echo $OUTPUT | awk '{print $1}'
+    echo $OUTPUT | jq -r .[0].id
   else
     echo "Failed to get instance ID: $OUTPUT"
     exit 2
