@@ -49,10 +49,10 @@ function section {
 }
 
 function check_exists {
-  if echo $1 | grep -q "not found"; then
+  if echo "$1" | grep -q "not found"; then
     return 1
   fi
-  if echo $1 | grep -q "crn:v1"; then
+  if echo "$1" | grep -q "crn:v1"; then
     return 0
   fi
   echo "Failed to check if object exists: $1"
