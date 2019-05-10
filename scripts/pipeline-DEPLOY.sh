@@ -106,7 +106,7 @@ fi
 KP_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-kms-acckey-$KP_GUID --output JSON)
 KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | jq -r .[0].credentials.apikey)
 KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
-KP_MANAGEMENT_URL="https://keyprotect.$REGION.bluemix.net/api/v2/keys"
+KP_MANAGEMENT_URL="https://$REGION.kms.cloud.ibm.com/api/v2/keys"
 
 # Create root key if it does not exist
 KP_KEYS=$(curl -s $KP_MANAGEMENT_URL \
