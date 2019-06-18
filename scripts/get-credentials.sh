@@ -25,7 +25,7 @@ COS_APIKEY=$(echo "$COS_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ print
 COS_RESOURCE_INSTANCE_ID=$(echo "$COS_CREDENTIALS" | grep "resource_instance_id"  | awk '{ print $2 }')
 COS_ENDPOINTS_URL=$(echo "$COS_CREDENTIALS" | grep endpoints | awk '{ print $2 }')
 COS_ENDPOINTS=$(curl -s $COS_ENDPOINTS_URL)
-COS_ENDPOINT=$(echo $COS_ENDPOINTS | jq -r '.["service-endpoints"].regional["'$REGION'"].public["'$REGION'"]')
+COS_ENDPOINT=$(echo $COS_ENDPOINTS | jq -r '.["service-endpoints"].regional["'$REGION'"].private["'$REGION'"]')
 COS_IBMAUTHENDPOINT=https://$(echo $COS_ENDPOINTS | jq -r '.["identity-endpoints"]["iam-token"]')/identity/token
 COS_BUCKET_NAME=secure-file-storage-$COS_GUID
 
