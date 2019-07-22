@@ -365,6 +365,7 @@ if ibmcloud iam service-policies $SERVICE_ID; then
 else
   ibmcloud iam service-policy-create $SERVICE_ID --roles Reader --service-name container-registry \
          --region $REGION --resource-type namespace --resource $TARGET_NAMESPACE
+fi
 
 if kubectl get secret secure-file-storage-docker-registry --namespace $TARGET_NAMESPACE; then
   echo "Docker Registry secret already exists"
