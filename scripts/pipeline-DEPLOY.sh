@@ -360,14 +360,19 @@ kubectl create secret generic secure-file-storage-credentials \
 #
 # Create a secret to access the registry
 #
+if ibmcloud iam service-policies $SERVICE_ID; then
+  echo "service policy already exists"
+else
+  ibmcloud iam service-policy-create $SERVICE_ID --roles Reader --service-name container-registry \
+         --region $REGION --resource-type namespace --resource $TARGET_NAMESPACE
+
 if kubectl get secret secure-file-storage-docker-registry --namespace $TARGET_NAMESPACE; then
   echo "Docker Registry secret already exists"
 else
-  REGISTRY_TOKEN=$(ibmcloud cr token-add --description "secure-file-storage-docker-registry for $TARGET_USER" --non-expiring --quiet)
   kubectl --namespace $TARGET_NAMESPACE create secret docker-registry secure-file-storage-docker-registry \
     --docker-server=${REGISTRY_URL} \
-    --docker-password="${REGISTRY_TOKEN}" \
-    --docker-username=token \
+    --docker-username=iamapikey \
+    --docker-password=${API_KEY_VALUE} \
     --docker-email="${TARGET_USER}" || exit 1
 fi
 
