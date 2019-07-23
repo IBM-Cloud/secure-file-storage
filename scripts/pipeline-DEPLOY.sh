@@ -105,7 +105,7 @@ check_value "$EXISTING_POLICIES"
 
 # Create a policy to make serviceID a writer for Key Protect
 if echo "$EXISTING_POLICIES" | \
-  jq -e -r 'select(.[].resources[].attributes[].name=="serviceInstance" and .[].resources[].attributes[].value=="'$KP_GUID'" and .[].roles[].display_name=="Writer")' > /dev/null; then
+  jq -e -r 'select(.[] | .resources[].attributes[].name=="serviceInstance" and .resources[].attributes[].value=="'$KP_GUID'" and .roles[].display_name=="Writer")' > /dev/null; then
   echo "Writer policy on Key Protect already exist for the Service ID"
 else
   ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name kms --service-instance $KP_GUID --force
@@ -245,7 +245,8 @@ else
 fi
 
 # Grant Writer role for COS to serviceID
-if ibmcloud iam service-policies $SERVICE_ID | grep -B 4 $COS_GUID | grep Writer; then
+if echo "$EXISTING_POLICIES" | \
+  jq -e -r 'select(.[] | .resources[].attributes[].name=="serviceInstance" and .resources[].attributes[].value=="'$COS_GUID'" and .roles[].display_name=="Writer")' > /dev/null; then
   echo "Writer policy on Cloud Object Storage already exist for the Service ID"
 else
   ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name cloud-object-storage --service-instance $COS_GUID -f
@@ -254,9 +255,13 @@ fi
 # Create the bucket
 echo "Creating storage bucket"
 
-API_KEY_OUT=$(ibmcloud iam service-api-key-create secure-file-storage-serviceID-API-key $SERVICE_ID -d "API key for secure-file-storage-serviceID" --force)
-API_KEY_VALUE=$(echo "$API_KEY_OUT" | grep "API Key" | awk '{print $3}')
-API_KEY_UUID=$(echo "$API_KEY_OUT" | grep "UUID" | awk '{print $2}')
+if check_exists "$(ibmcloud iam service-api-key secure-file-storage-serviceID-API-key $SERVICE_ID 2>&1)"; then
+  echo "API key already exists, reusing it"
+  API_KEY_OUT=$(ibmcloud iam service-api-key secure-file-storage-serviceID-API-key $SERVICE_ID --output json -f)
+else
+  API_KEY_OUT=$(ibmcloud iam service-api-key-create secure-file-storage-serviceID-API-key $SERVICE_ID -d "API key for secure-file-storage-serviceID" --force --output json)
+fi
+API_KEY_VALUE=$(echo "$API_KEY_OUT" | jq -r '.apiKey')
 SERVICE_ID_ACCESS_TOKEN=$(get_access_token $API_KEY_VALUE)
 
 curl -X PUT \
@@ -266,7 +271,8 @@ curl -X PUT \
   --header "ibm-service-instance-id: $COS_RESOURCE_INSTANCE_ID" \
   https://$COS_ENDPOINT/$COS_BUCKET_NAME
 
-ibmcloud iam service-api-key-delete secure-file-storage-serviceID-API-key $SERVICE_ID -f
+# we previously deleted the service key, but it is required for the ImagePull secret and needs to be valid
+#ibmcloud iam service-api-key-delete secure-file-storage-serviceID-API-key $SERVICE_ID -f
 
 #
 # App ID
@@ -358,18 +364,24 @@ kubectl create secret generic secure-file-storage-credentials \
   --namespace "$TARGET_NAMESPACE" || exit 1
 
 #
-# Create a secret to access the registry
+# Create a policy, then a secret to access the registry
 #
-if kubectl get secret secure-file-storage-docker-registry --namespace $TARGET_NAMESPACE; then
-  echo "Docker Registry secret already exists"
+if echo "$EXISTING_POLICIES" | \
+  jq -e -r 'select(.[] | .resources[].attributes[].name=="serviceName" and .resources[].attributes[].value=="container-registry" and .resources[].attributes[].value=="'$REGION'" and .roles[].display_name=="Reader")' > /dev/null; then
+  echo "Reader policy on Container Registry already exist for the Service ID"
 else
-  REGISTRY_TOKEN=$(ibmcloud cr token-add --description "secure-file-storage-docker-registry for $TARGET_USER" --non-expiring --quiet)
-  kubectl --namespace $TARGET_NAMESPACE create secret docker-registry secure-file-storage-docker-registry \
-    --docker-server=${REGISTRY_URL} \
-    --docker-password="${REGISTRY_TOKEN}" \
-    --docker-username=token \
-    --docker-email="${TARGET_USER}" || exit 1
+  ibmcloud iam service-policy-create $SERVICE_ID --roles Reader --service-name container-registry --region $REGION 
 fi
+
+if kubectl get secret secure-file-storage-docker-registry --namespace $TARGET_NAMESPACE; then
+  kubectl delete secret secure-file-storage-docker-registry --namespace "$TARGET_NAMESPACE"
+fi
+kubectl --namespace $TARGET_NAMESPACE create secret docker-registry secure-file-storage-docker-registry \
+    --docker-server=${REGISTRY_URL} \
+    --docker-username=iamapikey \
+    --docker-password=${API_KEY_VALUE} \
+    --docker-email="${TARGET_USER}" || exit 1
+
 
 #
 # Deploy the app
