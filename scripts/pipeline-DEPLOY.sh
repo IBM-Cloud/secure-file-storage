@@ -255,9 +255,13 @@ fi
 # Create the bucket
 echo "Creating storage bucket"
 
-API_KEY_OUT=$(ibmcloud iam service-api-key-create secure-file-storage-serviceID-API-key $SERVICE_ID -d "API key for secure-file-storage-serviceID" --force)
-API_KEY_VALUE=$(echo "$API_KEY_OUT" | grep "API Key" | awk '{print $3}')
-API_KEY_UUID=$(echo "$API_KEY_OUT" | grep "UUID" | awk '{print $2}')
+if check_exists "$(ibmcloud iam service-api-key secure-file-storage-serviceID-API-key $SERVICE_ID 2>&1)"; then
+  echo "API key already exists, reusing it"
+  API_KEY_OUT=$(ibmcloud iam service-api-key secure-file-storage-serviceID-API-key $SERVICE_ID --output json -f)
+else
+  API_KEY_OUT=$(ibmcloud iam service-api-key-create secure-file-storage-serviceID-API-key $SERVICE_ID -d "API key for secure-file-storage-serviceID" --force --output json)
+fi
+API_KEY_VALUE=$(echo "$API_KEY_OUT" | jq -r '.apiKey')
 SERVICE_ID_ACCESS_TOKEN=$(get_access_token $API_KEY_VALUE)
 
 curl -X PUT \
@@ -267,7 +271,8 @@ curl -X PUT \
   --header "ibm-service-instance-id: $COS_RESOURCE_INSTANCE_ID" \
   https://$COS_ENDPOINT/$COS_BUCKET_NAME
 
-ibmcloud iam service-api-key-delete secure-file-storage-serviceID-API-key $SERVICE_ID -f
+# we previously deleted the service key, but it is required for the ImagePull secret and needs to be valid
+#ibmcloud iam service-api-key-delete secure-file-storage-serviceID-API-key $SERVICE_ID -f
 
 #
 # App ID
