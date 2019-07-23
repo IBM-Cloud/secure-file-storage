@@ -105,7 +105,7 @@ check_value "$EXISTING_POLICIES"
 
 # Create a policy to make serviceID a writer for Key Protect
 if echo "$EXISTING_POLICIES" | \
-  jq -e -r 'select(.[].resources[].attributes[].name=="serviceInstance" and .[].resources[].attributes[].value=="'$KP_GUID'" and .[].roles[].display_name=="Writer")' > /dev/null; then
+  jq -e -r 'select(.[] | .resources[].attributes[].name=="serviceInstance" and .resources[].attributes[].value=="'$KP_GUID'" and .roles[].display_name=="Writer")' > /dev/null; then
   echo "Writer policy on Key Protect already exist for the Service ID"
 else
   ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name kms --service-instance $KP_GUID --force
@@ -245,7 +245,8 @@ else
 fi
 
 # Grant Writer role for COS to serviceID
-if ibmcloud iam service-policies $SERVICE_ID | grep -B 4 $COS_GUID | grep Writer; then
+if echo "$EXISTING_POLICIES" | \
+  jq -e -r 'select(.[] | .resources[].attributes[].name=="serviceInstance" and .resources[].attributes[].value=="'$COS_GUID'" and .roles[].display_name=="Writer")' > /dev/null; then
   echo "Writer policy on Cloud Object Storage already exist for the Service ID"
 else
   ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name cloud-object-storage --service-instance $COS_GUID -f
@@ -360,8 +361,9 @@ kubectl create secret generic secure-file-storage-credentials \
 #
 # Create a policy, then a secret to access the registry
 #
-if ibmcloud iam service-policies $SERVICE_ID | grep -B 3 container-registry | grep Reader; then
-  echo "service policy already exists"
+if echo "$EXISTING_POLICIES" | \
+  jq -e -r 'select(.[] | .resources[].attributes[].name=="serviceName" and .resources[].attributes[].value=="container-registry" and .resources[].attributes[].value=="'$REGION'" and .roles[].display_name=="Reader")' > /dev/null; then
+  echo "Reader policy on Container Registry already exist for the Service ID"
 else
   ibmcloud iam service-policy-create $SERVICE_ID --roles Reader --service-name container-registry \
          --region $REGION --resource-type namespace --resource $TARGET_NAMESPACE
