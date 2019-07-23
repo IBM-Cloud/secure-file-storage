@@ -365,8 +365,7 @@ if echo "$EXISTING_POLICIES" | \
   jq -e -r 'select(.[] | .resources[].attributes[].name=="serviceName" and .resources[].attributes[].value=="container-registry" and .resources[].attributes[].value=="'$REGION'" and .roles[].display_name=="Reader")' > /dev/null; then
   echo "Reader policy on Container Registry already exist for the Service ID"
 else
-  ibmcloud iam service-policy-create $SERVICE_ID --roles Reader --service-name container-registry \
-         --region $REGION --resource-type namespace --resource $TARGET_NAMESPACE
+  ibmcloud iam service-policy-create $SERVICE_ID --roles Reader --service-name container-registry --region $REGION 
 fi
 
 if kubectl get secret secure-file-storage-docker-registry --namespace $TARGET_NAMESPACE; then
