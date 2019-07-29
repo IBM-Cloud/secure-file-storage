@@ -1,9 +1,12 @@
 #!/bin/bash
 
+# fail script on error
+set -e
+
 source ./scripts/pipeline-HELPER.sh
 
 if [ -z "$REGION" ]; then
-  export REGION=$(ibmcloud target | grep Region | awk '{print $2}')
+  export REGION=$(ibmcloud target --output json | jq -r '.region.name')
 fi
 echo "REGION=$REGION"
 
@@ -42,7 +45,7 @@ APPID_NEW_CREDENTIALS=$(echo -n "$APPID_NEW_CREDENTIALS_OUT" | jq -r -c '.[].cre
 
 # Now generate a new secret and replace the existing one
 echo "Applying credentials to existing secret"
-kubectl create secret generic binding-secure-file-storage-appid --from-literal="binding=${APPID_NEW_CREDENTIALS}" -n secure-file-storage2019 -o yaml --dry-run=true | kubectl apply -f - 2>&1
+kubectl create secret generic binding-secure-file-storage-appid --from-literal="binding=${APPID_NEW_CREDENTIALS}" -n $TARGET_NAMESPACE -o yaml --dry-run=true | kubectl apply -f - 2>&1
 
 section "Done"
 echo "Now check that everything works. Thereafter you can remove the old key with the following command:"
