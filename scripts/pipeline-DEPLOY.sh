@@ -294,7 +294,7 @@ check_value "$APPID_GUID"
 if check_exists "$(ibmcloud resource service-key secure-file-storage-appid-acckey-$APPID_GUID 2>&1)"; then
   echo "App ID key already exists"
 else
-  ibmcloud resource service-key-create secure-file-storage-appid-acckey-$APPID_GUID Manager \
+  ibmcloud resource service-key-create secure-file-storage-appid-acckey-$APPID_GUID Writer \
     --instance-id "$APPID_INSTANCE_ID" || exit 1
 fi
 
@@ -340,6 +340,7 @@ else
   ibmcloud ks cluster-service-bind \
     --cluster "$PIPELINE_KUBERNETES_CLUSTER_NAME" \
     --namespace "$TARGET_NAMESPACE" \
+    --key "secure-file-storage-appid-acckey-${APPID_GUID}" \
     --service "$APPID_GUID" || exit 1
 fi
 
