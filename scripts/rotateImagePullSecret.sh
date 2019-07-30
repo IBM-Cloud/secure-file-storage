@@ -22,6 +22,10 @@ TARGET_USER=$(ibmcloud target --output json | jq -r '.user.user_email')
 check_value "$TARGET_USER"
 echo "TARGET_USER=$TARGET_USER"
 
+if [ -z "$REGISTRY_URL" ]; then
+    echo "Need to set REGISTRY_URL to container registry URI."
+    exit 1;
+fi
 echo "REGISTRY_URL=$REGISTRY_URL"
 IMAGE_PULL_SECRET="secure-file-storage-docker-registry"
 
