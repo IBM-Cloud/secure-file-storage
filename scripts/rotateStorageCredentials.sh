@@ -88,5 +88,10 @@ kubectl create secret generic secure-file-storage-credentials \
   --namespace "$TARGET_NAMESPACE" || exit 1
 
 
+section "Restarting the deployed app"
 # Restart the deployment to apply the secret
 kubectl rollout restart deployment secure-file-storage-deployment -n $TARGET_NAMESPACE
+
+echo "You can delete the old credentials once everything works ok using these commands:"
+echo "ibmcloud resource service-key-delete secure-file-storage-cos-acckey-$COS_GUID"
+echo "ibmcloud resource service-key-delete secure-file-storage-cloudant-acckey-$CLOUDANT_GUID"
