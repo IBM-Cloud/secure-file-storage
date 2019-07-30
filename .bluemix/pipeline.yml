@@ -54,33 +54,7 @@ stages:
     script: |
       #!/bin/bash
       ./scripts/pipeline-DEPLOY.sh
-- name: ROTATE STORAGE KEYS (manual)
-  inputs:
-  - type: job
-    stage: BUILD
-    job: Build Docker image
-  properties:
-  - name: buildprops
-    value: build.properties
-    type: file
-  - name: TARGET_NAMESPACE
-    value: ${TARGET_NAMESPACE}
-    type: text
-  triggers:
-  - type: stage
-    enabled: false
-  jobs:
-  - name: RotateStorage
-    type: deployer
-    target:
-      region_id: ${TARGET_REGION_ID}
-      api_key: ${API_KEY}
-      kubernetes_cluster: ${TARGET_CLUSTER_NAME}
-      resource_group: ${TARGET_RESOURCE_GROUP}
-    script: |
-      #!/bin/bash
-      ./scripts/pipeline-ROTATE_STORAGE_CREDENTIALS.sh
-- name: ROTATE APPID KEY (manual)
+- name: ROTATE CREDENTIALS (manual)
   inputs:
   - type: job
     stage: BUILD
@@ -99,33 +73,7 @@ stages:
   - type: stage
     enabled: false
   jobs:
-  - name: RotateAppID
-    type: deployer
-    target:
-      region_id: ${TARGET_REGION_ID}
-      api_key: ${API_KEY}
-      kubernetes_cluster: ${TARGET_CLUSTER_NAME}
-      resource_group: ${TARGET_RESOURCE_GROUP}
-    script: |
-      #!/bin/bash
-      ./scripts/pipeline-ROTATE_APPID_CREDENTIALS.sh
-- name: ROTATE REGISTRY KEY (manual)
-  inputs:
-  - type: job
-    stage: BUILD
-    job: Build Docker image
-  properties:
-  - name: buildprops
-    value: build.properties
-    type: file
-  - name: TARGET_NAMESPACE
-    value: ${TARGET_NAMESPACE}
-    type: text
-  triggers:
-  - type: stage
-    enabled: false
-  jobs:
-  - name: RotateRegistry
+  - name: RotateRegistryCredentials
     type: deployer
     target:
       region_id: ${TARGET_REGION_ID}
@@ -135,6 +83,26 @@ stages:
     script: |
       #!/bin/bash
       ./scripts/pipeline-ROTATE_REGISTRY_CREDENTIALS.sh
+  - name: RotateAppIDCredentials
+    type: deployer
+    target:
+      region_id: ${TARGET_REGION_ID}
+      api_key: ${API_KEY}
+      kubernetes_cluster: ${TARGET_CLUSTER_NAME}
+      resource_group: ${TARGET_RESOURCE_GROUP}
+    script: |
+      #!/bin/bash
+      ./scripts/pipeline-ROTATE_APPID_CREDENTIALS.sh
+  - name: RotateStorageCredentials
+    type: deployer
+    target:
+      region_id: ${TARGET_REGION_ID}
+      api_key: ${API_KEY}
+      kubernetes_cluster: ${TARGET_CLUSTER_NAME}
+      resource_group: ${TARGET_RESOURCE_GROUP}
+    script: |
+      #!/bin/bash
+      ./scripts/pipeline-ROTATE_STORAGE_CREDENTIALS.sh
 - name: UNINSTALL (manual)
   inputs:
   - type: job
