@@ -15,7 +15,7 @@ Refer to [this tutorial](https://cloud.ibm.com/docs/tutorials?topic=solution-tut
 
 ## Deploy with a toolchain
 
-This project comes with a partially automated toolchain capable of deploying the application to IBM Cloud while provisioning all required services.
+This project comes with a partially automated toolchain capable of deploying the application to IBM Cloud while provisioning all required services. The pipeline has manual stages to uninstall resources and to selectively rotate different service credentials and apply them to the deployed application (see below).
 
 ### Prerequisites
 
@@ -33,7 +33,7 @@ Once the toolchain has completed, the application will be available at `https://
 
 The toolchain includes a stage named **UNINSTALL (manual)**. This stage can only be triggered manually and will remove all resources created by the toolchain (app and services).
 
-If the deploy stage fails with the error, *The account already has an instance created with the Lite plan*, configure the stage's environment variables `COS_PLAN=standard` or `APP_ID_PLAN=graduated-tier` or `CLOUDANT_PLAN=standard` based on the failed service. You can then re-run the deploy stage (you do not need to re-create the toolchain).
+**Note:** If the deploy stage fails with the error, *The account already has an instance created with the Lite plan*, configure the stage's environment variables `COS_PLAN=standard` or `APP_ID_PLAN=graduated-tier` or `CLOUDANT_PLAN=standard` based on the failed service. You can then re-run the deploy stage (you do not need to re-create the toolchain).
 
 ## Code Structure
 
@@ -53,6 +53,35 @@ If the deploy stage fails with the error, *The account already has an instance c
    export TEST_AUTHORIZATION_HEADER="<value of the header attribute 'Bearer ... ...'>"
    ```
 1. npm start
+
+## Rotate service credentials
+To maintain security you should rotate the service credentials on a regular basis and in security-related events. This could be an employee leaving the team or during or after security incidents.
+
+### AppID credentials
+The AppID service is used to protect access to the application. The service is bound to the cluster ingress for the application's namespace. To update its credentials and the related Kubernetes secret, either run the manual stage in the delivery pipeline or the following command:
+
+```
+TARGET_NAMESPACE=your-app-namespace TARGET_RESOURCE_GROUP=your-resource-group ./scripts/pipeline-ROTATE_APPID_CREDENTIALS.sh
+```
+If not set, **TARGET_NAMESPACE** and **TARGET_RESOURCE_GROUP** are set to **default**.
+
+### Storage credentials
+The application stores files and their metadata in IBM Cloud Object Storage and Cloudant. The service credentials are stored in a single Kubernetes secret. Rotating the secret involves creating new credentials and then use the new keys to recreate the secret. This can be done either by manually invoking the stage in the delivery pipeline or by running the following command:
+
+```
+TARGET_NAMESPACE=your-app-namespace ./scripts/pipeline-ROTATE_STORAGE_CREDENTIALS.sh
+```
+
+If not set, **TARGET_NAMESPACE** is set to **default**.
+
+### Container registry credentials
+The container registry manages the Docker image. Deploying an image from the registry to a Kubernetes cluster typically relies on a **image pull secret** for registry access. To update the registry credentials and the secret, either run the manual stage in the delivery pipeline or the following command:
+
+```
+TARGET_NAMESPACE=your-app-namespace REGISTRY_URL=registry-url ./scripts/pipeline-ROTATE_REGISTRY_CREDENTIALS.sh
+```
+
+If not set, **TARGET_NAMESPACE** is set to **default**. **REGISTRY_URL** needs to be set to the region-specific host name, e.g., `de.icr.io`.
 
 ## License
 

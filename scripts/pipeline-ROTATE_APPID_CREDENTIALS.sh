@@ -10,12 +10,6 @@ if [ -z "$REGION" ]; then
 fi
 echo "REGION=$REGION"
 
-if [ -z "$PIPELINE_KUBERNETES_CLUSTER_NAME" ]; then
-  echo 'PIPELINE_KUBERNETES_CLUSTER_NAME was not set. Set it to the target cluster name.'
-  exit 1;
-fi
-echo "PIPELINE_KUBERNETES_CLUSTER_NAME=$PIPELINE_KUBERNETES_CLUSTER_NAME"
-
 if [ -z "$TARGET_RESOURCE_GROUP" ]; then
   TARGET_RESOURCE_GROUP=default
 fi
