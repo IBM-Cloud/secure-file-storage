@@ -90,6 +90,11 @@ kubectl create secret generic secure-file-storage-credentials \
 
 section "Restarting the deployed app"
 # Restart the deployment to apply the secret
+echo "We need a newer kubectl and download it as workaround"
+curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.15.1/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+
 kubectl rollout restart deployment secure-file-storage-deployment -n $TARGET_NAMESPACE
 
 echo "You can delete the old credentials once everything works ok using these commands:"

@@ -44,8 +44,10 @@ APPID_NEW_CREDENTIALS_OUT=$(ibmcloud resource service-key ${APPID_KEYNAME} -g $T
 APPID_NEW_CREDENTIALS=$(echo -n "$APPID_NEW_CREDENTIALS_OUT" | jq -r -c '.[].credentials')
 
 # Now generate a new secret and replace the existing one
-echo "Applying credentials to existing secret"
-kubectl create secret generic binding-secure-file-storage-appid --from-literal="binding=${APPID_NEW_CREDENTIALS}" -n $TARGET_NAMESPACE -o yaml --dry-run=true | kubectl apply -f - 2>&1
+section "Applying credentials to existing secret"
+kubectl create secret generic binding-secure-file-storage-appid \
+        --from-literal="binding=${APPID_NEW_CREDENTIALS}" -n $TARGET_NAMESPACE -o yaml --dry-run=true \
+        | kubectl apply -f - 2>&1
 
 section "Done"
 echo "Now check that everything works. Thereafter you can remove the old key with the following command:"
