@@ -52,6 +52,6 @@ kubectl --namespace $TARGET_NAMESPACE create secret docker-registry $IMAGE_PULL_
 
 section "Closing remarks"
 echo "To verify the updated secret, use this command:"
-echo "kubectl get secret $IMAGE_PULL_SECRET -n $TARGET_NAMESPACE -o yaml | grep dockerconfigjson: | awk '{print $2}' | base64 --decode"
+echo "kubectl get secret $IMAGE_PULL_SECRET -n $TARGET_NAMESPACE -o yaml | grep dockerconfigjson: | awk '{print \$2}' | base64 --decode"
 echo "To delete the old API key use:"
 echo "ibmcloud iam service-api-key-delete ${SERVICE_KEYNAME}-old-${TODAYS_DATE} $SERVICE_ID_NAME"
