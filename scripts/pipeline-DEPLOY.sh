@@ -11,7 +11,7 @@ source ./scripts/pipeline-HELPER.sh
 section "Environment"
 
 if [ -z "$REGION" ]; then
-  export REGION=$(ibmcloud target | grep Region | awk '{print $2}')
+  export REGION=$(ibmcloud target --output json | jq -r '.region.name')
 fi
 echo "REGION=$REGION"
 
@@ -58,7 +58,7 @@ ibmcloud target -g $TARGET_RESOURCE_GROUP || exit 1
 #
 # The user running the script will be used to name some resources
 #
-TARGET_USER=$(ibmcloud target | grep User | awk '{print $2}')
+TARGET_USER=$(ibmcloud target --output json | jq -r '.user.user_email')
 check_value "$TARGET_USER"
 echo "TARGET_USER=$TARGET_USER"
 
