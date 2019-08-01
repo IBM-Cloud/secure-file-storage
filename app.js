@@ -30,7 +30,7 @@ var CloudObjectStorage = require('ibm-cos-sdk');
 var config = {
   endpoint: process.env.cos_endpoint,
   apiKeyId: process.env.cos_apiKey,
-  ibmAuthEndpoint: process.env.cos_ibmAuthEndpoint || 'https://iam.ng.bluemix.net/oidc/token',
+  ibmAuthEndpoint: process.env.cos_ibmAuthEndpoint || 'https://iam.cloud.ibm.com/identity/token',
   serviceInstanceId: process.env.cos_resourceInstanceID,
   // credentials and signatureVersion are required to generate presigned URLs
   credentials: new CloudObjectStorage.Credentials(process.env.cos_access_key_id, process.env.cos_secret_access_key, sessionToken = null),
