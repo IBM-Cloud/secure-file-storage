@@ -219,7 +219,7 @@ if [ -z "$COS_ENDPOINT" ]; then
   echo "COS_ENDPOINT was not set, finding value from $COS_ENDPOINTS_URL"
   VPC=$(ibmcloud ks cluster-get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.vpcs) | .vpcs[]')
   if [ -z ${VPC} ]; then
-    export COS_ENDPOINT=$(echo $COS_ENDPOINTS | jq -r '.["service-endpoints"].regional["'$REGION'"].public["'$REGION'"]')
+    export COS_ENDPOINT=$(echo $COS_ENDPOINTS | jq -r '.["service-endpoints"].regional["'$REGION'"].private["'$REGION'"]')
   else
     export COS_ENDPOINT=$(echo $COS_ENDPOINTS | jq -r '.["service-endpoints"].regional["'$REGION'"].direct["'$REGION'"]')
   fi
