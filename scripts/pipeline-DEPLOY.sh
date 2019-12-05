@@ -223,6 +223,9 @@ if [ -z "$COS_ENDPOINT" ]; then
   else
     export COS_ENDPOINT=$(echo $COS_ENDPOINTS | jq -r '.["service-endpoints"].regional["'$REGION'"].direct["'$REGION'"]')
   fi
+  
+  export COS_ENDPOINT_PIPELINE=$(echo $COS_ENDPOINTS | jq -r '.["service-endpoints"].regional["'$REGION'"].public["'$REGION'"]')
+
 fi
 echo "COS_ENDPOINT=$COS_ENDPOINT"
 check_value "$COS_ENDPOINT"
@@ -274,7 +277,7 @@ curl -X PUT \
   --header "ibm-sse-kp-encryption-algorithm: AES256" \
   --header "ibm-sse-kp-customer-root-key-crn: $ROOT_KEY_CRN" \
   --header "ibm-service-instance-id: $COS_RESOURCE_INSTANCE_ID" \
-  https://$COS_ENDPOINT/$COS_BUCKET_NAME
+  https://$COS_ENDPOINT_PIPELINE/$COS_BUCKET_NAME
 
 # we previously deleted the service key, but it is required for the ImagePull secret and needs to be valid
 #ibmcloud iam service-api-key-delete secure-file-storage-serviceID-API-key $SERVICE_ID -f
