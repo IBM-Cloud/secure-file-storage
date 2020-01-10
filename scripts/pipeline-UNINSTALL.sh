@@ -33,7 +33,7 @@ ibmcloud cr image-rm $IMAGE_URL
 #
 section "App ID"
 GUID=$(get_guid secure-file-storage-appid)
-ibmcloud cs cluster-service-unbind \
+ibmcloud ks cluster service unbind \
   --cluster "$PIPELINE_KUBERNETES_CLUSTER_NAME" \
   --namespace "$TARGET_NAMESPACE" \
   --service "$GUID"
