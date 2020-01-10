@@ -217,7 +217,7 @@ echo "COS_BUCKET_NAME=$COS_BUCKET_NAME"
 
 if [ -z "$COS_ENDPOINT" ]; then
   echo "COS_ENDPOINT was not set, finding value from $COS_ENDPOINTS_URL"
-  VPC=$(ibmcloud ks cluster get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.vpcs) | .vpcs[]')
+  VPC=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.vpcs) | .vpcs[]')
   if [ -z ${VPC} ]; then
     export COS_ENDPOINT=$(echo $COS_ENDPOINTS | jq -r '.["service-endpoints"].regional["'$REGION'"].private["'$REGION'"]')
   else
@@ -313,9 +313,9 @@ APPID_ACCESS_TOKEN=$(get_access_token $APPID_API_KEY)
 
 # Set the redirect URL on App ID
 if [ -z ${VPC} ]; then
-  INGRESS_SUBDOMAIN=$(ibmcloud ks cluster get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.ingressHostname) | .ingressHostname')
+  INGRESS_SUBDOMAIN=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.ingressHostname) | .ingressHostname')
 else
-  INGRESS_SUBDOMAIN=$(ibmcloud ks cluster get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.ingress.hostname) | .ingress.hostname')
+  INGRESS_SUBDOMAIN=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.ingress.hostname) | .ingress.hostname')
 fi
 echo "INGRESS_SUBDOMAIN=$INGRESS_SUBDOMAIN"
 check_value "$INGRESS_SUBDOMAIN"
@@ -333,9 +333,9 @@ curl -X PUT \
 section "Kubernetes"
 
 if [ -z ${VPC} ]; then
-  INGRESS_SECRET=$(ibmcloud ks cluster get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.ingressSecretName) | .ingressSecretName')
+  INGRESS_SECRET=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.ingressSecretName) | .ingressSecretName')
 else
-  INGRESS_SECRET=$(ibmcloud ks cluster get $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.ingress.secretName) | .ingress.secretName')
+  INGRESS_SECRET=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.ingress.secretName) | .ingress.secretName')
 fi
 echo "INGRESS_SECRET=${INGRESS_SECRET}"
 check_value "$INGRESS_SECRET"
