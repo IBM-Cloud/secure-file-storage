@@ -16,8 +16,9 @@ services:
     service_id: githubpublic
     parameters:
       repo_name: 'secure-file-storage'
-      repo_url: 'https://github.com/IBM-Cloud/secure-file-storage'
+      repo_url: $env.repository
       type: clone
+      type: link
       has_issues: false
       enable_traceability: false
   build:
@@ -27,11 +28,14 @@ services:
         - repo
       name: 'secure-file-storage ({{form.pipeline.parameters.branch-name}})'
       ui-pipeline: true
+      type: $env.type
       configuration:
         content:
-          $text: pipeline.yml
+          $text: >
+            $env.type + '.yml'
         env:
           GIT_REPO: repo
+          GIT_REPO_URL: $env.repository
           GIT_BRANCH: '{{form.pipeline.parameters.branch-name}}'
           API_KEY: '{{form.pipeline.parameters.api-key}}'
           REGISTRY_REGION_ID: '{{form.pipeline.parameters.target-region}}'

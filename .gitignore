@@ -11,3 +11,6 @@ yarn-debug.log*
 yarn-error.log*
 local_yaml
 secure-file-storage.yaml
+
+#vim swap files
+[._]*.sw[a-p]
