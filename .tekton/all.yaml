@@ -330,7 +330,6 @@ spec:
     command: ["/bin/bash", "-c"]
     args:
     - |
-      set -x
       env
       # BUILD needs this:
       export ARCHIVE_DIR=.
