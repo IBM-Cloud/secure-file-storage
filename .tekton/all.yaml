@@ -364,7 +364,8 @@ spec:
       cat /tmp/out
       eval $(egrep 'export *KUBECONFIG' /tmp/out)
       env | grep KUBECONFIG
-      bash -x $script
+      # bash -x $script
+      bash $script
     volumeMounts:
     - mountPath: /cd-config
       name: cd-config-volume
