@@ -18,7 +18,6 @@ services:
       repo_name: 'secure-file-storage'
       repo_url: $env.repository
       type: clone
-      type: link
       has_issues: false
       enable_traceability: false
   build:
