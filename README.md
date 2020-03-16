@@ -25,15 +25,17 @@ This project comes with a partially automated toolchain capable of deploying the
 
 1. Optionally create a specific resource group for this project
 
+1. Choose either the classic or tekton toolchains below (not both)
+
 ### And then classic
 
-[![Create toolchain](https://cloud.ibm.com/devops/graphics/create_toolchain_button.png)](https://cloud.ibm.com/devops/setup/deploy/?repository=https%3A//github.com/powellquiring/secure-file-storage&env_id=ibm:yp:us-south&type=classic)
+[![Create toolchain](https://cloud.ibm.com/devops/graphics/create_toolchain_button.png)](https://cloud.ibm.com/devops/setup/deploy/?repository=https%3A//github.com/IBM-Cloud/secure-file-storage&env_id=ibm:yp:us-south&type=classic)
 
 ### Or else tekton
 
 Tekton pipelines are available in preview.  If you are risk averse use classic above.
 
-[![Create toolchain](https://cloud.ibm.com/devops/graphics/create_toolchain_button.png)](https://cloud.ibm.com/devops/setup/deploy/?repository=https%3A//github.com/powellquiring/secure-file-storage&env_id=ibm:yp:us-south&type=tekton)
+[![Create toolchain](https://cloud.ibm.com/devops/graphics/create_toolchain_button.png)](https://cloud.ibm.com/devops/setup/deploy/?repository=https%3A//github.com/IBM-Cloud/secure-file-storage&env_id=ibm:yp:us-south&type=tekton)
 
 Once the toolchain has completed, the application will be available at `https://secure-file-storage.<your-cluster-ingress-domain>`.
 
