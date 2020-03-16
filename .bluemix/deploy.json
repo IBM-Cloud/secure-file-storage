@@ -19,21 +19,32 @@
         "$ref": "#/messages/deploy.apiKeyDescription"
       },
       "type": "string",
-      "pattern": "\\S"
+      "pattern": "\\S",
+      "validator": {
+          "v-type": "api-key"
+      }
     },
     "target-region": {
       "description": {
         "$ref": "#/messages/deploy.regionDescription"
       },
       "type": "string",
-      "disabled": false
+      "disabled": false,
+      "validator": {
+          "v-type": "k8s-region",
+          "params": ["api-key"]
+      }
     },
     "target-resource-group": {
       "description": {
         "$ref": "#/messages/deploy.groupDescription"
       },
       "type": "string",
-      "pattern": "\\S"
+      "pattern": "\\S",
+      "validator": {
+          "v-type": "resource-group",
+          "params": ["api-key"]
+      }
     },
     "image-name": {
       "description": {
@@ -47,22 +58,30 @@
         "$ref": "#/messages/deploy.registryDescription"
       },
       "type": "string",
-      "enum": [],
-      "pattern": "^[a-z0-9][a-z0-9_-]{3,29}$"
+      "pattern": "^[a-z0-9][-_a-z0-9]{2,28}[a-z0-9]$",
+      "validator": {
+          "v-type": "k8s-registry-namespace",
+          "params": ["target-region"],
+          "validate": false
+      }
     },
     "target-cluster-name": {
       "description": {
         "$ref": "#/messages/deploy.clusterDescription"
       },
       "type": "string",
-      "pattern": "\\S"
+      "pattern": "\\S",
+      "validator": {
+          "v-type": "k8s-cluster-name",
+          "params": ["target-resource-group", "target-region"]
+      }
     },
     "target-cluster-namespace": {
       "description": {
         "$ref": "#/messages/deploy.namespaceDescription"
       },
       "type": "string",
-      "pattern": "\\S"
+      "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
     }
   },
   "required": [
@@ -77,7 +96,7 @@
   "form": [
     {
       "type": "validator",
-      "url": "/devops/setup/bm-helper/custom_helper.html"
+      "url": "/devops/validator/validator-v1.html"
     },
     {
       "type": "password",
@@ -96,7 +115,7 @@
       }
     },
     {
-      "type": "text",
+      "type": "select",
       "readonly": false,
       "title": {
         "$ref": "#/messages/deploy.groupName"
