@@ -222,17 +222,6 @@ spec:
   - name: CLOUDANT_PLAN
   - name: script
   tasks:
-#  - name: clone
-#    workspaces:
-#    - name: artifacts
-#      workspace: pipeline-workspace
-#    taskRef:
-#      name: clone-repo-task
-#    params:
-#    - name: repository
-#      value: $(params.GIT_REPO)
-#    - name: branch
-#      value: master
   - name: script
     workspaces:
     - name: task-workspace
@@ -266,8 +255,6 @@ spec:
       value: $(params.script)
     taskRef:
       name: gasket
-#    runAfter:
-#    - clone
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: Task
