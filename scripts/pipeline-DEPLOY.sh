@@ -56,9 +56,16 @@ echo "IMAGE_NAME=$IMAGE_NAME"
 ibmcloud target -g $TARGET_RESOURCE_GROUP || exit 1
 
 #
+CLUSTER_INFO=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --json)
+
+#
 # The user running the script will be used to name some resources
 #
-TARGET_USER=$(ibmcloud target --output json | jq -r '.user.user_email')
+TARGET_JSON=$(ibmcloud target --output json)
+TARGET_USER=$(echo $TARGET_JSON | jq -r '.user.user_email')
+if [ -z "$TARGET_USER" ]; then
+  TARGET_USER=$(echo $TARGET_JSON | jq -r '.user.display_name')
+fi
 check_value "$TARGET_USER"
 echo "TARGET_USER=$TARGET_USER"
 
@@ -66,7 +73,7 @@ echo "TARGET_USER=$TARGET_USER"
 # Create Service ID
 #
 section "Service ID"
-if check_exists "$(ibmcloud iam service-id secure-file-storage-serviceID-$TARGET_USER 2>&1)"; then
+if check_exists "$(ibmcloud iam "service-id secure-file-storage-serviceID-$TARGET_USER" 2>&1)"; then
   echo "Service ID already exists"
 else
   ibmcloud iam service-id-create "secure-file-storage-serviceID-$TARGET_USER" -d "serviceID for secure file storage tutorial"
@@ -154,8 +161,12 @@ check_value "$CLOUDANT_GUID"
 if check_exists "$(ibmcloud resource service-key secure-file-storage-cloudant-acckey-$CLOUDANT_GUID 2>&1)"; then
   echo "Cloudant key already exists"
 else
-  ibmcloud resource service-key-create secure-file-storage-cloudant-acckey-$CLOUDANT_GUID Manager \
-    --instance-id "$CLOUDANT_INSTANCE_ID" || exit 1
+  until ibmcloud resource service-key-create secure-file-storage-cloudant-acckey-$CLOUDANT_GUID Manager \
+    --instance-id "$CLOUDANT_INSTANCE_ID"
+  do
+    echo "Will retry..."
+    sleep 10
+  done
 fi
 
 CLOUDANT_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-cloudant-acckey-$CLOUDANT_GUID)
@@ -217,7 +228,7 @@ echo "COS_BUCKET_NAME=$COS_BUCKET_NAME"
 
 if [ -z "$COS_ENDPOINT" ]; then
   echo "COS_ENDPOINT was not set, finding value from $COS_ENDPOINTS_URL"
-  VPC=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.vpcs) | .vpcs[]')
+  VPC=$(echo $CLUSTER_INFO | jq -r 'select(.vpcs) | .vpcs[]')
   if [ -z ${VPC} ]; then
     export COS_ENDPOINT=$(echo $COS_ENDPOINTS | jq -r '.["service-endpoints"].regional["'$REGION'"].private["'$REGION'"]')
   else
@@ -313,9 +324,9 @@ APPID_ACCESS_TOKEN=$(get_access_token $APPID_API_KEY)
 
 # Set the redirect URL on App ID
 if [ -z ${VPC} ]; then
-  INGRESS_SUBDOMAIN=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.ingressHostname) | .ingressHostname')
+  INGRESS_SUBDOMAIN=$(echo $CLUSTER_INFO | jq -r 'select(.ingressHostname) | .ingressHostname')
 else
-  INGRESS_SUBDOMAIN=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.ingress.hostname) | .ingress.hostname')
+  INGRESS_SUBDOMAIN=$(echo $CLUSTER_INFO | jq -r 'select(.ingress.hostname) | .ingress.hostname')
 fi
 echo "INGRESS_SUBDOMAIN=$INGRESS_SUBDOMAIN"
 check_value "$INGRESS_SUBDOMAIN"
@@ -333,9 +344,9 @@ curl -X PUT \
 section "Kubernetes"
 
 if [ -z ${VPC} ]; then
-  INGRESS_SECRET=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.ingressSecretName) | .ingressSecretName')
+  INGRESS_SECRET=$(echo $CLUSTER_INFO | jq -r 'select(.ingressSecretName) | .ingressSecretName')
 else
-  INGRESS_SECRET=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --json | jq -r 'select(.ingress.secretName) | .ingress.secretName')
+  INGRESS_SECRET=$(echo $CLUSTER_INFO | jq -r 'select(.ingress.secretName) | .ingress.secretName')
 fi
 echo "INGRESS_SECRET=${INGRESS_SECRET}"
 check_value "$INGRESS_SECRET"
