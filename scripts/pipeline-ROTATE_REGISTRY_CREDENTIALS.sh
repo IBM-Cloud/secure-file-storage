@@ -18,7 +18,11 @@ if [ -z "$TARGET_NAMESPACE" ]; then
 fi
 echo "TARGET_NAMESPACE=$TARGET_NAMESPACE"
 
-TARGET_USER=$(ibmcloud target --output json | jq -r '.user.user_email')
+TARGET_JSON=$(ibmcloud target --output json)
+TARGET_USER=$(echo $TARGET_JSON | jq -r '.user.user_email')
+if [ -z "$TARGET_USER" ]; then
+  TARGET_USER=$(echo $TARGET_JSON | jq -r '.user.display_name')
+fi
 check_value "$TARGET_USER"
 echo "TARGET_USER=$TARGET_USER"
 

@@ -11,7 +11,11 @@ echo "REGION=$REGION"
 #
 # The user running the script will be used to name some resources
 #
-TARGET_USER=$(ibmcloud target | grep User | awk '{print $2}')
+TARGET_JSON=$(ibmcloud target --output json)
+TARGET_USER=$(echo $TARGET_JSON | jq -r '.user.user_email')
+if [ -z "$TARGET_USER" ]; then
+  TARGET_USER=$(echo $TARGET_JSON | jq -r '.user.display_name')
+fi
 check_value "$TARGET_USER"
 echo "TARGET_USER=$TARGET_USER"
 
