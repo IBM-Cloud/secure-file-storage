@@ -73,7 +73,7 @@ echo "TARGET_USER=$TARGET_USER"
 # Create Service ID
 #
 section "Service ID"
-if check_exists "$(ibmcloud iam "service-id secure-file-storage-serviceID-$TARGET_USER" 2>&1)"; then
+if check_exists "$(ibmcloud iam service-id "secure-file-storage-serviceID-$TARGET_USER" 2>&1)"; then
   echo "Service ID already exists"
 else
   ibmcloud iam service-id-create "secure-file-storage-serviceID-$TARGET_USER" -d "serviceID for secure file storage tutorial"
