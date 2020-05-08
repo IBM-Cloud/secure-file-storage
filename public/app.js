@@ -43,24 +43,20 @@ var app = new Vue({
   },
   created: function () {
     var vm = this;
-    vm.fetchTokens();
+    vm.fetchUser();
     vm.get();
   },
   methods: {
-    fetchTokens: function (event) {
+    fetchUser: function (event) {
       var vm = this;
       vm.$http
-        .get('/api/tokens')
+        .get('/api/user')
         .then(function (response) {
-          vm.tokens = response.data;
-          vm.user = {
-            name: response.data.identity_token.name,
-            picture: response.data.identity_token.picture,
-          };
+          vm.user = response.data;
         }).catch(function (err) {
           console.log(err);
           vm.$toast.open({
-            message: 'Failed to retrieve tokens',
+            message: 'Failed to retrieve user information',
             type: 'is-danger',
           });
         }).finally(function () {

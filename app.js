@@ -10,6 +10,8 @@ require('dotenv').config({
   path: 'credentials.env'
 });
 
+var allowAnonymousAccess = process.env.allow_anonymous || false;
+
 // Initialize Cloudant
 var Cloudant = require('@cloudant/cloudant');
 var cloudant = new Cloudant({
@@ -75,7 +77,11 @@ app.use('/', express.static(__dirname + '/public'));
 app.use('/api/', (req, res, next) => {
   const auth = req.header('authorization') || process.env.TEST_AUTHORIZATION_HEADER;
   if (!auth) {
-    res.status(403).send();
+    if (allowAnonymousAccess) {
+      next();
+    } else {
+      res.status(403).send();
+    }
   } else {
     // authorization should be "Bearer <access_token> <identity_token>"
     const parts = auth.split(' ');
@@ -108,12 +114,22 @@ app.use('/api/', (req, res, next) => {
   }
 });
 
+function getSub(req) {
+  if (req.appIdAuthorizationContext) {
+    return req.appIdAuthorizationContext.access_token.sub;
+  } else if (allowAnonymousAccess) {
+    return '__anonymous__';
+  } else {
+    throw new Error(403);
+  }
+}
+
 // Returns all files associated to the current user
 app.get('/api/files', async function (req, res) {
   try {
     const body = await db.find({
       selector: {
-        userId: req.appIdAuthorizationContext.access_token.sub,
+        userId: getSub(req),
       }
     });
     res.send(body.docs.map(function (item) {
@@ -134,7 +150,7 @@ app.get('/api/files/:id/url', async function (req, res) {
     const result = await db.find({
       selector: {
         _id: req.params.id,
-        userId: req.appIdAuthorizationContext.access_token.sub,
+        userId: getSub(req),
       }
     });
     if (result.docs.length === 0) {
@@ -172,7 +188,7 @@ app.post('/api/files', function (req, res) {
       type: file.type,
       size: file.size,
       createdAt: new Date(),
-      userId: req.appIdAuthorizationContext.access_token.sub,
+      userId: getSub(req),
     };
 
     try {
@@ -214,7 +230,7 @@ app.delete('/api/files/:id', async function (req, res) {
     const result = await db.find({
       selector: {
         _id: req.params.id,
-        userId: req.appIdAuthorizationContext.access_token.sub,
+        userId: getSub(req),
       }
     });
     if (result.docs.length === 0) {
@@ -247,6 +263,21 @@ app.get('/appid_callback', function (req, res) {
 
 app.get('/api/tokens', function (req, res) {
   res.send(req.appIdAuthorizationContext);
+});
+
+app.get('/api/user', function(req, res) {
+  let result = {};
+  if (req.appIdAuthorizationContext) {
+    result = {
+      name: req.appIdAuthorizationContext.identity_token.name,
+      picture: req.appIdAuthorizationContext.identity_token.picture,
+    }
+  } else if (allowAnonymousAccess) {
+    result = {
+      name: 'Anonymous',
+    }
+  }
+  res.send(result);
 });
 
 const server = app.listen(process.env.PORT || 8081, () => {
