@@ -25,18 +25,39 @@ var cloudant = new Cloudant({
 });
 var db = cloudant.db.use(process.env.cloudant_database || 'secure-file-storage-metadata');
 
-// Initialize Cloud Object Storage
 var CloudObjectStorage = require('ibm-cos-sdk');
+
+// Initialize the COS connection.
+// This connection is used when interacting with the bucket from the app to upload/delete files.
 var config = {
   endpoint: process.env.cos_endpoint,
   apiKeyId: process.env.cos_apiKey,
   ibmAuthEndpoint: process.env.cos_ibmAuthEndpoint || 'https://iam.cloud.ibm.com/identity/token',
   serviceInstanceId: process.env.cos_resourceInstanceID,
-  // credentials and signatureVersion are required to generate presigned URLs
-  credentials: new CloudObjectStorage.Credentials(process.env.cos_access_key_id, process.env.cos_secret_access_key, sessionToken = null),
-  signatureVersion: 'v4',
 };
 var cos = new CloudObjectStorage.S3(config);
+
+// Then this other connection is only used to generate the pre-signed URLs.
+// Pre-signed URLs require the COS public endpoint if we want the users to be
+// able to access the content from their own computer.
+//
+// We derive the COS public endpoint from what should be the private/direct endpoint.
+let cosPublicEndpoint = process.env.cos_endpoint;
+if (cosPublicEndpoint.startsWith('s3.private')) {
+  cosPublicEndpoint = `s3${cosPublicEndpoint.substring('s3.private'.length)}`;
+} else if (cosPublicEndpoint.startsWith('s3.direct')) {
+  cosPublicEndpoint = `s3${cosPublicEndpoint.substring('s3.direct'.length)}`;
+}
+console.log('Public endpoint for COS is', cosPublicEndpoint);
+
+var cosUrlGenerator = new CloudObjectStorage.S3({
+  endpoint: cosPublicEndpoint,
+  credentials: new CloudObjectStorage.Credentials(
+    process.env.cos_access_key_id,
+    process.env.cos_secret_access_key, sessionToken = null),
+  signatureVersion: 'v4',
+});
+
 const COS_BUCKET_NAME = process.env.cos_bucket_name;
 
 // Define routes
@@ -121,7 +142,7 @@ app.get('/api/files/:id/url', async function (req, res) {
       return;
     }
     const doc = result.docs[0];
-    const url = cos.getSignedUrl('getObject', {
+    const url = cosUrlGenerator.getSignedUrl('getObject', {
       Bucket: COS_BUCKET_NAME,
       Key: `${doc.userId}/${doc._id}/${doc.name}`,
       Expires: 60 * 5, // 5 minutes
