@@ -321,20 +321,16 @@ spec:
       pwd
       env
       df
+      ls -ld /working
+      ls -lisa /working
+      cd /working
+      df .
       # Builder type: Container Registry, initializes this default
       export ARCHIVE_DIR=.
 
       # Builder type: Kubernetes initializes these defaults:
       export PIPELINE_KUBERNETES_CLUSTER_NAME="$TARGET_CLUSTER_NAME"
       cat /cd-config/toolchain.json
-      ls -lisa /working
-      cd /working
-      # script source
-      if [ -z $GIT_BRANCH ]; then
-        git clone -q $GIT_REPO .
-      else
-        git clone -q -b $GIT_BRANCH $GIT_REPO .
-      fi
       TOOLCHAIN_REGION=$(jq -r '.region_id' /cd-config/toolchain.json | awk -F: '{print $3}')
       ibmcloud config --check-version false
       # REGISTRY_URL mus be based on TARGET_REGION_ID, parse the output of the cr api command, the echo
@@ -354,6 +350,12 @@ spec:
       eval $(egrep 'export *KUBECONFIG' /tmp/out)
       env | grep KUBECONFIG
       # bash -x $script
+      # script source
+      if [ -z $GIT_BRANCH ]; then
+        git clone -q $GIT_REPO .
+      else
+        git clone -q -b $GIT_BRANCH $GIT_REPO .
+      fi
       bash $script
     volumeMounts:
     - mountPath: /cd-config
