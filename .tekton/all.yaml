@@ -320,13 +320,12 @@ spec:
       set -x
       pwd
       env
+      df
       # Builder type: Container Registry, initializes this default
       export ARCHIVE_DIR=.
 
       # Builder type: Kubernetes initializes these defaults:
       export PIPELINE_KUBERNETES_CLUSTER_NAME="$TARGET_CLUSTER_NAME"
-      # todo Setting HOME explicitly to have ibmcloud plugins available
-      # export HOME="/root"
       cat /cd-config/toolchain.json
       ls -lisa /working
       cd /working
