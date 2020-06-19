@@ -321,7 +321,7 @@ spec:
       pwd
       env
       df
-      df --all
+      df --all -h -T
       df /usr
       df /usr/local
       df /usr/local/bin
