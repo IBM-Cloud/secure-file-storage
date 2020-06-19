@@ -282,9 +282,9 @@ spec:
   steps:
   - name: echoenvvar
     image: ibmcom/pipeline-base-image
-    #envFrom:
-    #- configMapRef:
-    #    name: environment-properties
+    envFrom:
+    - configMapRef:
+        name: environment-properties
     #- secretRef:
     #    name: secure-properties     
     #env:
