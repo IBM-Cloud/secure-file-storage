@@ -321,8 +321,18 @@ spec:
       pwd
       env
       df
+      df /usr
+      df /usr/local
+      df /usr/local/bin
+      cd /usr
+      df .
+      cd /usr/local
+      df .
+      cd /usr/local/bin
+      df .
       ls -ld /working
       ls -lisa /working
+      df /working
       cd /working
       df .
       df
