@@ -170,8 +170,9 @@ spec:
         name: pipeline-input-parameter-variable
       workspaces:
       - name: pipeline-workspace
-        persistentVolumeClaim:
-          claimName: pipelinerun-$(uid)-pvc
+        emptyDir: {}
+        #persistentVolumeClaim:
+        #  claimName: pipelinerun-$(uid)-pvc
       params:
       - name: GIT_REPO
         value: $(params.GIT_REPO)
