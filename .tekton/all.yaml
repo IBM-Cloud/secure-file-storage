@@ -262,9 +262,8 @@ metadata:
   name: gasket
 spec:
   workspaces:
-  - name: task-workspace-test
+  - name: task-workspace 
     mountPath: /working   
-    emptyDir: {}
   params:
   - name: GIT_REPO
   - name: GIT_BRANCH
