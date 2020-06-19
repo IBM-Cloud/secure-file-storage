@@ -285,8 +285,8 @@ spec:
     envFrom:
     - configMapRef:
         name: environment-properties
-    - secretRef:
-        name: secure-properties     
+    #- secretRef:
+    #    name: secure-properties     
     #env:
     #- name: API_KEY
     #  valueFrom:
