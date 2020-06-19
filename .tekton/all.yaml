@@ -325,6 +325,7 @@ spec:
       ls -lisa /working
       cd /working
       df .
+      df
       # Builder type: Container Registry, initializes this default
       export ARCHIVE_DIR=.
 
