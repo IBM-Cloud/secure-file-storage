@@ -316,13 +316,17 @@ spec:
     command: ["/bin/bash", "-c"]
     args:
     - |
+      echo version 01
+      set -x
+      pwd
       env
-      # BUILD needs this:
+      # Builder type: Container Registry, initializes this default
       export ARCHIVE_DIR=.
-      # DEPLOY, and probably the rest needs this additional stuff
+
+      # Builder type: Kubernetes initializes these defaults:
       export PIPELINE_KUBERNETES_CLUSTER_NAME="$TARGET_CLUSTER_NAME"
-      # Setting HOME explicitly to have ibmcloud plugins available
-      export HOME="/root"
+      # todo Setting HOME explicitly to have ibmcloud plugins available
+      # export HOME="/root"
       cat /cd-config/toolchain.json
       ls -lisa /working
       cd /working
