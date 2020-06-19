@@ -1,4 +1,4 @@
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: EventListener
 metadata:
   name: BUILD
@@ -9,7 +9,7 @@ spec:
     template:
       name: tt-common
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
   name: pipeline-BUILD
@@ -19,7 +19,7 @@ spec:
     value: ./scripts/pipeline-BUILD.sh
 
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: EventListener
 metadata:
   name: DEPLOY
@@ -30,7 +30,7 @@ spec:
     template:
       name: tt-common
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
   name: pipeline-DEPLOY
@@ -40,7 +40,7 @@ spec:
     value: ./scripts/pipeline-DEPLOY.sh
 
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: EventListener
 metadata:
   name: ROTATE_STORAGE_CREDENTIALS
@@ -51,7 +51,7 @@ spec:
     template:
       name: tt-common
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
   name: pipeline-ROTATE-STORAGE-CREDENTIALS
@@ -61,7 +61,7 @@ spec:
     value: ./scripts/pipeline-ROTATE_STORAGE_CREDENTIALS.sh
 
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: EventListener
 metadata:
   name: ROTATE_APPID_CREDENTIALS
@@ -72,7 +72,7 @@ spec:
     template:
       name: tt-common
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
   name: pipeline-ROTATE-APPID-CREDENTIALS
@@ -82,7 +82,7 @@ spec:
     value: ./scripts/pipeline-ROTATE_APPID_CREDENTIALS.sh
 
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: EventListener
 metadata:
   name: ROTATE_REGISTRY_CREDENTIALS
@@ -93,7 +93,7 @@ spec:
     template:
       name: tt-common
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
   name: pipeline-ROTATE-REGISTRY-CREDENTIALS
@@ -103,7 +103,7 @@ spec:
     value: ./scripts/pipeline-ROTATE_REGISTRY_CREDENTIALS.sh
 
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: EventListener
 metadata:
   name: UNINSTALL
@@ -114,7 +114,7 @@ spec:
     template:
       name: tt-common
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
   name: pipeline-UNINSTALL
@@ -123,7 +123,7 @@ spec:
   - name: script
     value: ./scripts/pipeline-UNINSTALL.sh
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
   name: tt-common
@@ -161,7 +161,7 @@ spec:
       volumeMode: Filesystem
       accessModes:
       - ReadWriteOnce
-  - apiVersion: tekton.dev/v1alpha1
+  - apiVersion: tekton.dev/v1beta1
     kind: PipelineRun
     metadata:
       name: pipelinerun-$(uid)
@@ -200,7 +200,7 @@ spec:
       - name: script
         value: $(params.script)
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: pipeline-input-parameter-variable
@@ -256,7 +256,7 @@ spec:
     taskRef:
       name: gasket
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: gasket
@@ -264,21 +264,20 @@ spec:
   workspaces:
   - name: task-workspace 
     mountPath: /working   
-  inputs:
-    params:
-    - name: GIT_REPO
-    - name: GIT_BRANCH
-    - name: REGISTRY_REGION_ID
-    - name: REGISTRY_NAMESPACE
-    - name: TARGET_CLUSTER_NAME
-    - name: IMAGE_NAME
-    - name: TARGET_REGION_ID
-    - name: TARGET_NAMESPACE
-    - name: TARGET_RESOURCE_GROUP
-    - name: COS_PLAN
-    - name: APP_ID_PLAN
-    - name: CLOUDANT_PLAN
-    - name: script
+  params:
+  - name: GIT_REPO
+  - name: GIT_BRANCH
+  - name: REGISTRY_REGION_ID
+  - name: REGISTRY_NAMESPACE
+  - name: TARGET_CLUSTER_NAME
+  - name: IMAGE_NAME
+  - name: TARGET_REGION_ID
+  - name: TARGET_NAMESPACE
+  - name: TARGET_RESOURCE_GROUP
+  - name: COS_PLAN
+  - name: APP_ID_PLAN
+  - name: CLOUDANT_PLAN
+  - name: script
   steps:
   - name: echoenvvar
     image: ibmcom/pipeline-base-image
@@ -289,31 +288,31 @@ spec:
           name: cd-secret
           key: API_KEY
     - name: GIT_REPO
-      value: $(inputs.params.GIT_REPO)
+      value: $(params.GIT_REPO)
     - name: GIT_BRANCH
-      value: $(inputs.params.GIT_BRANCH)
+      value: $(params.GIT_BRANCH)
     - name: REGISTRY_REGION_ID
-      value: $(inputs.params.REGISTRY_REGION_ID)
+      value: $(params.REGISTRY_REGION_ID)
     - name: REGISTRY_NAMESPACE
-      value: $(inputs.params.REGISTRY_NAMESPACE)
+      value: $(params.REGISTRY_NAMESPACE)
     - name: TARGET_CLUSTER_NAME
-      value: $(inputs.params.TARGET_CLUSTER_NAME)
+      value: $(params.TARGET_CLUSTER_NAME)
     - name: IMAGE_NAME
-      value: $(inputs.params.IMAGE_NAME)
+      value: $(params.IMAGE_NAME)
     - name: TARGET_REGION_ID
-      value: $(inputs.params.TARGET_REGION_ID)
+      value: $(params.TARGET_REGION_ID)
     - name: TARGET_NAMESPACE
-      value: $(inputs.params.TARGET_NAMESPACE)
+      value: $(params.TARGET_NAMESPACE)
     - name: TARGET_RESOURCE_GROUP
-      value: $(inputs.params.TARGET_RESOURCE_GROUP)
+      value: $(params.TARGET_RESOURCE_GROUP)
     - name: COS_PLAN
-      value: $(inputs.params.COS_PLAN)
+      value: $(params.COS_PLAN)
     - name: APP_ID_PLAN
-      value: $(inputs.params.APP_ID_PLAN)
+      value: $(params.APP_ID_PLAN)
     - name: CLOUDANT_PLAN
-      value: $(inputs.params.CLOUDANT_PLAN)
+      value: $(params.CLOUDANT_PLAN)
     - name: script
-      value: $(inputs.params.script)
+      value: $(params.script)
     command: ["/bin/bash", "-c"]
     args:
     - |
