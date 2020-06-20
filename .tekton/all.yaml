@@ -287,7 +287,7 @@ spec:
         name: environment-properties
     - secretRef:
         name: secure-properties     
-    #env:
+    env:
     #- name: API_KEY
     #  valueFrom:
     #    secretKeyRef:
@@ -317,8 +317,8 @@ spec:
     #  value: $(params.APP_ID_PLAN)
     #- name: CLOUDANT_PLAN
     #  value: $(params.CLOUDANT_PLAN)
-    #- name: script
-    #  value: $(params.script)
+    - name: script
+      value: $(params.script)
     command: ["/bin/bash", "-c"]
     args:
     - |
