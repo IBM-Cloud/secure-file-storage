@@ -127,18 +127,18 @@ spec:
 apiVersion: tekton.dev/v1beta1
 kind: EventListener
 metadata:
-  name: BUILD-DEPLOY
+  name: BUILD-DEPLOY-one-task
 spec:
   triggers:
   - binding:
-      name: pipeline-BUILD-DEPLOY
+      name: pipeline-BUILD-DEPLOY-one-task
     template:
       name: tt-common
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
-  name: pipeline-BUILD-DEPLOY
+  name: pipeline-BUILD-DEPLOY-one-task
 spec:
   params:
   - name: script
@@ -185,6 +185,74 @@ spec:
       value: $(params.script)
     taskRef:
       name: gasket
+---
+apiVersion: tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: BUILD-DEPLOY-two-task
+spec:
+  triggers:
+  - binding:
+      name: pipeline-BUILD-DEPLOY-two-task
+    template:
+      name: tt-build-deploy
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: pipeline-BUILD-DEPLOY-two-task
+spec:
+  params:
+  - name: script
+    value: ./scripts/pipeline-BUILD.sh ./scripts/pipeline-DEPLOY.sh
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: tt-build-deploy
+spec:
+  params:
+  - name: script
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      name: pipelinerun-$(uid)
+    spec:
+      pipelineRef:
+        name: pipeline-build-deploy
+      workspaces:
+      - name: pipeline-workspace
+        emptyDir: {}
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: pipeline-build-deploy
+spec:
+  workspaces:
+  - name: pipeline-workspace
+  tasks:
+  - name: build
+    workspaces:
+    - name: task-workspace
+      workspace: pipeline-workspace
+    params:
+    - name: script
+      value: ./scripts/pipeline-BUILD.sh
+    taskRef:
+      name: gasket
+  - name: deploy
+    workspaces:
+    - name: task-workspace
+      workspace: pipeline-workspace
+    params:
+    - name: script
+      value: ./scripts/pipeline-DEPLOY.sh
+    taskRef:
+      name: gasket
+    runAfter:
+    - build
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
