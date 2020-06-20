@@ -150,18 +150,6 @@ metadata:
   name: tt-common
 spec:
   params:
-  - name: GIT_REPO
-  - name: GIT_BRANCH
-  - name: REGISTRY_REGION_ID
-  - name: REGISTRY_NAMESPACE
-  - name: TARGET_CLUSTER_NAME
-  - name: IMAGE_NAME
-  - name: TARGET_REGION_ID
-  - name: TARGET_NAMESPACE
-  - name: TARGET_RESOURCE_GROUP
-  - name: COS_PLAN
-  - name: APP_ID_PLAN
-  - name: CLOUDANT_PLAN
   - name: script
   resourcetemplates:
   - apiVersion: v1
@@ -195,30 +183,6 @@ spec:
         #persistentVolumeClaim:
         #  claimName: pipelinerun-$(uid)-pvc
       params:
-      - name: GIT_REPO
-        value: $(params.GIT_REPO)
-      - name: GIT_BRANCH
-        value: $(params.GIT_BRANCH)
-      - name: REGISTRY_REGION_ID
-        value: $(params.REGISTRY_REGION_ID)
-      - name: REGISTRY_NAMESPACE
-        value: $(params.REGISTRY_NAMESPACE)
-      - name: TARGET_CLUSTER_NAME
-        value: $(params.TARGET_CLUSTER_NAME)
-      - name: IMAGE_NAME
-        value: $(params.IMAGE_NAME)
-      - name: TARGET_REGION_ID
-        value: $(params.TARGET_REGION_ID)
-      - name: TARGET_NAMESPACE
-        value: $(params.TARGET_NAMESPACE)
-      - name: TARGET_RESOURCE_GROUP
-        value: $(params.TARGET_RESOURCE_GROUP)
-      - name: COS_PLAN
-        value: $(params.COS_PLAN)
-      - name: APP_ID_PLAN
-        value: $(params.APP_ID_PLAN)
-      - name: CLOUDANT_PLAN
-        value: $(params.CLOUDANT_PLAN)
       - name: script
         value: $(params.script)
 ---
@@ -230,18 +194,6 @@ spec:
   workspaces:
   - name: pipeline-workspace
   params:
-  - name: GIT_REPO
-  - name: GIT_BRANCH
-  - name: REGISTRY_REGION_ID
-  - name: REGISTRY_NAMESPACE
-  - name: TARGET_CLUSTER_NAME
-  - name: IMAGE_NAME
-  - name: TARGET_REGION_ID
-  - name: TARGET_NAMESPACE
-  - name: TARGET_RESOURCE_GROUP
-  - name: COS_PLAN
-  - name: APP_ID_PLAN
-  - name: CLOUDANT_PLAN
   - name: script
   tasks:
   - name: script
@@ -249,30 +201,6 @@ spec:
     - name: task-workspace
       workspace: pipeline-workspace
     params:
-    - name: GIT_REPO
-      value: $(params.GIT_REPO)
-    - name: GIT_BRANCH
-      value: $(params.GIT_BRANCH)
-    - name: REGISTRY_REGION_ID
-      value: $(params.REGISTRY_REGION_ID)
-    - name: REGISTRY_NAMESPACE
-      value: $(params.REGISTRY_NAMESPACE)
-    - name: TARGET_CLUSTER_NAME
-      value: $(params.TARGET_CLUSTER_NAME)
-    - name: IMAGE_NAME
-      value: $(params.IMAGE_NAME)
-    - name: TARGET_REGION_ID
-      value: $(params.TARGET_REGION_ID)
-    - name: TARGET_NAMESPACE
-      value: $(params.TARGET_NAMESPACE)
-    - name: TARGET_RESOURCE_GROUP
-      value: $(params.TARGET_RESOURCE_GROUP)
-    - name: COS_PLAN
-      value: $(params.COS_PLAN)
-    - name: APP_ID_PLAN
-      value: $(params.APP_ID_PLAN)
-    - name: CLOUDANT_PLAN
-      value: $(params.CLOUDANT_PLAN)
     - name: script
       value: $(params.script)
     taskRef:
@@ -287,18 +215,6 @@ spec:
   - name: task-workspace 
     mountPath: /working   
   params:
-  - name: GIT_REPO
-  - name: GIT_BRANCH
-  - name: REGISTRY_REGION_ID
-  - name: REGISTRY_NAMESPACE
-  - name: TARGET_CLUSTER_NAME
-  - name: IMAGE_NAME
-  - name: TARGET_REGION_ID
-  - name: TARGET_NAMESPACE
-  - name: TARGET_RESOURCE_GROUP
-  - name: COS_PLAN
-  - name: APP_ID_PLAN
-  - name: CLOUDANT_PLAN
   - name: script
   steps:
   - name: echoenvvar
@@ -309,41 +225,20 @@ spec:
     - secretRef:
         name: secure-properties     
     env:
-    #- name: API_KEY
-    #  valueFrom:
-    #    secretKeyRef:
-    #      name: cd-secret
-    #      key: API_KEY
-    #- name: GIT_REPO
-    #  value: $(params.GIT_REPO)
-    #- name: GIT_BRANCH
-    #  value: $(params.GIT_BRANCH)
-    #- name: REGISTRY_REGION_ID
-    #  value: $(params.REGISTRY_REGION_ID)
-    #- name: REGISTRY_NAMESPACE
-    #  value: $(params.REGISTRY_NAMESPACE)
-    #- name: TARGET_CLUSTER_NAME
-    #  value: $(params.TARGET_CLUSTER_NAME)
-    #- name: IMAGE_NAME
-    #  value: $(params.IMAGE_NAME)
-    #- name: TARGET_REGION_ID
-    #  value: $(params.TARGET_REGION_ID)
-    #- name: TARGET_NAMESPACE
-    #  value: $(params.TARGET_NAMESPACE)
-    #- name: TARGET_RESOURCE_GROUP
-    #  value: $(params.TARGET_RESOURCE_GROUP)
-    #- name: COS_PLAN
-    #  value: $(params.COS_PLAN)
-    #- name: APP_ID_PLAN
-    #  value: $(params.APP_ID_PLAN)
-    #- name: CLOUDANT_PLAN
-    #  value: $(params.CLOUDANT_PLAN)
     - name: script
       value: $(params.script)
     command: ["/bin/bash", "-c"]
     args:
     - |
       env | sort
+      # verify all the variables are set
+      set -u
+      for e in GIT_REPO GIT_BRANCH REGISTRY_REGION_ID REGISTRY_NAMESPACE TARGET_CLUSTER_NAME IMAGE_NAME TARGET_REGION_ID TARGET_NAMESPACE TARGET_RESOURCE_GROUP COS_PLAN APP_ID_PLAN CLOUDANT_PLAN zzz; do
+        eval "echo $e=\$$e"
+      done
+      set +u
+
+      exit 0
       cd /working
 
       # Builder type: Container Registry, initializes this default
