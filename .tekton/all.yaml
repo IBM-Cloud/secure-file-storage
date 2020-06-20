@@ -323,7 +323,6 @@ spec:
     args:
     - |
       env | sort
-      exit 1
       cd /working
 
       # Builder type: Container Registry, initializes this default
