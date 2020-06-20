@@ -122,6 +122,27 @@ spec:
   params:
   - name: script
     value: ./scripts/pipeline-UNINSTALL.sh
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: BUILD-DEPLOY
+spec:
+  triggers:
+  - binding:
+      name: pipeline-BUILD-DEPLOY
+    template:
+      name: tt-common
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: pipeline-BUILD-DEPLOY
+spec:
+  params:
+  - name: script
+    value: ./scripts/pipeline-UNINSTALL.sh ./scripts/pipeline-UNINSTALL.sh
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TriggerTemplate
@@ -323,6 +344,7 @@ spec:
     args:
     - |
       env | sort
+      exit 1
       cd /working
 
       # Builder type: Container Registry, initializes this default
@@ -347,8 +369,15 @@ spec:
       else
         git clone -q -b $GIT_BRANCH $GIT_REPO .
       fi
-      ./$script
-
+      for s in $script; do
+        echo $s - START
+        if $s; then
+          echo $s - SUCCESS
+        else
+          echo $s - FAILED
+          exit 1
+        fi
+      done
     volumeMounts:
     - mountPath: /cd-config
       name: cd-config-volume
