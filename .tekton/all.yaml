@@ -152,24 +152,24 @@ spec:
   params:
   - name: script
   resourcetemplates:
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: cd-secret
-    type: Opaque
-    stringData:
-      API_KEY: $(params.API_KEY)
-  - apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-      name: pipelinerun-$(uid)-pvc
-    spec:
-      resources:
-        requests:
-          storage:  1Gi
-      volumeMode: Filesystem
-      accessModes:
-      - ReadWriteOnce
+  #- apiVersion: v1
+  #  kind: Secret
+  #  metadata:
+  #    name: cd-secret
+  #  type: Opaque
+  #  stringData:
+  #    API_KEY: $(params.API_KEY)
+  #- apiVersion: v1
+  #  kind: PersistentVolumeClaim
+  #  metadata:
+  #    name: pipelinerun-$(uid)-pvc
+  #  spec:
+  #    resources:
+  #      requests:
+  #        storage:  1Gi
+  #    volumeMode: Filesystem
+  #    accessModes:
+  #    - ReadWriteOnce
   - apiVersion: tekton.dev/v1beta1
     kind: PipelineRun
     metadata:
@@ -231,15 +231,14 @@ spec:
     args:
     - |
       env | sort
-      # verify all the variables are set
+      # verify all the required variables are set
       set -x
       set -u
-      for e in GIT_REPO GIT_BRANCH REGISTRY_REGION_ID REGISTRY_NAMESPACE TARGET_CLUSTER_NAME IMAGE_NAME TARGET_REGION_ID TARGET_NAMESPACE TARGET_RESOURCE_GROUP COS_PLAN APP_ID_PLAN CLOUDANT_PLAN zzz; do
+      for e in GIT_REPO GIT_BRANCH REGISTRY_REGION_ID REGISTRY_NAMESPACE TARGET_CLUSTER_NAME IMAGE_NAME TARGET_REGION_ID TARGET_NAMESPACE TARGET_RESOURCE_GROUP COS_PLAN APP_ID_PLAN CLOUDANT_PLAN script; do
         eval "echo $e="'$'$e
       done
       set +u
 
-      exit 0
       cd /working
 
       # Builder type: Container Registry, initializes this default
