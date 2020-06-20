@@ -374,7 +374,6 @@ spec:
           echo $s - SUCCESS
         else
           echo $s - FAILED
-          exit 1
         fi
       done
     volumeMounts:
