@@ -317,13 +317,3 @@ spec:
           echo $s - FAILED
         fi
       done
-    volumeMounts:
-    - mountPath: /cd-config
-      name: cd-config-volume
-  volumes:
-  - name: cd-config-volume
-    configMap:
-      name: toolchain
-      items:
-      - key: toolchain.json
-        path: toolchain.json
