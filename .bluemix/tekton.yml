@@ -50,6 +50,12 @@ triggers:
 - eventListener: DEPLOY
   name: DEPLOY
   type: manual
+- eventListener: BUILD-DEPLOY-two-task
+  name: BUILD-DEPLOY-two-task
+  type: manual
+- eventListener: BUILD-DEPLOY-one-task
+  name: BUILD-DEPLOY-one-task
+  type: manual
 - eventListener: ROTATE_STORAGE_CREDENTIALS
   name: ROTATE_STORAGE_CREDENTIALS
   type: manual
@@ -62,10 +68,10 @@ triggers:
 - eventListener: UNINSTALL
   name: UNINSTALL
   type: manual
-- eventListener: BUILD
+- eventListener: BUILD-DEPLOY-two-task
   branch: master
   events:
     push: true
-  name: git-BUILD
+  name: git-BUILD-DEPLOY-two-task
   type: git
   service: repo

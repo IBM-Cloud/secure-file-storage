@@ -265,7 +265,7 @@ spec:
   params:
   - name: script
   steps:
-  - name: echoenvvar
+  - name: execute-script
     image: ibmcom/pipeline-base-image
     envFrom:
     - configMapRef:
