@@ -233,16 +233,13 @@ spec:
       env | sort
       # verify all the variables are set
       set -x
-      echo "\"
-      echo "\\"
-      echo "\$"
-      echo "\\\$"
       echo "$HOME"
       echo "\$HOME"
       echo "\\$HOME"
       echo "\\\$HOME"
       set -u
       for e in GIT_REPO GIT_BRANCH REGISTRY_REGION_ID REGISTRY_NAMESPACE TARGET_CLUSTER_NAME IMAGE_NAME TARGET_REGION_ID TARGET_NAMESPACE TARGET_RESOURCE_GROUP COS_PLAN APP_ID_PLAN CLOUDANT_PLAN zzz; do
+        echo $e=\$$e
         eval "echo $e=\$$e"
       done
       set +u
