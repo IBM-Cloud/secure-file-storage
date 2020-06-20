@@ -142,7 +142,7 @@ metadata:
 spec:
   params:
   - name: script
-    value: ./scripts/pipeline-UNINSTALL.sh ./scripts/pipeline-UNINSTALL.sh
+    value: ./scripts/pipeline-BUILD.sh ./scripts/pipeline-DEPLOY.sh
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TriggerTemplate
