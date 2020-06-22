@@ -309,6 +309,7 @@ spec:
       else
         git clone -q -b $GIT_BRANCH $GIT_REPO .
       fi
+      env | sort
       for s in $script; do
         echo $s - START
         if $s; then

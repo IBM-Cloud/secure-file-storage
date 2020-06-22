@@ -68,7 +68,12 @@ Click **Create**
 
 Click on the Delivery Pipeline and take a look at the configuration:
 
+**Note:** The deploy stage will fail with the error, *The account already has an instance created with the Lite plan*, configure the stage's environment variables `COS_PLAN=standard` or `APP_ID_PLAN=graduated-tier` or `CLOUDANT_PLAN=standard` based on the failed service. You can then re-run the deploy stage (you do not need to re-create the toolchain).
+
 ### Classic Delivery Pipeline
+You will notice that the BUILD stage is executing and if successful the DEPLOY pipeline will follow.
+
+Click on the settings cog and then choose configuration on the BUILD stage and notice the Input and Jobs tabs have been configured from the values input when creating the toolchain.  Check out the DEPLOY stage as well.
 
 
 ### Tekton Delivery Pipeline
@@ -78,15 +83,15 @@ Inspect the tabs on the left
   - Branch: master
   - Path .tekton
 - Worker: (Beta) IBM Managed workers (Tekton Pipelines v0.11.2) in DALLAS
-- Triggers: BUILD, DEPLOY, ROTATE_STORAGE_CREDENTIALS, ...
-- Environment Properties - stuff copied from the initial toolchain creation.   Change the service plans as described in the README if required
+- Triggers: git-BUILD-DEPLOY-two-task, BUILD, DEPLOY, ROTATE_STORAGE_CREDENTIALS, ...
+- Environment Properties - stuff copied from the initial toolchain creation.   **Note** Change the service plans as described above if required.
 
+Once the toolchain has completed, the application will be available at `https://secure-file-storage.<your-cluster-ingress-domain>`.  The exact string is displayed in the log of one of the DEPLOY triggers.
 
-Once the toolchain has completed, the application will be available at `https://secure-file-storage.<your-cluster-ingress-domain>`.
+Click **Run Pipeline** and choose the triggers: BUILD then DEPLOY.
 
-The toolchain includes a stage named **UNINSTALL (manual)**. This stage can only be triggered manually and will remove all resources created by the toolchain (app and services).
-
-**Note:** If the deploy stage fails with the error, *The account already has an instance created with the Lite plan*, configure the stage's environment variables `COS_PLAN=standard` or `APP_ID_PLAN=graduated-tier` or `CLOUDANT_PLAN=standard` based on the failed service. You can then re-run the deploy stage (you do not need to re-create the toolchain).
+### Uninstall
+The toolchain includes a stage/trigger named **UNINSTALL (manual)**. This stage can only be triggered manually and will remove all resources created by the toolchain (app and services).
 
 ## Code Structure
 
