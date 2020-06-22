@@ -21,7 +21,7 @@ This project comes with a partially automated toolchain capable of deploying the
 
 1. Create a **standard** Kubernetes cluster
 
-1. Create a registry namespace
+1. Create a Kubernetes registry namespace
 
 1. Optionally create a specific resource group for this project
 
@@ -42,6 +42,44 @@ Tekton pipelines are available in preview.  If you are risk averse use classic a
 The toolchain will need to be started manually.  Open the toolchain and choose the Run Pipeline drop down.  Click first on BUILD and then DEPLOY.
 
 ### Continue
+
+
+Input is required on two tabs.
+**GitHub**
+- Change the toolchain name to secure-file-storage-toolchain
+- Select the region and resource group
+- GitHub Server: GitHub (https://githubcom) - already selected
+- Repository type: Existing
+- Repository URL: https://github.com/powellquiring/secure-file-storage - already selected
+- Integration Owner: powellquiring - already selected
+- Uncheck Enable GitHub Issues and Track deployment of code changes
+
+
+**Delivery Pipeline**
+- IBM Cloud API Key: click New+ (do not click Save this key in a secrets store for reuse).  The API key provides the same privileges as you user id and is used during pipeline execution
+- Region: Region matching the toolchain is the default
+- Resource group: choose
+- Image Registry Namespace: secure-file-storage
+- Docker Image name: secure-file-storage default is good
+- Cluster Name: secure-file-storage-cluster
+- Namespace: secure-file-storage - already is a good default
+
+Click **Create**
+
+Click on the Delivery Pipeline and take a look at the configuration:
+
+### Classic Delivery Pipeline
+
+
+### Tekton Delivery Pipeline
+Inspect the tabs on the left
+- Definitions: 
+  - Repository: https://github.com/powellquiring/secure-file-storage
+  - Branch: master
+  - Path .tekton
+- Worker: (Beta) IBM Managed workers (Tekton Pipelines v0.11.2) in DALLAS
+- Triggers: BUILD, DEPLOY, ROTATE_STORAGE_CREDENTIALS, ...
+- Environment Properties - stuff copied from the initial toolchain creation.   Change the service plans as described in the README if required
 
 
 Once the toolchain has completed, the application will be available at `https://secure-file-storage.<your-cluster-ingress-domain>`.
