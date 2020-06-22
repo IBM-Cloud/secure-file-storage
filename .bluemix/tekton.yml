@@ -2,7 +2,7 @@ inputs:
 - type: git
   branch: ${GIT_BRANCH}
   path: .tekton
-  service: repo
+  service: ${repo}
 properties:
 - name: GIT_REPO
   value: ${GIT_REPO_URL} 
@@ -73,5 +73,6 @@ triggers:
   events:
     push: true
   name: git-BUILD-DEPLOY-two-task
+  properties: []
   type: git
-  service: repo
+  service: ${repo}
