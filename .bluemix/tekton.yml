@@ -44,6 +44,14 @@ properties:
   value: "lite"
   type: text 
 triggers:
+- eventListener: BUILD-DEPLOY-two-task
+  branch: master
+  events:
+    push: true
+  name: git-BUILD-DEPLOY-two-task
+  properties: []
+  type: git
+  service: repo
 - eventListener: BUILD
   name: BUILD
   type: manual
@@ -68,11 +76,3 @@ triggers:
 - eventListener: UNINSTALL
   name: UNINSTALL
   type: manual
-- eventListener: BUILD-DEPLOY-two-task
-  branch: master
-  events:
-    push: true
-  name: git-BUILD-DEPLOY-two-task
-  properties: []
-  type: git
-  service: repo
