@@ -48,11 +48,11 @@ Input is required on two tabs.
 **GitHub**
 - Change the toolchain name to secure-file-storage-toolchain
 - Select the region and resource group
-- GitHub Server: GitHub (https://githubcom) - already selected
+- GitHub Server: GitHub (https://github.com) - already selected
 - Repository type: Existing
-- Repository URL: https://github.com/powellquiring/secure-file-storage - already selected
-- Integration Owner: powellquiring - already selected
-- Uncheck Enable GitHub Issues and Track deployment of code changes
+- Repository URL: https://github.com/IBM-Cloud/secure-file-storage - already selected
+- Repository Owner: Your GitHub user - already selected
+- If enabled, uncheck **Enable GitHub Issues** and **Track deployment of code changes**
 
 
 **Delivery Pipeline**
