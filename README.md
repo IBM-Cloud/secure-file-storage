@@ -79,7 +79,7 @@ Click on the settings cog and then choose configuration on the BUILD stage and n
 ### Tekton Delivery Pipeline
 Inspect the tabs on the left
 - Definitions: 
-  - Repository: https://github.com/powellquiring/secure-file-storage
+  - Repository: https://github.com/IBM-Cloud/secure-file-storage
   - Branch: master
   - Path .tekton
 - Worker: (Beta) IBM Managed workers (Tekton Pipelines v0.11.2) in DALLAS
