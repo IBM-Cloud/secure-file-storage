@@ -2,7 +2,7 @@
 
 The repository features a sample application that enables groups of users to upload files to a common storage pool and to provide access to those files via shareable links. The application is written in Node.js and deployed as Docker container to the IBM Cloud Kubernetes service. It leverages several security-related services and features to improve app security. It includes data encrypted with your own keys, user authentication, and security auditing.
 
-Refer to [this tutorial](https://cloud.ibm.com/docs/tutorials?topic=solution-tutorials-cloud-e2e-security) for instructions.
+Refer to [this tutorial](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cloud-e2e-security) for instructions.
 
 ![Architecture](Architecture.png)
 
