@@ -12,5 +12,10 @@ yarn-error.log*
 local_yaml
 secure-file-storage.yaml
 
+# Terraform
+*.tfvars
+.terraform
+*.tfstate*
+
 #vim swap files
 [._]*.sw[a-p]
