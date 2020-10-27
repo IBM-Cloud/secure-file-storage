@@ -3,6 +3,13 @@ resource "ibm_resource_group" "cloud_development" {
   tags = []
 }
 
+# Create a service ID for security resources
+resource "ibm_iam_service_id" "ServiceID" {
+  name        = "secure-file-storage-serviceID-${var.basename}"
+  description = "Service ID for deploying resources"
+
+}
+
 resource "ibm_resource_instance" "app_id" {
   name              = "${var.basename}-appid"
   service           = "appid"
