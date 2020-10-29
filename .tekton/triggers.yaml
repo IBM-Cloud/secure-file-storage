@@ -1,0 +1,97 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: trigger-template-container-registry
+spec:
+  params:
+    - name: git-repository
+      description: The git repo
+    - name: git-branch
+      description: the branch for the git repo
+    - name: pipeline-debug
+      default: "1"
+    - name: target-resource-group
+    - name: schematics-workspace-id
+    - name: target-region
+    - name: registry-namespace
+    - name: registry-region
+    - name: image-name
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1alpha1
+      kind: PipelineResource
+      metadata:
+        name: image-to-build
+      spec:
+        type: image
+        # params:
+        #   - name: url
+        #     value: $(params.image-url)
+    # PVC definition like pre-tekton-0.10.1
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: sfs-$(uid)-pvc
+      spec:
+        resources:
+          requests:
+            storage: 5Gi
+        volumeMode: Filesystem
+        accessModes:
+          - ReadWriteOnce
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        name: secure-file-storage-$(uid)
+      spec:
+        pipelineRef:
+          name: pipeline-build-deploy
+        resources:
+          - name: app-image
+            resourceRef:
+              name: image-to-build
+        params:
+          # - name: apikey
+          #   value: $(params.apikey)
+          - name: git-repository
+            value: $(params.git-repository)
+          - name: git-branch
+            value: $(params.git-branch)
+          - name: pipeline-debug
+            value: $(params.pipeline-debug)
+          - name: target-resource-group
+            value: $(params.target-resource-group)
+          - name: schematics-workspace-id
+            value: $(params.schematics-workspace-id)
+          - name: target-region
+            value: $(params.target-region)
+          - name: registry-namespace
+            value: $(params.registry-namespace)
+          - name: registry-region
+            value: $(params.registry-region)
+          - name: image-name
+            value: $(params.image-name)
+        workspaces:
+          - name: pipeline-ws
+            persistentVolumeClaim:
+              claimName: sfs-$(uid)-pvc
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: trigger-binding-container-registry
+spec:
+  params:
+    - name: branch
+      value: "master"
+---
+apiVersion: tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: ManualListener
+spec:
+  triggers:
+    - binding:
+        name: trigger-binding-container-registry
+      template:
+        name: trigger-template-container-registry

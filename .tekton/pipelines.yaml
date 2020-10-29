@@ -1,0 +1,88 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: pipeline-build-deploy
+spec:
+  params:
+    - name: git-repository
+      description: the git repo
+    - name: git-branch
+      description: the branch for the git repo
+    - name: target-resource-group
+    - name: schematics-workspace-id
+    - name: target-region
+    - name: registry-namespace
+    - name: image-name
+    - name: registry-region
+    - name: pipeline-debug
+  resources:
+    - name: app-image
+      type: image
+  workspaces:
+  - name: pipeline-ws
+  tasks:
+  - name: git-repo-changes
+    workspaces:
+    - name: task-workspace
+      workspace: pipeline-ws
+    params:
+    - name: toolchain-dirs
+      value: ".tekton .bluemix scripts"
+    - name: app-dirs
+      value: "app"
+    - name: generic-dirs
+      value: mapfile.txt
+    - name: git-repository
+      value: $(params.git-repository)
+    - name: git-branch
+      value: $(params.git-branch)
+    taskRef:
+       name: detect-change-task
+  - name: build
+    when: 
+    - input: "$(tasks.git-repo-changes.results.is_app)"
+      operator: in
+      values: ["true"]
+    taskRef:
+      name: icr-containerize
+    params:
+    - name: path-to-context
+      value: "/app"
+    - name: path-to-dockerfile
+      value: "/app"
+    - name: additional-tags
+      value: "latest"
+    - name: properties-file
+      value: "build.properties"
+    - name: registry-region
+      value: $(params.registry-region)
+    - name: registry-namespace
+      value: $(params.registry-namespace)
+    - name: image-name
+      value: $(params.image-name)
+    - name: pipeline-debug
+      value: $(parmas.pipeline-debug)
+    workspaces:
+    - name: source
+      workspace: pipeline-ws
+    resources:
+       outputs:
+        - name: built-image
+          resource: app-image
+  - name: deploy-to-kubernetes
+    taskRef:
+      name: deploy-app
+    runAfter: [build]
+    workspaces:
+    - name: task-workspace
+      workspace: pipeline-ws
+    params:
+      - name: target-resource-group
+        value: $(params.target-resource-group)
+      - name: schematics-workspace-id
+        value: $(params.schematics-workspace-id)
+      - name: target-region
+        value: $(params.target-region)
+      - name: image-repository
+        value: $(tasks.build.results.image-repository)

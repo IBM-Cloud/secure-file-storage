@@ -1,11 +1,12 @@
-resource "ibm_resource_group" "cloud_development" {
-  name = "${var.basename}-development"
-  tags = []
+data "ibm_resource_group" "cloud_development" {
+  name = var.resource_group
 }
 
-# Create a service ID for security resources
+# Create a service ID for security resources.
+# The name is appended by the target resource group to distinguish
+# between deployment environments
 resource "ibm_iam_service_id" "ServiceID" {
-  name        = "secure-file-storage-serviceID-${var.basename}"
+  name        = "secure-file-storage-serviceID-${var.resource_group}"
   description = "Service ID for deploying resources"
 
 }
@@ -15,7 +16,7 @@ resource "ibm_resource_instance" "app_id" {
   service           = "appid"
   plan              = "graduated-tier"
   location          = var.region
-  resource_group_id = ibm_resource_group.cloud_development.id
+  resource_group_id = data.ibm_resource_group.cloud_development.id
   service_endpoints = "private"
 }
 
@@ -24,16 +25,16 @@ resource "ibm_resource_instance" "cloudant" {
   service           = "cloudantnosqldb"
   plan              = "lite"
   location          = var.region
-  resource_group_id = ibm_resource_group.cloud_development.id
+  resource_group_id = data.ibm_resource_group.cloud_development.id
   service_endpoints = "private"
 }
 
 resource "ibm_resource_instance" "keyprotect" {
-  name              = "${var.basename}-kp"
+  name              = "${var.basename}-kms"
   service           = "kms"
   plan              = "tiered-pricing"
   location          = var.region
-  resource_group_id = ibm_resource_group.cloud_development.id
+  resource_group_id = data.ibm_resource_group.cloud_development.id
   service_endpoints = "private"
 }
 
@@ -42,7 +43,7 @@ resource "ibm_resource_instance" "cos" {
   service           = "cloud-object-storage"
   plan              = "standard"
   location          = "global"
-  resource_group_id = ibm_resource_group.cloud_development.id
+  resource_group_id = data.ibm_resource_group.cloud_development.id
 }
 
 # create root key
@@ -55,11 +56,11 @@ resource "ibm_kp_key" "rootkey" {
 
 
 resource "ibm_iam_authorization_policy" "COSKMSpolicy" {
-  source_service_name      = "cloud-object-storage"
-  source_resource_group_id = ibm_resource_group.cloud_development.id
-  target_service_name      = "kms"
-  target_resource_group_id = ibm_resource_group.cloud_development.id
-  roles                    = ["Reader"]
+  source_service_name         = "cloud-object-storage"
+  source_resource_instance_id    = ibm_resource_instance.cos.guid
+  target_service_name         = "kms"
+  target_resource_instance_id = ibm_resource_instance.keyprotect.guid
+  roles                       = ["Reader"]
 }
 
 # create encrypted COS bucket using that root key
@@ -79,6 +80,21 @@ resource "ibm_resource_key" "RKcos" {
   parameters           = { HMAC = true }
 }
 
+# special null resource to empty the bucket in order to delete it
+resource null_resource delete_cos_objects {
+  triggers = {
+    ACCESS_KEY             = ibm_resource_key.RKcos.credentials["cos_hmac_keys.access_key_id"]
+    SECRET_ACCESS_KEY      = ibm_resource_key.RKcos.credentials["cos_hmac_keys.secret_access_key"]
+    COS_REGION             = var.region
+    COS_BUCKET_NAME        = ibm_cos_bucket.cosbucket.bucket_name
+  }
+  provisioner "local-exec" {
+    when = destroy
+    command = "./delete-cos-objects.sh ${self.triggers.COS_REGION} ${self.triggers.ACCESS_KEY} ${self.triggers.SECRET_ACCESS_KEY} ${self.triggers.COS_BUCKET_NAME} || true"
+  }
+  depends_on = [ibm_resource_key.RKcos,ibm_cos_bucket.cosbucket]
+}
+
 # service access key for Cloudant with Writer privilege for app usage
 resource "ibm_resource_key" "RKcloudant" {
   name                 = "${var.basename}-accKey-cloudant"
@@ -94,7 +110,7 @@ resource "ibm_resource_key" "RKcloudantManager" {
 
   # create the database
   provisioner "local-exec" {
-    command = "curl -X PUT ${ibm_resource_key.RKcloudantManager.credentials.url}/${var.basename}-metadata"
+    command = "curl -X PUT ${ibm_resource_key.RKcloudantManager.credentials.url}/secure-file-storage-metadata"
   }
 }
 

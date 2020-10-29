@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 0.13"
+  #required_version = ">= 0.13"
   required_providers {
     ibm = {
       source  = "ibm-cloud/ibm"
@@ -12,8 +12,7 @@ terraform {
 }
 
 provider "ibm" {
-  ibmcloud_api_key = var.ibmcloud_api_key
+  #ibmcloud_api_key = var.ibmcloud_api_key
   region           = var.region
-  generation       = 2
   ibmcloud_timeout = var.ibmcloud_timeout
 }

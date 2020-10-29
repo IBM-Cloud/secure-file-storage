@@ -20,11 +20,21 @@ services:
       type: clone
       has_issues: false
       enable_traceability: false
+  tekton-catalog:
+    service_id: githubpublic
+    parameters:
+      repo_url: "https://github.com/open-toolchain/tekton-catalog"
+      source_repo_url: "https://github.com/open-toolchain/tekton-catalog"
+      type: "link"
+      has_issues: false
+      enable_traceability: false
+      kind: ['pipeline']
   build:
     service_id: pipeline
     parameters:
       services:
         - repo
+        - tekton-catalog
       name: 'secure-file-storage ({{form.pipeline.parameters.branch-name}})'
       ui-pipeline: true
       type: $env.type
@@ -40,10 +50,11 @@ services:
           REGISTRY_REGION_ID: '{{form.pipeline.parameters.target-region}}'
           REGISTRY_NAMESPACE: '{{form.pipeline.parameters.registry-namespace}}'
           IMAGE_NAME: '{{form.pipeline.parameters.image-name}}'
-          TARGET_REGION_ID: '{{form.pipeline.parameters.target-region}}'
           TARGET_CLUSTER_NAME: '{{form.pipeline.parameters.target-cluster-name}}'
-          TARGET_NAMESPACE: '{{form.pipeline.parameters.target-cluster-namespace}}'
+          TARGET_REGION_ID: '{{form.pipeline.parameters.target-region}}'
           TARGET_RESOURCE_GROUP: '{{form.pipeline.parameters.target-resource-group}}'
+          SCHEMATICS_WORKSPACE_ID: '{{form.pipeline.parameters.schematics-workspace-id}}'
+          TEKTON_CATALOG_REPO: tekton-catalog
         execute: true
 form:
   pipeline:
@@ -51,6 +62,6 @@ form:
       image-name: 'secure-file-storage'
       target-cluster-namespace: secure-file-storage
       target-resource-group: 'default'
-      branch-name: 'master'
+      branch-name: $env.branch || 'master'
     schema:
       $ref: deploy.json

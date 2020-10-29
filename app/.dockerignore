@@ -7,8 +7,14 @@ Dockerfile*
 README.md
 LICENSE
 .vscode
-credentials.template.env
+# scripts and artifacts
 scripts
 artifacts
+# environment 
 .env
 credentials.env
+credentials.template.env
+# Terraform
+*.tfvars
+.terraform
+*.tfstate*

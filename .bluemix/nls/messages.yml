@@ -20,3 +20,5 @@ deploy.clusterNote: "Retrieve the Kubernetes cluster name with the CLI command '
 region: "Region"
 deploy.groupName: "Resource group where to create resources"
 deploy.groupDescription: "Resource group where to create resources"
+deploy.schematicsWorkspace: "Schematics workspace ID"
+deploy.schematicsWorkspaceDescription: "Schematics workspace ID for workspace with deployed resources"

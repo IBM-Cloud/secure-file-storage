@@ -3,76 +3,43 @@ inputs:
   branch: ${GIT_BRANCH}
   path: .tekton
   service: repo
+- type: git
+  branch: master
+  service: ${TEKTON_CATALOG_REPO}
+  path: container-registry
+- type: git
+  branch: master
+  service: ${TEKTON_CATALOG_REPO}
+  path: kubernetes-service
 properties:
-- name: GIT_REPO
+- name: git-repository
   value: ${GIT_REPO_URL} 
   type: text 
-- name: GIT_BRANCH
+- name: git-branch
   value: ${GIT_BRANCH}
   type: text 
-- name: API_KEY
+- name: apikey
   value: ${API_KEY}
   type: SECURE
-- name: REGISTRY_REGION_ID
+- name: registry-region
   value: ${REGISTRY_REGION_ID}
-  type: text 
-- name: REGISTRY_NAMESPACE
+  type: text
+- name: registry-namespace
   value: ${REGISTRY_NAMESPACE}
   type: text 
-- name: TARGET_CLUSTER_NAME
-  value: ${TARGET_CLUSTER_NAME}
+- name: schematics-workspace-id
+  value: ${SCHEMATICS_WORKSPACE_ID}
   type: text 
-- name: IMAGE_NAME
+- name: image-name
   value: ${IMAGE_NAME}
   type: text 
-- name: TARGET_REGION_ID
-  value: ${TARGET_REGION_ID}
-  type: text 
-- name: TARGET_NAMESPACE
-  value: ${TARGET_NAMESPACE}
-  type: text 
-- name: TARGET_RESOURCE_GROUP
+- name: target-resource-group
   value: ${TARGET_RESOURCE_GROUP}
-  type: text 
-- name: COS_PLAN
-  value: "lite"
-  type: text 
-- name: APP_ID_PLAN
-  value: "lite"
-  type: text 
-- name: CLOUDANT_PLAN
-  value: "lite"
-  type: text 
+  type: text
+- name: target-region
+  value: ${TARGET_REGION_ID}
+  type: text
 triggers:
-- eventListener: BUILD-DEPLOY-two-task
-  branch: master
-  events:
-    push: true
-  name: git-BUILD-DEPLOY-two-task
-  properties: []
-  type: git
-  service: repo
-- eventListener: BUILD
-  name: BUILD
-  type: manual
-- eventListener: DEPLOY
-  name: DEPLOY
-  type: manual
-- eventListener: BUILD-DEPLOY-two-task
-  name: BUILD-DEPLOY-two-task
-  type: manual
-- eventListener: BUILD-DEPLOY-one-task
-  name: BUILD-DEPLOY-one-task
-  type: manual
-- eventListener: ROTATE_STORAGE_CREDENTIALS
-  name: ROTATE_STORAGE_CREDENTIALS
-  type: manual
-- eventListener: ROTATE_APPID_CREDENTIALS
-  name: ROTATE_APPID_CREDENTIALS
-  type: manual
-- eventListener: ROTATE_REGISTRY_CREDENTIALS
-  name: ROTATE_REGISTRY_CREDENTIALS
-  type: manual
-- eventListener: UNINSTALL
-  name: UNINSTALL
+- eventListener: ManualListener
+  name: ManualListener
   type: manual

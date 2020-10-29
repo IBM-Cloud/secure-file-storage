@@ -1,0 +1,25 @@
+{
+    "name": "schematics_secure-file-storage",
+    "type": [
+      "terraform_v0.12"
+    ],
+    "description": "Deploy services for solution tutorial on applying e2e security (secure file storage)",
+    "tags": [
+      "tutorial",
+      "security",
+      "env:dev"
+    ],
+    "template_repo": {
+      "url": "https://github.com/IBM-Cloud/secure-file-storage/tree/terraform/terraform"
+    },
+    "template_data": [{
+      "folder": ".",
+      "type": "terraform_v0.12",
+      "variablestore": [{
+          "name": "project_name",
+          "value": "secure-file-storage",
+          "type": "string"
+        }
+      ]
+    }]
+  }

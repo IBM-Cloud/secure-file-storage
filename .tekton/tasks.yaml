@@ -1,0 +1,117 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: detect-change-task
+spec:
+  results:
+    - name: is_app
+      description: changed files belong to app
+    - name: is_toolchain
+      description: changed files belong to toolchain
+  workspaces:
+    - name: task-workspace
+      mountPath: /working
+  params:
+    - name: toolchain-dirs
+    - name: app-dirs
+    - name: generic-dirs
+    - name: git-repository
+    - name: git-branch
+  steps:
+    - name: execute-script
+      image: ibmcom/pipeline-base-image:2.9
+      envFrom:
+        - configMapRef:
+            name: environment-properties
+        - secretRef:
+            name: secure-properties
+      env:
+        - name: toolchaindirs
+          value: $(params.toolchain-dirs)
+        - name: appdirs
+          value: $(params.app-dirs)
+        - name: genericdirs
+          value: $(params.generic-dirs)
+        - name: GIT_BRANCH
+          value: $(params.git-branch)
+        - name: GIT_REPO
+          value: $(params.git-repository)
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          cd /working
+          # get the right repo and branch
+          if [ -z $GIT_BRANCH ]; then
+            git clone -q $GIT_REPO .
+          else
+            git clone -q -b $GIT_BRANCH $GIT_REPO .
+          fi
+          # check for changed directories
+          changed_directories=$(git log --format= -n 1 --name-only | grep / | awk 'BEGIN {FS="/"} {print $1}' | uniq)
+          #echo "changed_directories:\n$changed_directories"
+          # check if it is toolchain-related
+          echo "toolchain?\n"
+          printf false | tee $(results.is_toolchain.path)
+          for d in ${toolchaindirs[@]}; do
+            if [[ " ${changed_directories[@]} " =~ "${d}" ]]; then
+              printf true | tee $(results.is_toolchain.path)
+              break
+            fi
+          done
+          # check if it is app-related
+          echo "app?\n"
+          printf false | tee $(results.is_app.path)
+          for d in ${appdirs[@]}; do
+            if [[ " ${changed_directories[@]} " =~ "${d}" ]]; then
+              printf true | tee $(results.is_app.path)
+              break
+            fi
+          done
+          echo "generic=$genericdirs"
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: deploy-app
+spec:
+  workspaces:
+    - name: task-workspace
+      mountPath: /working
+  params:
+    - name: target-resource-group
+    - name: schematics-workspace-id
+    - name: target-region
+    - name: image-repository
+  steps:
+    - name: execute-script
+      image: ibmcom/pipeline-base-image:2.9
+      envFrom:
+        - configMapRef:
+            name: environment-properties
+        - secretRef:
+            name: secure-properties
+      env:
+      - name: TARGET_RESOURCE_GROUP
+        value: $(params.target-resource-group)
+      - name: SCHEMATICS_WORKSPACE_NAME
+        value: $(params.schematics-workspace-id)
+      - name: REGION
+        value: $(params.target-region)
+      - name: IMAGE_REPOSITORY
+        value: $(params.image-repository)
+      - name: PIPELINE_APIKEY
+        valueFrom:
+          secretKeyRef:
+            name: secure-properties
+            key: apikey
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          cd /working
+          # if REGION is in the format 'ibm:yp:<region>' just keep the region part
+          export REGION=$(echo $REGION | awk -F ':' '{print $NF;}')
+          ibmcloud login -a cloud.ibm.com -r $REGION --apikey $PIPELINE_APIKEY
+          export REGISTRY_URL=$(echo $IMAGE_REPOSITORY |  awk -F/ '{print $1}')
+          echo "IMAGE_REPOSITORY=$IMAGE_REPOSITORY"
+          source ./scripts/pipeline-DEPLOY.sh

@@ -65,6 +65,13 @@
           "validate": false
       }
     },
+    "schematics-workspace-id": {
+      "description": {
+        "$ref": "#/messages/deploy.workspaceDescription"
+      },
+      "type": "string",
+      "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+    },
     "target-cluster-name": {
       "description": {
         "$ref": "#/messages/deploy.clusterDescription"
@@ -83,15 +90,14 @@
       "type": "string",
       "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
     }
-  },
-  "required": [
+},
+"required": [
     "api-key",
     "target-region",
     "target-resource-group",
     "image-name",
     "registry-namespace",
-    "target-cluster-name",
-    "target-cluster-namespace"
+    "schematics-workspace-id"
   ],
   "form": [
     {
@@ -131,28 +137,21 @@
       "key": "registry-namespace"
     },
     {
+      "type": "select",
+      "readonly": false,
+      "title": {
+        "$ref": "#/messages/deploy.schematicsWorkspace"
+      },
+      "key": "schematics-workspace-id"
+    },
+
+    {
       "type": "text",
       "readonly": false,
       "title": {
         "$ref": "#/messages/deploy.imageName"
       },
       "key": "image-name"
-    },
-    {
-      "key": "target-cluster-name",
-      "readonly": false,
-      "type": "select",
-      "title": {
-        "$ref": "#/messages/deploy.clusterName"
-      }
-    },
-    {
-      "type": "text",
-      "readonly": false,
-      "title": {
-        "$ref": "#/messages/deploy.namespaceName"
-      },
-      "key": "target-cluster-namespace"
     }
-  ]
+ ]
 }
