@@ -7,10 +7,6 @@ inputs:
   branch: master
   service: ${TEKTON_CATALOG_REPO}
   path: container-registry
-- type: git
-  branch: master
-  service: ${TEKTON_CATALOG_REPO}
-  path: kubernetes-service
 properties:
 - name: git-repository
   value: ${GIT_REPO_URL} 
@@ -40,6 +36,9 @@ properties:
   value: ${TARGET_REGION_ID}
   type: text
 triggers:
-- eventListener: ManualListener
-  name: ManualListener
+- eventListener: manual-listener-builddeploy
+  name: manual-listener-builddeploy
+  type: manual
+- eventListener: manual-listener-uninstall
+  name: manual-listener-uninstall
   type: manual

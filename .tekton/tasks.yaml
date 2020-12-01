@@ -79,7 +79,6 @@ spec:
     - name: task-workspace
       mountPath: /working
   params:
-    - name: target-resource-group
     - name: schematics-workspace-id
     - name: target-region
     - name: image-repository
@@ -92,8 +91,6 @@ spec:
         - secretRef:
             name: secure-properties
       env:
-      - name: TARGET_RESOURCE_GROUP
-        value: $(params.target-resource-group)
       - name: SCHEMATICS_WORKSPACE_NAME
         value: $(params.schematics-workspace-id)
       - name: REGION
@@ -113,3 +110,41 @@ spec:
           export REGION=$(echo $REGION | awk -F ':' '{print $NF;}')
           ibmcloud login -a cloud.ibm.com -r $REGION --apikey $PIPELINE_APIKEY
           source ./scripts/pipeline-DEPLOY.sh
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: task-uninstall-app
+spec:
+  workspaces:
+    - name: task-workspace
+      mountPath: /working
+  params:
+    - name: schematics-workspace-id
+    - name: target-region
+  steps:
+    - name: execute-script
+      image: ibmcom/pipeline-base-image:2.9
+      envFrom:
+        - configMapRef:
+            name: environment-properties
+        - secretRef:
+            name: secure-properties
+      env:
+      - name: SCHEMATICS_WORKSPACE_NAME
+        value: $(params.schematics-workspace-id)
+      - name: REGION
+        value: $(params.target-region)
+      - name: PIPELINE_APIKEY
+        valueFrom:
+          secretKeyRef:
+            name: secure-properties
+            key: apikey
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          cd /working
+          # if REGION is in the format 'ibm:yp:<region>' just keep the region part
+          export REGION=$(echo $REGION | awk -F ':' '{print $NF;}')
+          ibmcloud login -a cloud.ibm.com -r $REGION --apikey $PIPELINE_APIKEY
+          source ./scripts/pipeline-UNINSTALL.sh

@@ -8,6 +8,22 @@ if [ -z "$REGION" ]; then
 fi
 echo "REGION=$REGION"
 
+# Get the workspace information
+WORKSPACE_INFO=$(ibmcloud schematics workspace get --id $SCHEMATICS_WORKSPACE_NAME --output json)
+
+# Extract required information from workspace JSON
+# resource group
+TARGET_RESOURCE_GROUP=$(echo $WORKSPACE_INFO | jq -r '.resource_group')
+echo TARGET_RESOURCE_GROUP=$TARGET_RESOURCE_GROUP
+
+# Name of Kubernetes cluster
+PIPELINE_KUBERNETES_CLUSTER_NAME=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="iks_cluster_name").value')
+echo PIPELINE_KUBERNETES_CLUSTER_NAME=$PIPELINE_KUBERNETES_CLUSTER_NAME
+
+# deployment namespace in cluster
+TARGET_NAMESPACE=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="iks_namespace").value')
+echo TARGET_NAMESPACE=$TARGET_NAMESPACE
+
 #
 # The user running the script will be used to name some resources
 #

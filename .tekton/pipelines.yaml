@@ -9,13 +9,11 @@ spec:
       description: the git repo
     - name: git-branch
       description: the branch for the git repo
-    - name: target-resource-group
     - name: schematics-workspace-id
     - name: target-region
     - name: registry-namespace
     - name: image-name
     - name: registry-region
-    - name: pipeline-debug
   resources:
     - name: app-image
       type: image
@@ -78,11 +76,32 @@ spec:
     - name: task-workspace
       workspace: pipeline-ws
     params:
-      - name: target-resource-group
-        value: $(params.target-resource-group)
       - name: schematics-workspace-id
         value: $(params.schematics-workspace-id)
       - name: target-region
         value: $(params.target-region)
       - name: image-repository
         value: $(tasks.build.results.image-repository)
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: pipeline-uninstall
+spec:
+  params:
+    - name: schematics-workspace-id
+    - name: target-region
+  workspaces:
+  - name: pipeline-ws
+  tasks:
+  - name: uninstall-app
+    workspaces:
+    - name: task-workspace
+      workspace: pipeline-ws
+    params:
+    - name: schematics-workspace-id
+      value: $(params.schematics-workspace-id)
+    - name: target-region
+      value: $(params.target-region)
+    taskRef:
+       name: task-uninstall-app
