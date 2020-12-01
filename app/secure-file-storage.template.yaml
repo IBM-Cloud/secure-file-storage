@@ -31,7 +31,7 @@ spec:
 #        - name: $IMAGE_PULL_SECRET
       containers:
       - name: secure-file-storage-container
-        image: $REGISTRY_URL/$REGISTRY_NAMESPACE/$IMAGE_NAME:latest
+        image: $IMAGE_REPOSITORY:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8081
