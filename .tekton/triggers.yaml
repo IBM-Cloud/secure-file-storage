@@ -64,6 +64,31 @@ spec:
             value: $(params.image-name)
         workspaces:
           - name: pipeline-ws
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: tt-secure-file-storage-uninstall
+spec:
+  params:
+    - name: pipeline-debug
+      default: "1"
+    - name: schematics-workspace-id
+    - name: target-region
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        name: secure-file-storage-$(uid)
+      spec:
+        pipelineRef:
+          name: pipeline-uninstall
+        params:
+          - name: schematics-workspace-id
+            value: $(params.schematics-workspace-id)
+          - name: target-region
+            value: $(params.target-region)
+        workspaces:
+          - name: pipeline-ws
             persistentVolumeClaim:
               claimName: sfs-$(uid)-pvc
 ---
