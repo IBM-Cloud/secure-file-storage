@@ -88,20 +88,32 @@ kind: Pipeline
 metadata:
   name: pipeline-uninstall
 spec:
+  workspaces:
+  - name: pipeline-workspace
   params:
     - name: schematics-workspace-id
     - name: target-region
-  workspaces:
-  - name: pipeline-ws
+    - name: git-repository
+    - name: git-branch
+    - name: registry-namespace
+    - name: image-name
   tasks:
   - name: uninstall-app
     workspaces:
     - name: task-workspace
-      workspace: pipeline-ws
+      workspace: pipeline-workspace
     params:
     - name: schematics-workspace-id
       value: $(params.schematics-workspace-id)
     - name: target-region
       value: $(params.target-region)
+    - name: git-repository
+      value: $(params.git-repository)
+    - name: git-branch
+      value: $(params.git-branch)
+    - name: registry-namespace
+      value: $(params.registry-namespace)
+    - name: image-name
+      value: $(params.image-name)
     taskRef:
        name: task-uninstall-app

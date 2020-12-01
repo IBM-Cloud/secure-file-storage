@@ -1,7 +1,11 @@
 #!/bin/bash
 source ./scripts/pipeline-HELPER.sh
 
-ibmcloud target -g $TARGET_RESOURCE_GROUP || exit 1
+# fail script on error
+set -e
+
+# change into the app directory which contains the configuration file
+cd app
 
 if [ -z "$REGION" ]; then
   export REGION=$(ibmcloud target | grep Region | awk '{print $2}')
@@ -16,6 +20,8 @@ WORKSPACE_INFO=$(ibmcloud schematics workspace get --id $SCHEMATICS_WORKSPACE_NA
 TARGET_RESOURCE_GROUP=$(echo $WORKSPACE_INFO | jq -r '.resource_group')
 echo TARGET_RESOURCE_GROUP=$TARGET_RESOURCE_GROUP
 
+ibmcloud target -g $TARGET_RESOURCE_GROUP || exit 1
+
 # Name of Kubernetes cluster
 PIPELINE_KUBERNETES_CLUSTER_NAME=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="iks_cluster_name").value')
 echo PIPELINE_KUBERNETES_CLUSTER_NAME=$PIPELINE_KUBERNETES_CLUSTER_NAME
@@ -24,24 +30,20 @@ echo PIPELINE_KUBERNETES_CLUSTER_NAME=$PIPELINE_KUBERNETES_CLUSTER_NAME
 TARGET_NAMESPACE=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="iks_namespace").value')
 echo TARGET_NAMESPACE=$TARGET_NAMESPACE
 
-#
-# The user running the script will be used to name some resources
-#
-TARGET_JSON=$(ibmcloud target --output json)
-TARGET_USER=$(echo $TARGET_JSON | jq -r '.user.user_email')
-if [ -z "$TARGET_USER" ]; then
-  TARGET_USER=$(echo $TARGET_JSON | jq -r '.user.display_name')
-fi
-check_value "$TARGET_USER"
-echo "TARGET_USER=$TARGET_USER"
-
-
 # remove App ID binding to Kubernetes cluster
 GUID=$(get_guid secure-file-storage-appid)
-ibmcloud ks cluster service unbind \
-  --cluster "$PIPELINE_KUBERNETES_CLUSTER_NAME" \
-  --namespace "$TARGET_NAMESPACE" \
-  --service "$GUID"
+echo GUID=$GUID
+
+# download and set cluster context
+echo "getting cluster config"
+ibmcloud ks cluster config --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME
+
+# this should be done by TF as it is not really app-related
+# echo "unbindng appid"
+# ibmcloud ks cluster service unbind \
+#   --cluster "$PIPELINE_KUBERNETES_CLUSTER_NAME" \
+#   --namespace "$TARGET_NAMESPACE" \
+#   --service "$GUID"
 
 #
 # Kubernetes
@@ -54,10 +56,13 @@ kubectl delete --namespace $TARGET_NAMESPACE secret secure-file-storage-credenti
 #
 # Docker image
 #
+REGISTRY_URL=$(ibmcloud cr info | grep -m1 -i '^Container Registry' | awk '{print $3;}')
+IMAGE_URL="${REGISTRY_URL}/${REGISTRY_NAMESPACE}/${IMAGE_NAME}"
+
 ibmcloud cr image-rm $IMAGE_URL
 
 #
 # Services
 #
 
-section "service to be removed using Schematics / terraform"
+section "services to be removed using Schematics / terraform"

@@ -17,11 +17,6 @@ if [ -z "$REGION" ]; then
 fi
 echo "REGION=$REGION"
 
-#
-# Set target
-#
-ibmcloud target -g $TARGET_RESOURCE_GROUP || exit 1
-
 # Schematics workspace name MUST be set
 if [ -z "$SCHEMATICS_WORKSPACE_NAME" ]; then
   echo "Schematics workspace required"
@@ -34,6 +29,9 @@ WORKSPACE_INFO=$(ibmcloud schematics workspace get --id $SCHEMATICS_WORKSPACE_NA
 # resource group
 TARGET_RESOURCE_GROUP=$(echo $WORKSPACE_INFO | jq -r '.resource_group')
 echo TARGET_RESOURCE_GROUP=$TARGET_RESOURCE_GROUP
+# set it
+ibmcloud target -g $TARGET_RESOURCE_GROUP || exit 1
+
 
 # Name of Kubernetes cluster
 PIPELINE_KUBERNETES_CLUSTER_NAME=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="iks_cluster_name").value')
@@ -54,7 +52,7 @@ CLUSTER_INFO=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NA
 ibmcloud ks cluster config --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME
 
 # show available contexts for debugging reasons
-kubectl config get-contexts
+# kubectl config get-contexts
 
 #
 # The user running the script will be used to pull the image
@@ -71,9 +69,10 @@ echo "TARGET_USER=$TARGET_USER"
 # Obtain Service ID information
 #
 section "Service ID"
-SERVICE_ID=$(ibmcloud iam service-id "secure-file-storage-serviceID-$TARGET_RESOURCE_GROUP" --uuid)
-echo "SERVICE_ID=$SERVICE_ID"
-check_value "$SERVICE_ID"
+SERVICE_ID=secure-file-storage-serviceID-$TARGET_RESOURCE_GROUP
+#SERVICE_ID=$(ibmcloud iam service-id "secure-file-storage-serviceID-$TARGET_RESOURCE_GROUP" --uuid)
+#echo "SERVICE_ID=$SERVICE_ID"
+#check_value "$SERVICE_ID"
 
 #
 # Key Protect
@@ -144,10 +143,9 @@ if [ -z "$COS_ENDPOINT" ]; then
   else
     export COS_ENDPOINT=$(echo $COS_ENDPOINTS | jq -r '.["service-endpoints"].regional["'$REGION'"].direct["'$REGION'"]')
   fi
-  
   export COS_ENDPOINT_PIPELINE=$(echo $COS_ENDPOINTS | jq -r '.["service-endpoints"].regional["'$REGION'"].public["'$REGION'"]')
-
 fi
+
 echo "COS_ENDPOINT=$COS_ENDPOINT"
 check_value "$COS_ENDPOINT"
 
@@ -160,6 +158,7 @@ check_value "$COS_IBMAUTHENDPOINT"
 
 # we previously deleted the service key, but it is required for the ImagePull secret and needs to be valid
 #ibmcloud iam service-api-key-delete secure-file-storage-serviceID-API-key $SERVICE_ID -f
+
 if check_exists "$(ibmcloud iam service-api-key secure-file-storage-serviceID-API-key $SERVICE_ID 2>&1)"; then
   echo "API key already exists, deleting it"
   ibmcloud iam service-api-key-delete secure-file-storage-serviceID-API-key $SERVICE_ID -f
@@ -223,6 +222,8 @@ fi
 #
 # Bind App ID to the cluster
 #
+# this should be done by TF because it is related to the existing cluster and service
+# Keep it here to fix wrong bindings: delete the ingress binding and redeploy
 if kubectl get secret binding-secure-file-storage-appid --namespace $TARGET_NAMESPACE; then
   echo "App ID service already bound to namespace"
 else
@@ -281,6 +282,7 @@ cat secure-file-storage.yaml | \
   INGRESS_SUBDOMAIN=$INGRESS_SUBDOMAIN \
   IMAGE_PULL_SECRET=secure-file-storage-docker-registry \
   IMAGE_REPOSITORY=$IMAGE_REPOSITORY \
+  TARGET_NAMESPACE=$TARGET_NAMESPACE \
   envsubst \
   | \
   kubectl apply --namespace $TARGET_NAMESPACE -f - || exit 1

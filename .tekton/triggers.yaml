@@ -64,6 +64,8 @@ spec:
             value: $(params.image-name)
         workspaces:
           - name: pipeline-ws
+            persistentVolumeClaim:
+              claimName: sfs-$(uid)-pvc
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TriggerTemplate
@@ -75,10 +77,15 @@ spec:
       default: "1"
     - name: schematics-workspace-id
     - name: target-region
+    - name: git-repository
+    - name: git-branch
+    - name: registry-namespace
+    - name: image-name    
+  resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
-        name: secure-file-storage-$(uid)
+        name: sfs-uninstall-$(uid)
       spec:
         pipelineRef:
           name: pipeline-uninstall
@@ -87,15 +94,22 @@ spec:
             value: $(params.schematics-workspace-id)
           - name: target-region
             value: $(params.target-region)
+          - name: git-repository
+            value: $(params.git-repository)
+          - name: git-branch
+            value: $(params.git-branch)
+          - name: registry-namespace
+            value: $(params.registry-namespace)
+          - name: image-name
+            value: $(params.image-name)            
         workspaces:
-          - name: pipeline-ws
-            persistentVolumeClaim:
-              claimName: sfs-$(uid)-pvc
+        - name: pipeline-workspace
+          emptyDir: {}
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
-  name: trigger-binding-secure-file-storage
+  name: tb-secure-file-storage-builddeploy
 spec:
   params:
     - name: branch
@@ -108,18 +122,14 @@ metadata:
 spec:
   triggers:
     - binding:
-        name: trigger-binding-secure-file-storage
+        name: tb-secure-file-storage-builddeploy
       template:
-        name: tt-secure-file-storage
+        name: tt-secure-file-storage-builddeploy
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
-  name: trigger-binding-secure-file-storage-uninstall
-spec:
-  params:
-    - name: branch
-      value: "master"
+  name: tb-secure-file-storage-uninstall
 ---
 apiVersion: tekton.dev/v1beta1
 kind: EventListener
@@ -128,6 +138,6 @@ metadata:
 spec:
   triggers:
     - binding:
-        name: trigger-binding-secure-file-storage-uninstall
+        name: tb-secure-file-storage-uninstall
       template:
         name: tt-secure-file-storage-uninstall

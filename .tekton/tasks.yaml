@@ -122,6 +122,10 @@ spec:
   params:
     - name: schematics-workspace-id
     - name: target-region
+    - name: git-repository
+    - name: git-branch
+    - name: registry-namespace
+    - name: image-name
   steps:
     - name: execute-script
       image: ibmcom/pipeline-base-image:2.9
@@ -135,6 +139,14 @@ spec:
         value: $(params.schematics-workspace-id)
       - name: REGION
         value: $(params.target-region)
+      - name: GIT_BRANCH
+        value: $(params.git-branch)
+      - name: GIT_REPO
+        value: $(params.git-repository)
+      - name: IMAGE_NAME
+        value: $(params.image-name)
+      - name: REGISTRY_NAMESPACE
+        value: $(params.registry-namespace)
       - name: PIPELINE_APIKEY
         valueFrom:
           secretKeyRef:
@@ -144,6 +156,12 @@ spec:
       args:
         - |
           cd /working
+          # get the right repo and branch
+          if [ -z $GIT_BRANCH ]; then
+            git clone -q $GIT_REPO .
+          else
+            git clone -q -b $GIT_BRANCH $GIT_REPO .
+          fi
           # if REGION is in the format 'ibm:yp:<region>' just keep the region part
           export REGION=$(echo $REGION | awk -F ':' '{print $NF;}')
           ibmcloud login -a cloud.ibm.com -r $REGION --apikey $PIPELINE_APIKEY
