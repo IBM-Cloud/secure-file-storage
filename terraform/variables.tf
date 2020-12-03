@@ -4,15 +4,12 @@
 variable "region" {}
 
 variable "iks_cluster_name" {
-  default = ""
 }
 
 variable "iks_namespace" {
-  default = "default"
 }
 
 variable "resource_group" {
-  default = "default"
 }
 
 # variable "cos_endpoint" {
@@ -24,7 +21,6 @@ variable "resource_group" {
 # }
 
 variable "basename" {
-  default = "secure-file-storage"
 }
 
 variable "ibmcloud_timeout" {

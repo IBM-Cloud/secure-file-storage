@@ -33,24 +33,3 @@ resource "kubernetes_namespace" "namespace" {
     name = var.iks_namespace
   }
 }
-
-# # Create new secret with app configuration which the app container will consume
-# resource "kubernetes_secret" "appsecrets" {
-#   metadata {
-#     name      = "secure-file-storage-credentials"
-#     namespace = kubernetes_namespace.namespace.metadata.0.name
-#   }
-
-#   data = {
-#     cos_endpoint           = var.cos_endpoint
-#     cos_ibmAuthEndpoint    = var.cos_ibmAuthEndpoint
-#     cos_apiKey             = ibm_resource_key.RKcos.credentials.apikey
-#     cos_resourceInstanceId = ibm_resource_key.RKcos.credentials.resource_instance_id
-#     cos_access_key_id      = ibm_resource_key.RKcos.credentials["cos_hmac_keys.access_key_id"]
-#     cos_secret_access_key  = ibm_resource_key.RKcos.credentials["cos_hmac_keys.secret_access_key"]
-#     cos_bucket_name        = ibm_cos_bucket.cosbucket.bucket_name
-#     cloudant_username      = ibm_resource_key.RKcloudant.credentials.username
-#     cloudant_iam_apikey    = ibm_resource_key.RKcloudant.credentials.apikey
-#     cloudant_database      = "secure-file-storage-metadata"
-#   }
-# }

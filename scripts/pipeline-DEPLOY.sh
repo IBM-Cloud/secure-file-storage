@@ -32,6 +32,10 @@ echo TARGET_RESOURCE_GROUP=$TARGET_RESOURCE_GROUP
 # set it
 ibmcloud target -g $TARGET_RESOURCE_GROUP || exit 1
 
+# extract basename
+BASENAME=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="basename").value')
+echo BASENAME=$BASENAME
+
 
 # Name of Kubernetes cluster
 PIPELINE_KUBERNETES_CLUSTER_NAME=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="iks_cluster_name").value')
@@ -69,8 +73,8 @@ echo "TARGET_USER=$TARGET_USER"
 # Obtain Service ID information
 #
 section "Service ID"
-SERVICE_ID=secure-file-storage-serviceID-$TARGET_RESOURCE_GROUP
-#SERVICE_ID=$(ibmcloud iam service-id "secure-file-storage-serviceID-$TARGET_RESOURCE_GROUP" --uuid)
+SERVICE_ID=$BASENAME-serviceID-$TARGET_RESOURCE_GROUP
+#SERVICE_ID=$(ibmcloud iam service-id "$BASENAME-serviceID-$TARGET_RESOURCE_GROUP" --uuid)
 #echo "SERVICE_ID=$SERVICE_ID"
 #check_value "$SERVICE_ID"
 
@@ -79,14 +83,14 @@ SERVICE_ID=secure-file-storage-serviceID-$TARGET_RESOURCE_GROUP
 #
 section "Key Protect"
 
-KP_INSTANCE_ID=$(get_instance_id secure-file-storage-kms)
-KP_GUID=$(get_guid secure-file-storage-kms)
+KP_INSTANCE_ID=$(get_instance_id $BASENAME-kms)
+KP_GUID=$(get_guid $BASENAME-kms)
 echo "KP_INSTANCE_ID=$KP_INSTANCE_ID"
 echo "KP_GUID=$KP_GUID"
 #check_value "$KP_INSTANCE_ID"
 #check_value "$KP_GUID"
 
-KP_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-accKey-kms --output JSON)
+KP_CREDENTIALS=$(ibmcloud resource service-key $BASENAME-accKey-kms --output JSON)
 KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | jq -r .[0].credentials.apikey)
 KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
 KP_MANAGEMENT_URL="https://$REGION.kms.cloud.ibm.com/api/v2/keys"
@@ -95,14 +99,14 @@ KP_MANAGEMENT_URL="https://$REGION.kms.cloud.ibm.com/api/v2/keys"
 # Cloudant instance with IAM authentication
 #
 section "Cloudant"
-CLOUDANT_INSTANCE_ID=$(get_instance_id secure-file-storage-cloudant)
-CLOUDANT_GUID=$(get_guid secure-file-storage-cloudant)
+CLOUDANT_INSTANCE_ID=$(get_instance_id $BASENAME-cloudant)
+CLOUDANT_GUID=$(get_guid $BASENAME-cloudant)
 echo "CLOUDANT_INSTANCE_ID=$CLOUDANT_INSTANCE_ID"
 echo "CLOUDANT_GUID=$CLOUDANT_GUID"
 check_value "$CLOUDANT_INSTANCE_ID"
 check_value "$CLOUDANT_GUID"
 
-CLOUDANT_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-accKey-cloudant)
+CLOUDANT_CREDENTIALS=$(ibmcloud resource service-key $BASENAME-accKey-cloudant)
 CLOUDANT_USERNAME=$(echo "$CLOUDANT_CREDENTIALS" | grep "username:" | awk '{ print $2 }')
 CLOUDANT_IAM_APIKEY=$(echo "$CLOUDANT_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ print $2 }')
 CLOUDANT_URL=$(echo "$CLOUDANT_CREDENTIALS" | grep "url:" -m 1 | awk '{ print $2 }')
@@ -118,12 +122,12 @@ echo "CLOUDANT_DATABASE=$CLOUDANT_DATABASE"
 # Cloud Object Storage with HMAC authentication
 #
 section "Cloud Object Storage"
-COS_INSTANCE_ID=$(get_instance_id secure-file-storage-cos)
-COS_GUID=$(get_guid secure-file-storage-cos)
+COS_INSTANCE_ID=$(get_instance_id $BASENAME-cos)
+COS_GUID=$(get_guid $BASENAME-cos)
 check_value "$COS_INSTANCE_ID"
 check_value "$COS_GUID"
 
-COS_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-accKey-cos)
+COS_CREDENTIALS=$(ibmcloud resource service-key $BASENAME-accKey-cos)
 COS_ACCESS_KEY_ID=$(echo "$COS_CREDENTIALS" | grep access_key_id  | awk '{ print $2 }')
 COS_SECRET_ACCESS_KEY=$(echo "$COS_CREDENTIALS" | grep secret_access_key  | awk '{ print $2 }')
 COS_APIKEY=$(echo "$COS_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ print $2 }')
@@ -132,7 +136,7 @@ COS_ENDPOINTS_URL=$(echo "$COS_CREDENTIALS" | grep endpoints | awk '{ print $2 }
 COS_ENDPOINTS=$(curl -s $COS_ENDPOINTS_URL)
 COS_ACCESS_TOKEN=$(get_access_token $COS_APIKEY)
 
-COS_BUCKET_NAME=secure-file-storage-bucket-$COS_GUID
+COS_BUCKET_NAME=$BASENAME-bucket-$COS_GUID
 echo "COS_BUCKET_NAME=$COS_BUCKET_NAME"
 
 if [ -z "$COS_ENDPOINT" ]; then
@@ -157,28 +161,28 @@ echo "COS_IBMAUTHENDPOINT=$COS_IBMAUTHENDPOINT"
 check_value "$COS_IBMAUTHENDPOINT"
 
 # we previously deleted the service key, but it is required for the ImagePull secret and needs to be valid
-#ibmcloud iam service-api-key-delete secure-file-storage-serviceID-API-key $SERVICE_ID -f
+#ibmcloud iam service-api-key-delete $BASENAME-serviceID-API-key $SERVICE_ID -f
 
-if check_exists "$(ibmcloud iam service-api-key secure-file-storage-serviceID-API-key $SERVICE_ID 2>&1)"; then
+if check_exists "$(ibmcloud iam service-api-key $BASENAME-serviceID-API-key $SERVICE_ID 2>&1)"; then
   echo "API key already exists, deleting it"
-  ibmcloud iam service-api-key-delete secure-file-storage-serviceID-API-key $SERVICE_ID -f
+  ibmcloud iam service-api-key-delete $BASENAME-serviceID-API-key $SERVICE_ID -f
 fi
-API_KEY_OUT=$(ibmcloud iam service-api-key-create secure-file-storage-serviceID-API-key $SERVICE_ID -d "API key for secure-file-storage-serviceID" --force --output json)
+API_KEY_OUT=$(ibmcloud iam service-api-key-create $BASENAME-serviceID-API-key $SERVICE_ID -d "API key for $BASENAME-serviceID" --force --output json)
 API_KEY_VALUE=$(echo "$API_KEY_OUT" | jq -r '.apikey')
 
 #
 # App ID
 #
 section "App ID"
-APPID_INSTANCE_ID=$(get_instance_id secure-file-storage-appid)
-APPID_GUID=$(get_guid secure-file-storage-appid)
+APPID_INSTANCE_ID=$(get_instance_id $BASENAME-appid)
+APPID_GUID=$(get_guid $BASENAME-appid)
 echo "APPID_INSTANCE_ID=$APPID_INSTANCE_ID"
 echo "APPID_GUID=$APPID_GUID"
 check_value "$APPID_INSTANCE_ID"
 check_value "$APPID_GUID"
 
 
-APPID_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-accKey-appid)
+APPID_CREDENTIALS=$(ibmcloud resource service-key $BASENAME-accKey-appid)
 APPID_MANAGEMENT_URL=$(echo "$APPID_CREDENTIALS" | grep managementUrl  | awk '{ print $2 }')
 APPID_API_KEY=$(echo "$APPID_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ print $2 }')
 APPID_ACCESS_TOKEN=$(get_access_token $APPID_API_KEY)
@@ -224,24 +228,24 @@ fi
 #
 # this should be done by TF because it is related to the existing cluster and service
 # Keep it here to fix wrong bindings: delete the ingress binding and redeploy
-if kubectl get secret binding-secure-file-storage-appid --namespace $TARGET_NAMESPACE; then
+if kubectl get secret binding-$BASENAME-appid --namespace $TARGET_NAMESPACE; then
   echo "App ID service already bound to namespace"
 else
   ibmcloud ks cluster service bind \
     --cluster "$PIPELINE_KUBERNETES_CLUSTER_NAME" \
     --namespace "$TARGET_NAMESPACE" \
-    --key "secure-file-storage-accKey-appid" \
+    --key "$BASENAME-accKey-appid" \
     --service "$APPID_GUID" || exit 1
 fi
 
 #
 # Create a secret in the cluster holding the credentials for Cloudant and COS
 #
-if kubectl get secret secure-file-storage-credentials --namespace "$TARGET_NAMESPACE"; then
-  kubectl delete secret secure-file-storage-credentials --namespace "$TARGET_NAMESPACE"
+if kubectl get secret $BASENAME-credentials --namespace "$TARGET_NAMESPACE"; then
+  kubectl delete secret $BASENAME-credentials --namespace "$TARGET_NAMESPACE"
 fi
 
-kubectl create secret generic secure-file-storage-credentials \
+kubectl create secret generic $BASENAME-credentials \
   --from-literal="cos_endpoint=$COS_ENDPOINT" \
   --from-literal="cos_ibmAuthEndpoint=$COS_IBMAUTHENDPOINT" \
   --from-literal="cos_apiKey=$COS_APIKEY" \
@@ -257,10 +261,10 @@ kubectl create secret generic secure-file-storage-credentials \
 #
 # Create a policy, then a secret to access the registry
 #
-if kubectl get secret secure-file-storage-docker-registry --namespace $TARGET_NAMESPACE; then
-  kubectl delete secret secure-file-storage-docker-registry --namespace "$TARGET_NAMESPACE"
+if kubectl get secret $BASENAME-docker-registry --namespace $TARGET_NAMESPACE; then
+  kubectl delete secret $BASENAME-docker-registry --namespace "$TARGET_NAMESPACE"
 fi
-kubectl --namespace $TARGET_NAMESPACE create secret docker-registry secure-file-storage-docker-registry \
+kubectl --namespace $TARGET_NAMESPACE create secret docker-registry $BASENAME-docker-registry \
     --docker-server=${REGISTRY_URL} \
     --docker-username=iamapikey \
     --docker-password=${API_KEY_VALUE} \
@@ -280,7 +284,7 @@ cat secure-file-storage.yaml | \
   IMAGE_NAME=$IMAGE_NAME \
   INGRESS_SECRET=$INGRESS_SECRET \
   INGRESS_SUBDOMAIN=$INGRESS_SUBDOMAIN \
-  IMAGE_PULL_SECRET=secure-file-storage-docker-registry \
+  IMAGE_PULL_SECRET=$BASENAME-docker-registry \
   IMAGE_REPOSITORY=$IMAGE_REPOSITORY \
   TARGET_NAMESPACE=$TARGET_NAMESPACE \
   envsubst \
