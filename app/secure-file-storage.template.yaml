@@ -37,7 +37,7 @@ spec:
         - containerPort: 8081
         envFrom:
          - secretRef:
-            name: secure-file-storage-credentials
+            name: $BASENAME-credentials
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -45,7 +45,7 @@ metadata:
   name: ingress-for-secure-file-storage
   annotations:
     # protect the service with App ID
-    ingress.bluemix.net/appid-auth: "bindSecret=binding-secure-file-storage-appid namespace=$TARGET_NAMESPACE requestType=web serviceName=secure-file-storage-service"
+    ingress.bluemix.net/appid-auth: "bindSecret=binding-$BASENAME-appid namespace=$TARGET_NAMESPACE requestType=web serviceName=secure-file-storage-service"
     # increase max upload size
     ingress.bluemix.net/client-max-body-size: "50m"
 spec:

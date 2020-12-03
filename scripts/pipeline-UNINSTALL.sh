@@ -15,6 +15,10 @@ echo "REGION=$REGION"
 # Get the workspace information
 WORKSPACE_INFO=$(ibmcloud schematics workspace get --id $SCHEMATICS_WORKSPACE_NAME --output json)
 
+# extract basename
+BASENAME=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="basename").value')
+echo BASENAME=$BASENAME
+
 # Extract required information from workspace JSON
 # resource group
 TARGET_RESOURCE_GROUP=$(echo $WORKSPACE_INFO | jq -r '.resource_group')
@@ -31,8 +35,8 @@ TARGET_NAMESPACE=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[
 echo TARGET_NAMESPACE=$TARGET_NAMESPACE
 
 # remove App ID binding to Kubernetes cluster
-GUID=$(get_guid secure-file-storage-appid)
-echo GUID=$GUID
+# GUID=$(get_guid secure-file-storage-appid)
+# echo GUID=$GUID
 
 # download and set cluster context
 echo "getting cluster config"
@@ -50,8 +54,8 @@ ibmcloud ks cluster config --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME
 #
 section "Kubernetes"
 kubectl delete --namespace $TARGET_NAMESPACE -f secure-file-storage.template.yaml
-kubectl delete --namespace $TARGET_NAMESPACE secret secure-file-storage-docker-registry
-kubectl delete --namespace $TARGET_NAMESPACE secret secure-file-storage-credentials
+kubectl delete --namespace $TARGET_NAMESPACE secret $BASENAME-docker-registry
+kubectl delete --namespace $TARGET_NAMESPACE secret $BASENAME-credentials
 
 #
 # Docker image

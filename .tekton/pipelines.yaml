@@ -38,10 +38,11 @@ spec:
     taskRef:
        name: detect-change-task
   - name: build
-    when: 
-    - input: "$(tasks.git-repo-changes.results.is_app)"
-      operator: in
-      values: ["true"]
+    # ENABLE to only build on app changes
+    # when: 
+    # - input: "$(tasks.git-repo-changes.results.is_app)"
+    #   operator: in
+    #   values: ["true"]
     taskRef:
       name: icr-containerize
     params:

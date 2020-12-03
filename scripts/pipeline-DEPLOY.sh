@@ -287,6 +287,7 @@ cat secure-file-storage.yaml | \
   IMAGE_PULL_SECRET=$BASENAME-docker-registry \
   IMAGE_REPOSITORY=$IMAGE_REPOSITORY \
   TARGET_NAMESPACE=$TARGET_NAMESPACE \
+  BASENAME=$BASENAME \
   envsubst \
   | \
   kubectl apply --namespace $TARGET_NAMESPACE -f - || exit 1
