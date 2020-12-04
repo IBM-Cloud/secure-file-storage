@@ -60,8 +60,6 @@ spec:
       value: $(params.registry-namespace)
     - name: image-name
       value: $(params.image-name)
-    - name: pipeline-debug
-      value: $(parmas.pipeline-debug)
     workspaces:
     - name: source
       workspace: pipeline-ws

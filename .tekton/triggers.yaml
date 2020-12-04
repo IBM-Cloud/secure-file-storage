@@ -9,8 +9,6 @@ spec:
       description: The git repo
     - name: git-branch
       description: the branch for the git repo
-    - name: pipeline-debug
-      default: "1"
     - name: schematics-workspace-id
     - name: target-region
     - name: registry-namespace
@@ -50,8 +48,6 @@ spec:
             value: $(params.git-repository)
           - name: git-branch
             value: $(params.git-branch)
-          - name: pipeline-debug
-            value: $(params.pipeline-debug)
           - name: schematics-workspace-id
             value: $(params.schematics-workspace-id)
           - name: target-region
@@ -73,8 +69,6 @@ metadata:
   name: tt-secure-file-storage-uninstall
 spec:
   params:
-    - name: pipeline-debug
-      default: "1"
     - name: schematics-workspace-id
     - name: target-region
     - name: git-repository
