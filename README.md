@@ -13,41 +13,50 @@ Refer to [this tutorial](https://cloud.ibm.com/docs/solution-tutorials?topic=sol
 5. The bucket where the files are stored is using a user-provided key to encrypt the data.
 6. All activities related to managing the solution are logged by [Cloud Activity Tracker with LogDNA](https://cloud.ibm.com/catalog/services/logdnaat).
 
-## Deploy with a toolchain
+## Deploy with a toolchain and Terraform
 
-This project comes with a partially automated toolchain capable of deploying the application to IBM Cloud while provisioning all required services. The pipeline has manual stages to uninstall resources and to selectively rotate different service credentials and apply them to the deployed application (see below).
+This project comes with a partially automated toolchain capable of deploying the application to IBM Cloud. The environment including the needed services is set up using Terraform (Infrastructure as Code). The Terraform scripts are managed in a [Schematics workspace](https://cloud.ibm.com/schematics/workspaces).
 
 ### Prerequisites
 
-1. Create a **standard** Kubernetes cluster
+1. Create a **standard** Kubernetes cluster in a VPC (Virtual Private Cloud)
 
-1. Create a Kubernetes registry namespace
+2. Optionally create a specific resource group for this project
 
-1. Optionally create a specific resource group for this project
 
-1. Choose either the classic or tekton toolchains below (not both)
+### Deploy resources using Terraform managed by Schematics
 
-### And then classic
+Either create the Schematics workspace automatically by clicking this ["deploy link"](https://cloud.ibm.com/schematics/workspaces/create?repository=https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform&terraform_version=terraform_v0.13)
+[Schematics workspace](https://cloud.ibm.com/schematics/workspaces). Or set it up manually by going to the [Schematics workspaces](https://cloud.ibm.com/schematics/workspaces) and using https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform as source respository including path and Terraform v0.13 as runtime.
 
-[![Create toolchain](https://cloud.ibm.com/devops/graphics/create_toolchain_button.png)](https://cloud.ibm.com/devops/setup/deploy/?repository=https%3A//github.com/IBM-Cloud/secure-file-storage&env_id=ibm:yp:us-south&type=classic)
+Configure all required variables:
+- **region** where the resources will be deployed. It should the location of the Kubernetes cluster: us-south, eu-de, ...
+- **iks_cluster_name**: name of your existing (VPC-based) Kubernetes cluster
+- **iks_namespace**: Kubernetes namespace into which to deploy the app
+- **resource_group**: the IBM Cloud resource group where to deploy the services to
+- **basename**: project basename which is used as prefix for names, e.g., secure-file-storage
 
-The toolchain will begin building automatically.  Open the toolchain to see progress.
+Be sure to click "**Save**".
 
-### Or else tekton
+Next, optionally click "**Generate plan**" to verify everything would be working ok. Or directly click on "Apply plan" to deploy the configured resources, authorizations and service keys:
+- App ID
+- Cloud Object Storage
+- Cloudant NoSQL database
+- Key Protect
 
-Tekton pipelines are available in preview.  If you are risk averse use classic above.
+**Note:** If the deployment fails with an error like *The account already has an instance created with the Lite plan*, configure the plan settings in the file [terraform/main.tf](terraform/main.tf). Use `standard` for COS,  `graduated-tier` for App ID or `standard` for Cloudant. 
+
+
+### Deploy the app using Tekton
+
+Click the following link to create a Tekton-based toolchain in the IBM Cloud Continuous Delivery service:
 
 [![Create toolchain](https://cloud.ibm.com/devops/graphics/create_toolchain_button.png)](https://cloud.ibm.com/devops/setup/deploy/?repository=https%3A//github.com/IBM-Cloud/secure-file-storage&env_id=ibm:yp:us-south&type=tekton)
 
-The toolchain will need to be started manually.  Open the toolchain and choose the Run Pipeline drop down.  Click first on BUILD and then DEPLOY.
+In the dialog configure the git repository and the pipeline:
 
-### Continue
-
-
-Input is required on two tabs.
 **GitHub**
-- Change the toolchain name to secure-file-storage-toolchain
-- Select the region and resource group
+- Select the region and resource group for the toolchain.
 - GitHub Server: GitHub (https://github.com) - already selected
 - Repository type: Existing
 - Repository URL: https://github.com/IBM-Cloud/secure-file-storage - already selected
@@ -56,37 +65,14 @@ Input is required on two tabs.
 
 
 **Delivery Pipeline**
-- IBM Cloud API Key: click New+ (do not click Save this key in a secrets store for reuse).  The API key provides the same privileges as you user id and is used during pipeline execution
+- IBM Cloud API Key: click New+ (do not click Save this key in a secrets store for reuse).  The API key provides the same privileges as your user id and is used during pipeline execution
 - Region: Region matching the toolchain is the default
 - Resource group: choose
 - Image Registry Namespace: secure-file-storage
 - Docker Image name: secure-file-storage default is good
-- Cluster Name: secure-file-storage-cluster
-- Namespace: secure-file-storage - already is a good default
 
-Click **Create**
+Click **Create**.
 
-Click on the Delivery Pipeline and take a look at the configuration:
-
-**Note:** The deploy stage will fail with the error, *The account already has an instance created with the Lite plan*, configure the stage's environment variables `COS_PLAN=standard` or `APP_ID_PLAN=graduated-tier` or `CLOUDANT_PLAN=standard` based on the failed service. You can then re-run the deploy stage (you do not need to re-create the toolchain).
-
-### Classic Delivery Pipeline
-You will notice that the BUILD stage is executing and if successful the DEPLOY pipeline will follow.
-
-Click on the settings cog and then choose configuration on the BUILD stage and notice the Input and Jobs tabs have been configured from the values input when creating the toolchain.  Check out the DEPLOY stage as well.
-
-
-### Tekton Delivery Pipeline
-Inspect the tabs on the left
-- Definitions: 
-  - Repository: https://github.com/IBM-Cloud/secure-file-storage
-  - Branch: master
-  - Path .tekton
-- Worker: (Beta) IBM Managed workers (Tekton Pipelines v0.11.2) in DALLAS
-- Triggers: git-BUILD-DEPLOY-two-task, BUILD, DEPLOY, ROTATE_STORAGE_CREDENTIALS, ...
-- Environment Properties - stuff copied from the initial toolchain creation.   **Note** Change the service plans as described above if required.
-
-Once the toolchain has completed, the application will be available at `https://secure-file-storage.<your-cluster-ingress-domain>`.  The exact string is displayed in the log of one of the DEPLOY triggers.
 
 Click **Run Pipeline** and choose the triggers: BUILD then DEPLOY.
 
@@ -112,34 +98,6 @@ The toolchain includes a stage/trigger named **UNINSTALL (manual)**. This stage 
    ```
 1. npm start
 
-## Rotate service credentials
-To maintain security you should rotate the service credentials on a regular basis and in security-related events. This could be an employee leaving the team or during or after security incidents.
-
-### AppID credentials
-The AppID service is used to protect access to the application. The service is bound to the cluster ingress for the application's namespace. To update its credentials and the related Kubernetes secret, either run the manual stage in the delivery pipeline or the following command:
-
-```
-TARGET_NAMESPACE=your-app-namespace TARGET_RESOURCE_GROUP=your-resource-group ./scripts/pipeline-ROTATE_APPID_CREDENTIALS.sh
-```
-If not set, **TARGET_NAMESPACE** and **TARGET_RESOURCE_GROUP** are set to **default**.
-
-### Storage credentials
-The application stores files and their metadata in IBM Cloud Object Storage and Cloudant. The service credentials are stored in a single Kubernetes secret. Rotating the secret involves creating new credentials and then use the new keys to recreate the secret. This can be done either by manually invoking the stage in the delivery pipeline or by running the following command:
-
-```
-TARGET_NAMESPACE=your-app-namespace ./scripts/pipeline-ROTATE_STORAGE_CREDENTIALS.sh
-```
-
-If not set, **TARGET_NAMESPACE** is set to **default**.
-
-### Container registry credentials
-The container registry manages the Docker image. Deploying an image from the registry to a Kubernetes cluster typically relies on a **image pull secret** for registry access. To update the registry credentials and the secret, either run the manual stage in the delivery pipeline or the following command:
-
-```
-TARGET_NAMESPACE=your-app-namespace REGISTRY_URL=registry-url ./scripts/pipeline-ROTATE_REGISTRY_CREDENTIALS.sh
-```
-
-If not set, **TARGET_NAMESPACE** is set to **default**. **REGISTRY_URL** needs to be set to the region-specific host name, e.g., `de.icr.io`.
 
 ## License
 
