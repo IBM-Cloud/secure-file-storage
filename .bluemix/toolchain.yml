@@ -50,7 +50,6 @@ services:
           REGISTRY_REGION_ID: '{{form.pipeline.parameters.target-region}}'
           REGISTRY_NAMESPACE: '{{form.pipeline.parameters.registry-namespace}}'
           IMAGE_NAME: '{{form.pipeline.parameters.image-name}}'
-          TARGET_CLUSTER_NAME: '{{form.pipeline.parameters.target-cluster-name}}'
           TARGET_REGION_ID: '{{form.pipeline.parameters.target-region}}'
           SCHEMATICS_WORKSPACE_ID: '{{form.pipeline.parameters.schematics-workspace-id}}'
           TEKTON_CATALOG_REPO: tekton-catalog
@@ -59,7 +58,6 @@ form:
   pipeline:
     parameters:
       image-name: 'secure-file-storage'
-      target-cluster-namespace: secure-file-storage
       branch-name: $env.branch || 'master'
     schema:
       $ref: deploy.json
