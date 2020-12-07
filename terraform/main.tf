@@ -6,7 +6,7 @@ data "ibm_resource_group" "cloud_development" {
 # The name is appended by the target resource group to distinguish
 # between deployment environments
 resource "ibm_iam_service_id" "ServiceID" {
-  name        = "secure-file-storage-serviceID-${var.resource_group}"
+  name        = "${var.basename}-serviceID-${var.resource_group}"
   description = "Service ID for deploying resources"
 
 }
