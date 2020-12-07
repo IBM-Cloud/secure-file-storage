@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 0.12"
+  required_version = ">= 0.13"
   required_providers {
     ibm = {
       source  = "IBM-Cloud/ibm"
-      version = "~>1.14"
+      version = "~>1.16"
     }
     kubernetes = {
       source = "hashicorp/kubernetes"

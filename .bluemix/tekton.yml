@@ -34,8 +34,8 @@ properties:
   type: text
 triggers:
 - eventListener: manual-listener-builddeploy
-  name: manual-listener-builddeploy
+  name: manual-builddeploy
   type: manual
 - eventListener: manual-listener-uninstall
-  name: manual-listener-uninstall
+  name: manual-uninstall
   type: manual

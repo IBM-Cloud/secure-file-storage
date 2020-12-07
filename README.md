@@ -67,26 +67,37 @@ In the dialog configure the git repository and the pipeline:
 **Delivery Pipeline**
 - IBM Cloud API Key: click New+ (do not click Save this key in a secrets store for reuse).  The API key provides the same privileges as your user id and is used during pipeline execution
 - Region: Region matching the toolchain is the default
-- Resource group: choose
-- Image Registry Namespace: secure-file-storage
+- Image Registry Namespace, e.g., secure-file-storage or your username
 - Docker Image name: secure-file-storage default is good
 
 Click **Create**.
 
 
-Click **Run Pipeline** and choose the triggers: BUILD then DEPLOY.
+Click **Run Pipeline** and choose the manual trigger to build and depploy.
 
 ### Uninstall
-The toolchain includes a stage/trigger named **UNINSTALL (manual)**. This stage can only be triggered manually and will remove all resources created by the toolchain (app and services).
+The toolchain includes a trigger to uninstall the app. Click **Run Pipeline** and select that trigger. Thereafter, switch to the [Schematics workspace](https://cloud.ibm.com/schematics/workspaces) and select the action to **Destroy** the resources. As an alternative, you could also select **Delete**. This will offer to only delete the workspace and leave the resources deployed, to delete (destroy) the resources and keep the workspace, or to delete both.
 
 ## Code Structure
+The file for the Infrastructure as Code, the Continuous Delivery pipeline, and the app itself are organized in several directories.
+
+### Terraform
+The [terraform](terraform) directory holds the resource configurations files. They are loaded into the Schematics workspace to provision or destroy the resources.
+
+### Toolchain and pipeline
+
+The directory [.bluemix](.bluemix) holds the toolchain definition including for the setup form. [.tekton](.tekton) has the files to define the pipelines, their tasks and how the pipelines are triggered.
+
+### App
+Located in the [app](app) directory:
 
 | File | Description |
 | ---- | ----------- |
-|[app.js](app.js)|Implementation of the application.|
-|[credentials.template.env](credentials.template.env)|To be copied to `credentials.env` and filled with credentials to access services. `credentials.env` is used when running the app locally and to create a Kubernetes secret before deploying the application to a cluster manually.|
-|[Dockerfile](Dockerfile)|Docker image description file.|
-|[secure-file-storage.template.yaml](secure-file-storage.template.yaml)|Kubernetes deployment file with placeholders. To be copied to `secure-file-storage.yaml` and edited to match your environment.|
+|[app.js](app/app.js)|Implementation of the application.|
+|[app/credentials.template.env](credentials.template.env)|To be copied to `credentials.env` and filled with credentials to access services. `credentials.env` is used when running the app locally and to create a Kubernetes secret before deploying the application to a cluster manually.|
+|[app/Dockerfile](Dockerfile)|Docker image description file.|
+|[app/secure-file-storage.template.yaml](secure-file-storage.template.yaml)|Kubernetes deployment file with placeholders. To be copied to `secure-file-storage.yaml` and edited to match your environment.|
+
 
 ### To test locally
 
