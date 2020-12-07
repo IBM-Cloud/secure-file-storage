@@ -73,8 +73,8 @@ echo "TARGET_USER=$TARGET_USER"
 # Obtain Service ID information
 #
 section "Service ID"
-SERVICE_ID=$BASENAME-serviceID-$TARGET_RESOURCE_GROUP
-#SERVICE_ID=$(ibmcloud iam service-id "$BASENAME-serviceID-$TARGET_RESOURCE_GROUP" --uuid)
+SERVICE_ID_NAME=$BASENAME-serviceID-$TARGET_RESOURCE_GROUP
+SERVICE_ID=$(ibmcloud iam service-id $SERVICE_ID_NAME --uuid)
 #echo "SERVICE_ID=$SERVICE_ID"
 #check_value "$SERVICE_ID"
 
@@ -167,7 +167,7 @@ if check_exists "$(ibmcloud iam service-api-key $BASENAME-serviceID-API-key $SER
   echo "API key already exists, deleting it"
   ibmcloud iam service-api-key-delete $BASENAME-serviceID-API-key $SERVICE_ID -f
 fi
-API_KEY_OUT=$(ibmcloud iam service-api-key-create $BASENAME-serviceID-API-key $SERVICE_ID -d "API key for $BASENAME-serviceID" --force --output json)
+API_KEY_OUT=$(ibmcloud iam service-api-key-create $BASENAME-serviceID-API-key $SERVICE_ID -d "API key for $SERVICE_ID_NAME" --force --output json)
 API_KEY_VALUE=$(echo "$API_KEY_OUT" | jq -r '.apikey')
 
 #

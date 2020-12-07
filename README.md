@@ -19,9 +19,10 @@ This project comes with a partially automated toolchain capable of deploying the
 
 ### Prerequisites
 
-1. Create a **standard** Kubernetes cluster in a VPC (Virtual Private Cloud)
+1. Create a **standard** Kubernetes cluster in a VPC (Virtual Private Cloud).
+2. Have an instance of Continuous Delivery service to be used by the toolchain.
 
-2. Optionally create a specific resource group for this project
+3. Optionally create a specific resource group for this project
 
 
 ### Deploy resources using Terraform managed by Schematics
@@ -53,6 +54,8 @@ Click the following link to create a Tekton-based toolchain in the IBM Cloud Con
 
 [![Create toolchain](https://cloud.ibm.com/devops/graphics/create_toolchain_button.png)](https://cloud.ibm.com/devops/setup/deploy/?repository=https%3A//github.com/IBM-Cloud/secure-file-storage&env_id=ibm:yp:us-south&type=tekton)
 
+Make sure to select the region where your Continuous Delivery service is deployed.
+
 In the dialog configure the git repository and the pipeline:
 
 **GitHub**
@@ -66,7 +69,7 @@ In the dialog configure the git repository and the pipeline:
 
 **Delivery Pipeline**
 - IBM Cloud API Key: click New+ (do not click Save this key in a secrets store for reuse).  The API key provides the same privileges as your user id and is used during pipeline execution
-- Region: Region matching the toolchain is the default
+- Region: Region matching the toolchain is the default, but should be adjusted to where you plan to deploy the app.
 - Image Registry Namespace, e.g., secure-file-storage or your username
 - Docker Image name: secure-file-storage default is good
 
