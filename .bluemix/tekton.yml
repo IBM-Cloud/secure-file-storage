@@ -29,9 +29,6 @@ properties:
 - name: image-name
   value: ${IMAGE_NAME}
   type: text 
-- name: target-resource-group
-  value: ${TARGET_RESOURCE_GROUP}
-  type: text
 - name: target-region
   value: ${TARGET_REGION_ID}
   type: text

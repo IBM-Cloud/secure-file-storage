@@ -68,7 +68,6 @@ spec:
               break
             fi
           done
-          echo "generic=$genericdirs"
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task

@@ -35,17 +35,6 @@
           "params": ["api-key"]
       }
     },
-    "target-resource-group": {
-      "description": {
-        "$ref": "#/messages/deploy.groupDescription"
-      },
-      "type": "string",
-      "pattern": "\\S",
-      "validator": {
-          "v-type": "resource-group",
-          "params": ["api-key"]
-      }
-    },
     "image-name": {
       "description": {
         "$ref": "#/messages/deploy.imageDescription"
@@ -94,7 +83,6 @@
 "required": [
     "api-key",
     "target-region",
-    "target-resource-group",
     "image-name",
     "registry-namespace",
     "schematics-workspace-id"
@@ -119,14 +107,6 @@
       "title": {
         "$ref": "#/messages/region"
       }
-    },
-    {
-      "type": "select",
-      "readonly": false,
-      "title": {
-        "$ref": "#/messages/deploy.groupName"
-      },
-      "key": "target-resource-group"
     },
     {
       "type": "select",
