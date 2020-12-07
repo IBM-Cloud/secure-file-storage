@@ -60,24 +60,6 @@
       },
       "type": "string",
       "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
-    },
-    "target-cluster-name": {
-      "description": {
-        "$ref": "#/messages/deploy.clusterDescription"
-      },
-      "type": "string",
-      "pattern": "\\S",
-      "validator": {
-          "v-type": "k8s-cluster-name",
-          "params": ["target-resource-group", "target-region"]
-      }
-    },
-    "target-cluster-namespace": {
-      "description": {
-        "$ref": "#/messages/deploy.namespaceDescription"
-      },
-      "type": "string",
-      "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
     }
 },
 "required": [
