@@ -75,8 +75,8 @@ echo "TARGET_USER=$TARGET_USER"
 section "Service ID"
 SERVICE_ID_NAME=$BASENAME-serviceID-$TARGET_RESOURCE_GROUP
 SERVICE_ID=$(ibmcloud iam service-id $SERVICE_ID_NAME --uuid)
-#echo "SERVICE_ID=$SERVICE_ID"
-#check_value "$SERVICE_ID"
+echo "SERVICE_ID=$SERVICE_ID"
+check_value "$SERVICE_ID"
 
 #
 # Key Protect
