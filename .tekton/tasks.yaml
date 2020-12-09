@@ -41,6 +41,8 @@ spec:
       args:
         - |
           cd /working
+          echo "going to check for changes in git repository..."
+
           # get the right repo and branch
           if [ -z $GIT_BRANCH ]; then
             git clone -q $GIT_REPO .
@@ -49,25 +51,27 @@ spec:
           fi
           # check for changed directories
           changed_directories=$(git log --format= -n 1 --name-only | grep / | awk 'BEGIN {FS="/"} {print $1}' | uniq)
-          #echo "changed_directories:\n$changed_directories"
+          echo "changed_directories:\n$changed_directories"
           # check if it is toolchain-related
-          echo "toolchain?\n"
-          printf false | tee $(results.is_toolchain.path)
+          echo "Changed toolchain? "
+          CHANGED_TOOLCHAIN=false
           for d in ${toolchaindirs[@]}; do
             if [[ " ${changed_directories[@]} " =~ "${d}" ]]; then
-              printf true | tee $(results.is_toolchain.path)
+              CHANGED_TOOLCHAIN=true
               break
             fi
           done
+          printf $CHANGED_TOOLCHAIN | tee $(results.is_toolchain.path)
           # check if it is app-related
-          echo "app?\n"
-          printf false | tee $(results.is_app.path)
+          echo "Changed app? "
+          CHANGED_APP=false
           for d in ${appdirs[@]}; do
             if [[ " ${changed_directories[@]} " =~ "${d}" ]]; then
-              printf true | tee $(results.is_app.path)
+              CHANGED_APP=true
               break
             fi
           done
+          printf CHANGED_APP | tee $(results.is_app.path)
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
