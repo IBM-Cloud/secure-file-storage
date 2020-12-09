@@ -33,11 +33,11 @@ Either create the Schematics workspace automatically by clicking this ["deploy l
 [Schematics workspace](https://cloud.ibm.com/schematics/workspaces). Or set it up manually by going to the [Schematics workspaces](https://cloud.ibm.com/schematics/workspaces) and using https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform as source respository including path and Terraform v0.13 as runtime.
 
 Configure all required variables:
-- **region** where the resources will be deployed. It should the location of the Kubernetes cluster: us-south, eu-de, ...
-- **iks_cluster_name**: name of your existing (VPC-based) Kubernetes cluster
-- **iks_namespace**: Kubernetes namespace into which to deploy the app
-- **resource_group**: the IBM Cloud resource group where to deploy the services to
 - **basename**: project basename which is used as prefix for names, e.g., secure-file-storage
+- **region** is where the resources will be deployed and the location of the existing Kubernetes cluster: us-south, eu-de, ...
+- **iks_cluster_name**: name of your existing (VPC-based) Kubernetes cluster
+- **iks_namespace**: Kubernetes namespace into which to deploy the app. It will be created if it does not exist.
+- **resource_group** is the name of the IBM Cloud resource group where to deploy the services into.
 
 Be sure to click "**Save**".
 
