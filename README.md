@@ -25,6 +25,8 @@ This project comes with a partially automated toolchain capable of deploying the
 3. Optionally create a specific resource group for this project
 
 
+Please note that the Kubernetes cluster and the resources deployed via Terraform / Schematics have to be in the same region and resource group. The app is deployed to the Kubernetes cluster and hence in the same region and resource group, too.
+
 ### Deploy resources using Terraform managed by Schematics
 
 Either create the Schematics workspace automatically by clicking this ["deploy link"](https://cloud.ibm.com/schematics/workspaces/create?repository=https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform&terraform_version=terraform_v0.13)
@@ -45,7 +47,7 @@ Next, optionally click "**Generate plan**" to verify everything would be working
 - Cloudant NoSQL database
 - Key Protect
 
-**Note:** If the deployment fails with an error like *The account already has an instance created with the Lite plan*, configure the plan settings in the file [terraform/main.tf](terraform/main.tf). Use `standard` for COS,  `graduated-tier` for App ID or `standard` for Cloudant. 
+**Note:** By default, services are provisioned with service plans that should work in typical accounts. It means that paid plans are used. If you want to change to lite plans, you may configure different plans by changing values for variables like **cos_plan**, **appid_plan**, etc.
 
 
 ### Deploy the app using Tekton

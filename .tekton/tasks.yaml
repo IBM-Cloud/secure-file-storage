@@ -51,7 +51,7 @@ spec:
           fi
           # check for changed directories
           changed_directories=$(git log --format= -n 1 --name-only | grep / | awk 'BEGIN {FS="/"} {print $1}' | uniq)
-          echo "changed_directories:\n$changed_directories"
+          echo "changed_directories: $changed_directories"
           # check if it is toolchain-related
           echo "Changed toolchain? "
           CHANGED_TOOLCHAIN=false
@@ -63,6 +63,7 @@ spec:
           done
           printf $CHANGED_TOOLCHAIN | tee $(results.is_toolchain.path)
           # check if it is app-related
+          echo
           echo "Changed app? "
           CHANGED_APP=false
           for d in ${appdirs[@]}; do
@@ -71,7 +72,7 @@ spec:
               break
             fi
           done
-          printf CHANGED_APP | tee $(results.is_app.path)
+          printf $CHANGED_APP | tee $(results.is_app.path)
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task

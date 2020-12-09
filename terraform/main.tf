@@ -14,7 +14,7 @@ resource "ibm_iam_service_id" "ServiceID" {
 resource "ibm_resource_instance" "app_id" {
   name              = "${var.basename}-appid"
   service           = "appid"
-  plan              = "graduated-tier"
+  plan              = "${var.appid_plan}"
   location          = var.region
   resource_group_id = data.ibm_resource_group.cloud_development.id
   service_endpoints = "private"
@@ -23,7 +23,7 @@ resource "ibm_resource_instance" "app_id" {
 resource "ibm_resource_instance" "cloudant" {
   name              = "${var.basename}-cloudant"
   service           = "cloudantnosqldb"
-  plan              = "lite"
+  plan              = "${var.cloudant_plan}"
   location          = var.region
   resource_group_id = data.ibm_resource_group.cloud_development.id
   service_endpoints = "private"
@@ -32,7 +32,7 @@ resource "ibm_resource_instance" "cloudant" {
 resource "ibm_resource_instance" "keyprotect" {
   name              = "${var.basename}-kms"
   service           = "kms"
-  plan              = "tiered-pricing"
+  plan              = "${var.kp_plan}"
   location          = var.region
   resource_group_id = data.ibm_resource_group.cloud_development.id
   service_endpoints = "private"
@@ -41,7 +41,7 @@ resource "ibm_resource_instance" "keyprotect" {
 resource "ibm_resource_instance" "cos" {
   name              = "${var.basename}-cos"
   service           = "cloud-object-storage"
-  plan              = "standard"
+  plan              = "${var.cos_plan}"
   location          = "global"
   resource_group_id = data.ibm_resource_group.cloud_development.id
 }
