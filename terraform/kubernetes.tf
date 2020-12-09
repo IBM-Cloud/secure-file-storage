@@ -12,6 +12,13 @@ resource "ibm_container_bind_service" "bind_appid" {
   namespace_id          = kubernetes_namespace.namespace.metadata.0.name
 }
 
+resource "ibm_container_addons" "addons" {
+  cluster = data.ibm_container_vpc_cluster.cluster.name
+  addons {
+    name    = "alb-oauth-proxy"
+    version = "1.0.0"
+  }
+}
 
 # Download the cluster configuration...
 data "ibm_container_cluster_config" "mycluster" {
