@@ -93,6 +93,14 @@ The [terraform](terraform) directory holds the resource configurations files. Th
 
 The directory [.bluemix](.bluemix) holds the toolchain definition including for the setup form. [.tekton](.tekton) has the files to define the pipelines, their tasks and how the pipelines are triggered.
 
+The file [.tekton/pipelines.yaml](.tekton/pipelines.yaml) defines two pipelines, one for the build & deploy process, one to uninstall the app. The "build & deploy" pipeline has three tasks:
+1. **git-repo-changes** clones the source repository and checks for code changes to the toolchain and app.
+2. **build** uses the task [icr-containerize](https://github.com/open-toolchain/tekton-catalog/blob/master/container-registry/README.md#icr-containerize) from the Open Toolchain Tekton Catalog to build the Docker image.
+3. **deploy-to-kubernetes** deploys the Docker image to the Kubernetes cluster and configures the app.
+
+Note that the pipeline definition includes an inactive check to only build and deploy the app if there were app-related changes. Uncomment that section in the source code to enable the check.
+
+
 ### App
 Located in the [app](app) directory:
 

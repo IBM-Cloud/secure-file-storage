@@ -49,26 +49,29 @@ spec:
           else
             git clone -q -b $GIT_BRANCH $GIT_REPO .
           fi
+
           # check for changed directories
           changed_directories=$(git log --format= -n 1 --name-only | grep / | awk 'BEGIN {FS="/"} {print $1}' | uniq)
           echo "changed_directories: $changed_directories"
+          
           # check if it is toolchain-related
           echo "Changed toolchain? "
           CHANGED_TOOLCHAIN=false
           for d in ${toolchaindirs[@]}; do
             if [[ " ${changed_directories[@]} " =~ "${d}" ]]; then
-              CHANGED_TOOLCHAIN=true
+              export CHANGED_TOOLCHAIN=true
               break
             fi
           done
           printf $CHANGED_TOOLCHAIN | tee $(results.is_toolchain.path)
+          
           # check if it is app-related
           echo
           echo "Changed app? "
           CHANGED_APP=false
           for d in ${appdirs[@]}; do
             if [[ " ${changed_directories[@]} " =~ "${d}" ]]; then
-              CHANGED_APP=true
+              export CHANGED_APP=true
               break
             fi
           done
