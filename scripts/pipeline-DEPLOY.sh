@@ -216,7 +216,7 @@ fi
 
 # we need to create an Ingress secret if deploying to non-default namespace
 if [ "$TARGET_NAMESPACE" != "default" ]; then
-  INGRESS_SECRET_IN_NAMESPACE=$(ibmcloud ks ingress secret ls -c $PIPELINE_KUBERNETES_CLUSTER_NAME --output json | jq -r '.[] | select(.namespace=="'$TARGET_NAMESPACE'").name')
+  INGRESS_SECRET_IN_NAMESPACE=$(ibmcloud ks ingress secret ls -c $PIPELINE_KUBERNETES_CLUSTER_NAME --output json | jq -r '.[] | select(.namespace=="'$TARGET_NAMESPACE'" and .name=="'$INGRESS_SECRET'").name')
   if [ "$INGRESS_SECRET" == "$INGRESS_SECRET_IN_NAMESPACE" ] ; then
     echo "copied Ingress secret exists"
   else
