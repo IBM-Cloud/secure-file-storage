@@ -1,3 +1,5 @@
+An older code version for this tutorial can be found in the branch [archive_classic_tekton](https://github.com/IBM-Cloud/secure-file-storage/tree/archive_classic_tekton).
+
 # Apply end to end security to a cloud application
 
 The repository features a sample application that enables groups of users to upload files to a common storage pool and to provide access to those files via shareable links. The application is written in Node.js and deployed as Docker container to the IBM Cloud Kubernetes service. It leverages several security-related services and features to improve app security. It includes data encrypted with your own keys, user authentication, and security auditing.
