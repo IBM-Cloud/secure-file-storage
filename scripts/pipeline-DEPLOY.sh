@@ -50,7 +50,7 @@ export REGISTRY_URL=$(echo $IMAGE_REPOSITORY |  awk -F/ '{print $1}')
 echo "REGISTRY_URL=$REGISTRY_URL"
 
 #
-CLUSTER_INFO=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --json)
+CLUSTER_INFO=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --output json)
 
 # download and set cluster context
 ibmcloud ks cluster config --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME
@@ -200,7 +200,7 @@ curl -X PUT \
   --header 'Content-Type: application/json' \
   --header 'Accept: application/json' \
   --header "Authorization: Bearer $APPID_ACCESS_TOKEN" \
-  -d '{ "redirectUris": [ "https://secure-file-storage.'$INGRESS_SUBDOMAIN'/appid_callback" ] }' \
+  -d '{ "redirectUris": [ "https://secure-file-storage.'$INGRESS_SUBDOMAIN'/oauth2-'$BASENAME'-appid/callback" ] }' \
   $APPID_MANAGEMENT_URL/config/redirect_uris
 
 #
@@ -212,6 +212,18 @@ if [ -z ${VPC} ]; then
   INGRESS_SECRET=$(echo $CLUSTER_INFO | jq -r 'select(.ingressSecretName) | .ingressSecretName')
 else
   INGRESS_SECRET=$(echo $CLUSTER_INFO | jq -r 'select(.ingress.secretName) | .ingress.secretName')
+fi
+
+# we need to create an Ingress secret if deploying to non-default namespace
+if [ "$TARGET_NAMESPACE" != "default" ]; then
+  INGRESS_SECRET_IN_NAMESPACE=$(ibmcloud ks ingress secret ls -c $PIPELINE_KUBERNETES_CLUSTER_NAME --output json | jq -r '.[] | select(.namespace=="'$TARGET_NAMESPACE'" and .name=="'$INGRESS_SECRET'").name')
+  if [ "$INGRESS_SECRET" == "$INGRESS_SECRET_IN_NAMESPACE" ] ; then
+    echo "copied Ingress secret exists"
+  else
+    echo "copying Ingress secret to namespace $TARGET_NAMESPACE"
+    INGRESS_SECRET_CRN=$(ibmcloud ks ingress secret get -c $PIPELINE_KUBERNETES_CLUSTER_NAME -n default --name $INGRESS_SECRET --output json | jq -r .crn)
+    ibmcloud ks ingress secret create -c $PIPELINE_KUBERNETES_CLUSTER_NAME -n $TARGET_NAMESPACE --name $INGRESS_SECRET --cert-crn $INGRESS_SECRET_CRN
+  fi
 fi
 echo "INGRESS_SECRET=${INGRESS_SECRET}"
 check_value "$INGRESS_SECRET"
@@ -288,7 +300,7 @@ cat secure-file-storage.yaml | \
   IMAGE_REPOSITORY=$IMAGE_REPOSITORY \
   TARGET_NAMESPACE=$TARGET_NAMESPACE \
   BASENAME=$BASENAME \
-  envsubst \
+  envsubst '$IMAGE_NAME $INGRESS_SECRET $INGRESS_SUBDOMAIN $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' \
   | \
   kubectl apply --namespace $TARGET_NAMESPACE -f - || exit 1
 

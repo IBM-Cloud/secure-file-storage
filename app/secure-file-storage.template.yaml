@@ -38,33 +38,33 @@ spec:
         envFrom:
          - secretRef:
             name: $BASENAME-credentials
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: ingress-for-secure-file-storage
-  annotations:
-    # protect the service with App ID
-    ingress.bluemix.net/appid-auth: "bindSecret=binding-$BASENAME-appid namespace=$TARGET_NAMESPACE requestType=web serviceName=secure-file-storage-service"
-    # increase max upload size
-    ingress.bluemix.net/client-max-body-size: "50m"
-spec:
-  tls:
-  - hosts:
-    - secure-file-storage.$INGRESS_SUBDOMAIN
-    secretName: $INGRESS_SECRET
-# Uncomment below if you are using a custom domain
-#  - hosts:
-#    - secure-file-storage.<your custom domain>
-#    secretName: secure-file-storage-certificate
-  rules:
-  - host: secure-file-storage.$INGRESS_SUBDOMAIN
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: secure-file-storage-service
-          servicePort: 8081
+# ---
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   name: ingress-for-secure-file-storage
+#   annotations:
+#     # protect the service with App ID
+#     ingress.bluemix.net/appid-auth: "bindSecret=binding-$BASENAME-appid namespace=$TARGET_NAMESPACE requestType=web serviceName=secure-file-storage-service"
+#     # increase max upload size
+#     ingress.bluemix.net/client-max-body-size: "50m"
+# spec:
+#   tls:
+#   - hosts:
+#     - secure-file-storage.$INGRESS_SUBDOMAIN
+#     secretName: $INGRESS_SECRET
+# # Uncomment below if you are using a custom domain
+# #  - hosts:
+# #    - secure-file-storage.<your custom domain>
+# #    secretName: secure-file-storage-certificate
+#   rules:
+#   - host: secure-file-storage.$INGRESS_SUBDOMAIN
+#     http:
+#       paths:
+#       - path: /
+#         backend:
+#           serviceName: secure-file-storage-service
+#           servicePort: 8081
 # Uncomment below if you are using a custom domain
 #  - host: secure-file-storage.<your custom domain>
 #    http:
@@ -73,3 +73,36 @@ spec:
 #        backend:
 #          serviceName: secure-file-storage-service
 #          servicePort: 8081
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-for-secure-file-storage
+  annotations:
+    kubernetes.io/ingress.class: "public-iks-k8s-nginx"
+    nginx.ingress.kubernetes.io/auth-url: https://$host/oauth2-$BASENAME-appid/auth
+    nginx.ingress.kubernetes.io/auth-signin: https://$host/oauth2-$BASENAME-appid/start?rd=$escaped_request_uri
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      auth_request_set $access_token $upstream_http_x_auth_request_access_token;
+      auth_request_set $id_token $upstream_http_authorization;
+      access_by_lua_block {
+        if ngx.var.id_token ~= "" and ngx.var.access_token ~= "" then
+          ngx.req.set_header("Authorization", "Bearer " .. ngx.var.access_token .. " " .. ngx.var.id_token:match("%s*Bearer%s*(.*)"))
+        end
+      }
+spec:
+  tls:
+  - hosts:
+    - secure-file-storage.$INGRESS_SUBDOMAIN
+    secretName: $INGRESS_SECRET
+  rules:
+  - host: secure-file-storage.$INGRESS_SUBDOMAIN
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: secure-file-storage-service
+            port: 
+              number: 8081
