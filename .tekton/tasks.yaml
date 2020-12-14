@@ -1,0 +1,175 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: detect-change-task
+spec:
+  results:
+    - name: is_app
+      description: changed files belong to app
+    - name: is_toolchain
+      description: changed files belong to toolchain
+  workspaces:
+    - name: task-workspace
+      mountPath: /working
+  params:
+    - name: toolchain-dirs
+    - name: app-dirs
+    - name: generic-dirs
+    - name: git-repository
+    - name: git-branch
+  steps:
+    - name: execute-script
+      image: ibmcom/pipeline-base-image:2.9
+      envFrom:
+        - configMapRef:
+            name: environment-properties
+        - secretRef:
+            name: secure-properties
+      env:
+        - name: toolchaindirs
+          value: $(params.toolchain-dirs)
+        - name: appdirs
+          value: $(params.app-dirs)
+        - name: genericdirs
+          value: $(params.generic-dirs)
+        - name: GIT_BRANCH
+          value: $(params.git-branch)
+        - name: GIT_REPO
+          value: $(params.git-repository)
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          cd /working
+          echo "going to check for changes in git repository..."
+
+          # get the right repo and branch
+          if [ -z $GIT_BRANCH ]; then
+            git clone -q $GIT_REPO .
+          else
+            git clone -q -b $GIT_BRANCH $GIT_REPO .
+          fi
+
+          # check for changed directories
+          changed_directories=$(git log --format= -n 1 --name-only | grep / | awk 'BEGIN {FS="/"} {print $1}' | uniq)
+          echo "changed_directories: $changed_directories"
+          
+          # check if it is toolchain-related
+          echo "Changed toolchain? "
+          CHANGED_TOOLCHAIN=false
+          for d in ${toolchaindirs[@]}; do
+            if [[ " ${changed_directories[@]} " =~ "${d}" ]]; then
+              export CHANGED_TOOLCHAIN=true
+              break
+            fi
+          done
+          printf $CHANGED_TOOLCHAIN | tee $(results.is_toolchain.path)
+          
+          # check if it is app-related
+          echo
+          echo "Changed app? "
+          CHANGED_APP=false
+          for d in ${appdirs[@]}; do
+            if [[ " ${changed_directories[@]} " =~ "${d}" ]]; then
+              export CHANGED_APP=true
+              break
+            fi
+          done
+          printf $CHANGED_APP | tee $(results.is_app.path)
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: deploy-app
+spec:
+  workspaces:
+    - name: task-workspace
+      mountPath: /working
+  params:
+    - name: schematics-workspace-id
+    - name: target-region
+    - name: image-repository
+  steps:
+    - name: execute-script
+      image: ibmcom/pipeline-base-image:2.9
+      envFrom:
+        - configMapRef:
+            name: environment-properties
+        - secretRef:
+            name: secure-properties
+      env:
+      - name: SCHEMATICS_WORKSPACE_NAME
+        value: $(params.schematics-workspace-id)
+      - name: REGION
+        value: $(params.target-region)
+      - name: IMAGE_REPOSITORY
+        value: $(params.image-repository)
+      - name: PIPELINE_APIKEY
+        valueFrom:
+          secretKeyRef:
+            name: secure-properties
+            key: apikey
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          cd /working
+          # if REGION is in the format 'ibm:yp:<region>' just keep the region part
+          export REGION=$(echo $REGION | awk -F ':' '{print $NF;}')
+          ibmcloud login -a cloud.ibm.com -r $REGION --apikey $PIPELINE_APIKEY
+          source ./scripts/pipeline-DEPLOY.sh
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: task-uninstall-app
+spec:
+  workspaces:
+    - name: task-workspace
+      mountPath: /working
+  params:
+    - name: schematics-workspace-id
+    - name: target-region
+    - name: git-repository
+    - name: git-branch
+    - name: registry-namespace
+    - name: image-name
+  steps:
+    - name: execute-script
+      image: ibmcom/pipeline-base-image:2.9
+      envFrom:
+        - configMapRef:
+            name: environment-properties
+        - secretRef:
+            name: secure-properties
+      env:
+      - name: SCHEMATICS_WORKSPACE_NAME
+        value: $(params.schematics-workspace-id)
+      - name: REGION
+        value: $(params.target-region)
+      - name: GIT_BRANCH
+        value: $(params.git-branch)
+      - name: GIT_REPO
+        value: $(params.git-repository)
+      - name: IMAGE_NAME
+        value: $(params.image-name)
+      - name: REGISTRY_NAMESPACE
+        value: $(params.registry-namespace)
+      - name: PIPELINE_APIKEY
+        valueFrom:
+          secretKeyRef:
+            name: secure-properties
+            key: apikey
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          cd /working
+          # get the right repo and branch
+          if [ -z $GIT_BRANCH ]; then
+            git clone -q $GIT_REPO .
+          else
+            git clone -q -b $GIT_BRANCH $GIT_REPO .
+          fi
+          # if REGION is in the format 'ibm:yp:<region>' just keep the region part
+          export REGION=$(echo $REGION | awk -F ':' '{print $NF;}')
+          ibmcloud login -a cloud.ibm.com -r $REGION --apikey $PIPELINE_APIKEY
+          source ./scripts/pipeline-UNINSTALL.sh

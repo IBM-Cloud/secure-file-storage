@@ -1,78 +1,72 @@
 #!/bin/bash
 source ./scripts/pipeline-HELPER.sh
 
-ibmcloud target -g $TARGET_RESOURCE_GROUP || exit 1
+# fail script on error
+set -e
+
+# change into the app directory which contains the configuration file
+cd app
 
 if [ -z "$REGION" ]; then
   export REGION=$(ibmcloud target | grep Region | awk '{print $2}')
 fi
 echo "REGION=$REGION"
 
-#
-# The user running the script will be used to name some resources
-#
-TARGET_JSON=$(ibmcloud target --output json)
-TARGET_USER=$(echo $TARGET_JSON | jq -r '.user.user_email')
-if [ -z "$TARGET_USER" ]; then
-  TARGET_USER=$(echo $TARGET_JSON | jq -r '.user.display_name')
-fi
-check_value "$TARGET_USER"
-echo "TARGET_USER=$TARGET_USER"
+# Get the workspace information
+WORKSPACE_INFO=$(ibmcloud schematics workspace get --id $SCHEMATICS_WORKSPACE_NAME --output json)
+
+# extract basename
+BASENAME=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="basename").value')
+echo BASENAME=$BASENAME
+
+# Extract required information from workspace JSON
+# resource group
+TARGET_RESOURCE_GROUP=$(echo $WORKSPACE_INFO | jq -r '.resource_group')
+echo TARGET_RESOURCE_GROUP=$TARGET_RESOURCE_GROUP
+
+ibmcloud target -g $TARGET_RESOURCE_GROUP || exit 1
+
+# Name of Kubernetes cluster
+PIPELINE_KUBERNETES_CLUSTER_NAME=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="iks_cluster_name").value')
+echo PIPELINE_KUBERNETES_CLUSTER_NAME=$PIPELINE_KUBERNETES_CLUSTER_NAME
+
+# deployment namespace in cluster
+TARGET_NAMESPACE=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="iks_namespace").value')
+echo TARGET_NAMESPACE=$TARGET_NAMESPACE
+
+# remove App ID binding to Kubernetes cluster
+# GUID=$(get_guid secure-file-storage-appid)
+# echo GUID=$GUID
+
+# download and set cluster context
+echo "getting cluster config"
+ibmcloud ks cluster config --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME
+
+# this should be done by TF as it is not really app-related
+# echo "unbindng appid"
+# ibmcloud ks cluster service unbind \
+#   --cluster "$PIPELINE_KUBERNETES_CLUSTER_NAME" \
+#   --namespace "$TARGET_NAMESPACE" \
+#   --service "$GUID"
 
 #
 # Kubernetes
 #
 section "Kubernetes"
 kubectl delete --namespace $TARGET_NAMESPACE -f secure-file-storage.template.yaml
-kubectl delete --namespace $TARGET_NAMESPACE secret secure-file-storage-docker-registry
-kubectl delete --namespace $TARGET_NAMESPACE secret secure-file-storage-credentials
+kubectl delete --namespace $TARGET_NAMESPACE secret $BASENAME-docker-registry
+kubectl delete --namespace $TARGET_NAMESPACE secret $BASENAME-credentials
 
 #
 # Docker image
 #
+REGISTRY_URL=$(ibmcloud cr info | grep -m1 -i '^Container Registry' | awk '{print $3;}')
+IMAGE_URL="${REGISTRY_URL}/${REGISTRY_NAMESPACE}/${IMAGE_NAME}"
+
 ibmcloud cr image-rm $IMAGE_URL
 
 #
 # Services
 #
-section "App ID"
-GUID=$(get_guid secure-file-storage-appid)
-ibmcloud ks cluster service unbind \
-  --cluster "$PIPELINE_KUBERNETES_CLUSTER_NAME" \
-  --namespace "$TARGET_NAMESPACE" \
-  --service "$GUID"
-ibmcloud resource service-instance-delete -f --recursive secure-file-storage-appid
 
-section "Cloud Object Storage"
-ibmcloud resource service-instance-delete -f --recursive secure-file-storage-cos
-
-section "Cloudant"
-ibmcloud resource service-instance-delete -f --recursive secure-file-storage-cloudant
-
-section "Key Protect"
-KP_GUID=$(get_guid secure-file-storage-kms)
-echo "KP_GUID=$KP_GUID"
-KP_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-kms-acckey-$KP_GUID)
-echo "KP_CREDENTIALS=$KP_CREDENTIALS"
-KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ print $2 }')
-echo "KP_IAM_APIKEY=$KP_IAM_APIKEY"
-KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
-echo "KP_ACCESS_TOKEN=$KP_ACCESS_TOKEN"
-KP_MANAGEMENT_URL="https://keyprotect.$REGION.bluemix.net/api/v2/keys"
-
-# Delete root key
-KP_KEYS=$(curl -s $KP_MANAGEMENT_URL \
-  --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-  --header "Bluemix-Instance: $KP_GUID")
-KP_COS_KEY_ID=$(echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="secure-file-storage-root-enckey") | .id')
-curl -v -X DELETE \
-  "$KP_MANAGEMENT_URL/$KP_COS_KEY_ID" \
-  -H "Authorization: Bearer $KP_ACCESS_TOKEN" \
-  -H "Bluemix-Instance: $KP_GUID" \
-  -H "Accept: application/vnd.ibm.kms.key+json"
-
-# And the service
-ibmcloud resource service-instance-delete -f --recursive secure-file-storage-kms
-
-section "Service ID"
-ibmcloud iam service-id-delete -f "secure-file-storage-serviceID-$TARGET_USER"
+section "services to be removed using Schematics / terraform"

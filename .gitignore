@@ -1,5 +1,6 @@
-/*.env
+/app/*.env
 /.env
+/app/.env
 node_modules
 artifacts
 
@@ -10,7 +11,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 local_yaml
-secure-file-storage.yaml
+/app/secure-file-storage.yaml
+
+# Terraform
+*.tfvars
+.terraform
+*.tfstate*
 
 #vim swap files
 [._]*.sw[a-p]
