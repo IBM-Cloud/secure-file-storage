@@ -67,6 +67,20 @@ spec:
        outputs:
         - name: built-image
           resource: app-image
+  - name: va-scan
+    taskRef:
+       name: icr-check-va-scan
+    runAfter: [build]
+    params:
+    - name: scan-report-file
+      value: "secure-file-storage-va-report.json"
+    - name: image-url
+      value: $(tasks.build.results.image-repository)
+    - name: image-digest
+      value: $(tasks.build.results.image-digest)
+    workspaces:
+    - name: artifacts
+      workspace: pipeline-ws
   - name: deploy-to-kubernetes
     taskRef:
       name: deploy-app
