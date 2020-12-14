@@ -80,6 +80,7 @@ resource "ibm_cos_bucket" "cosbucket" {
   region_location      = var.region
   key_protect          = ibm_kp_key.rootkey.crn
   storage_class        = "standard"
+  force_delete         = true
 }
 
 # service access key for COS
@@ -90,20 +91,20 @@ resource "ibm_resource_key" "RKcos" {
   parameters           = { HMAC = true }
 }
 
-# special null resource to empty the bucket in order to delete it
-resource null_resource delete_cos_objects {
-  triggers = {
-    ACCESS_KEY             = ibm_resource_key.RKcos.credentials["cos_hmac_keys.access_key_id"]
-    SECRET_ACCESS_KEY      = ibm_resource_key.RKcos.credentials["cos_hmac_keys.secret_access_key"]
-    COS_REGION             = var.region
-    COS_BUCKET_NAME        = ibm_cos_bucket.cosbucket.bucket_name
-  }
-  provisioner "local-exec" {
-    when = destroy
-    command = "./delete-cos-objects.sh ${self.triggers.COS_REGION} ${self.triggers.ACCESS_KEY} ${self.triggers.SECRET_ACCESS_KEY} ${self.triggers.COS_BUCKET_NAME} || true"
-  }
-  depends_on = [ibm_resource_key.RKcos,ibm_cos_bucket.cosbucket]
-}
+# # special null resource to empty the bucket in order to delete it
+# resource null_resource delete_cos_objects {
+#   triggers = {
+#     ACCESS_KEY             = ibm_resource_key.RKcos.credentials["cos_hmac_keys.access_key_id"]
+#     SECRET_ACCESS_KEY      = ibm_resource_key.RKcos.credentials["cos_hmac_keys.secret_access_key"]
+#     COS_REGION             = var.region
+#     COS_BUCKET_NAME        = ibm_cos_bucket.cosbucket.bucket_name
+#   }
+#   provisioner "local-exec" {
+#     when = destroy
+#     command = "./delete-cos-objects.sh ${self.triggers.COS_REGION} ${self.triggers.ACCESS_KEY} ${self.triggers.SECRET_ACCESS_KEY} ${self.triggers.COS_BUCKET_NAME} || true"
+#   }
+#   depends_on = [ibm_resource_key.RKcos,ibm_cos_bucket.cosbucket]
+# }
 
 # service access key for Cloudant with Writer privilege for app usage
 resource "ibm_resource_key" "RKcloudant" {
