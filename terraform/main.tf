@@ -80,6 +80,7 @@ resource "ibm_cos_bucket" "cosbucket" {
   region_location      = var.region
   key_protect          = ibm_kp_key.rootkey.crn
   storage_class        = "standard"
+  force_delete         = true
 }
 
 # service access key for COS
