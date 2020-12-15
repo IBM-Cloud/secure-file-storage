@@ -27,22 +27,34 @@ WORKSPACE_INFO=$(ibmcloud schematics workspace get --id $SCHEMATICS_WORKSPACE_NA
 
 # Extract required information from workspace JSON
 # resource group
-TARGET_RESOURCE_GROUP=$(echo $WORKSPACE_INFO | jq -r '.resource_group')
+TARGET_RESOURCE_GROUP=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="resource_group").value')
+if [ -z "$TARGET_RESOURCE_GROUP" ]; then
+  export TARGET_RESOURCE_GROUP=$(echo $WORKSPACE_INFO | jq -r '.template_data | .[].values_metadata[] | select(.name=="resource_group").default'
+fi
 echo TARGET_RESOURCE_GROUP=$TARGET_RESOURCE_GROUP
 # set it
 ibmcloud target -g $TARGET_RESOURCE_GROUP || exit 1
 
 # extract basename
 BASENAME=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="basename").value')
+if [ -z "$BASENAME" ]; then
+  export BASENAME=$(echo $WORKSPACE_INFO | jq -r '.template_data | .[].values_metadata[] | select(.name=="basename").default'
+fi
 echo BASENAME=$BASENAME
 
 
 # Name of Kubernetes cluster
 PIPELINE_KUBERNETES_CLUSTER_NAME=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="iks_cluster_name").value')
+if [ -z "$PIPELINE_KUBERNETES_CLUSTER_NAME" ]; then
+  export PIPELINE_KUBERNETES_CLUSTER_NAME=$(echo $WORKSPACE_INFO | jq -r '.template_data | .[].values_metadata[] | select(.name=="iks_cluster_name").default'
+fi
 echo PIPELINE_KUBERNETES_CLUSTER_NAME=$PIPELINE_KUBERNETES_CLUSTER_NAME
 
 # deployment namespace in cluster
 TARGET_NAMESPACE=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="iks_namespace").value')
+if [ -z "$TARGET_NAMESPACE" ]; then
+  export TARGET_NAMESPACE=$(echo $WORKSPACE_INFO | jq -r '.template_data | .[].values_metadata[] | select(.name=="iks_namespace").default'
+fi
 echo TARGET_NAMESPACE=$TARGET_NAMESPACE
 
 echo "IMAGE_REPOSITORY=$IMAGE_REPOSITORY"

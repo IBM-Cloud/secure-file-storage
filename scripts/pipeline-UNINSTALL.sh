@@ -15,8 +15,11 @@ echo "REGION=$REGION"
 # Get the workspace information
 WORKSPACE_INFO=$(ibmcloud schematics workspace get --id $SCHEMATICS_WORKSPACE_NAME --output json)
 
-# extract basename
+# extract basename, try set values first, then defaults if not set
 BASENAME=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="basename").value')
+if [ -z "$BASENAME" ]; then
+  export BASENAME=$(echo $WORKSPACE_INFO | jq -r '.template_data | .[].values_metadata[] | select(.name=="basename").default'
+fi
 echo BASENAME=$BASENAME
 
 # Extract required information from workspace JSON
@@ -28,15 +31,17 @@ ibmcloud target -g $TARGET_RESOURCE_GROUP || exit 1
 
 # Name of Kubernetes cluster
 PIPELINE_KUBERNETES_CLUSTER_NAME=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="iks_cluster_name").value')
+if [ -z "$PIPELINE_KUBERNETES_CLUSTER_NAME" ]; then
+  export PIPELINE_KUBERNETES_CLUSTER_NAME=$(echo $WORKSPACE_INFO | jq -r '.template_data | .[].values_metadata[] | select(.name=="iks_cluster_name").default'
+fi
 echo PIPELINE_KUBERNETES_CLUSTER_NAME=$PIPELINE_KUBERNETES_CLUSTER_NAME
 
 # deployment namespace in cluster
 TARGET_NAMESPACE=$(echo $WORKSPACE_INFO | jq -r '.template_data[].variablestore[] | select(.name=="iks_namespace").value')
+if [ -z "$TARGET_NAMESPACE" ]; then
+  export TARGET_NAMESPACE=$(echo $WORKSPACE_INFO | jq -r '.template_data | .[].values_metadata[] | select(.name=="iks_namespace").default'
+fi
 echo TARGET_NAMESPACE=$TARGET_NAMESPACE
-
-# remove App ID binding to Kubernetes cluster
-# GUID=$(get_guid secure-file-storage-appid)
-# echo GUID=$GUID
 
 # download and set cluster context
 echo "getting cluster config"
