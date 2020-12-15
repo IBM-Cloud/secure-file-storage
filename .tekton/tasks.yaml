@@ -55,7 +55,7 @@ spec:
           echo "changed_directories: $changed_directories"
           
           # check if it is toolchain-related
-          echo "Changed toolchain? "
+          echo -e "\nChanged toolchain sources? "
           CHANGED_TOOLCHAIN=false
           for d in ${toolchaindirs[@]}; do
             if [[ " ${changed_directories[@]} " =~ "${d}" ]]; then
@@ -66,8 +66,7 @@ spec:
           printf $CHANGED_TOOLCHAIN | tee $(results.is_toolchain.path)
           
           # check if it is app-related
-          echo
-          echo "Changed app? "
+          echo -e "\n\nChanged app sources? "
           CHANGED_APP=false
           for d in ${appdirs[@]}; do
             if [[ " ${changed_directories[@]} " =~ "${d}" ]]; then

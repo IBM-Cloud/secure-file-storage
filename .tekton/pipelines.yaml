@@ -84,7 +84,7 @@ spec:
   - name: deploy-to-kubernetes
     taskRef:
       name: deploy-app
-    runAfter: [build]
+    runAfter: [va-scan]
     workspaces:
     - name: task-workspace
       workspace: pipeline-ws
