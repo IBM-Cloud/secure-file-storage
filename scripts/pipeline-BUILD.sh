@@ -8,6 +8,8 @@ echo "BUILD_NUMBER=${BUILD_NUMBER}"
 echo "ARCHIVE_DIR=${ARCHIVE_DIR}"
 
 IMAGE_URL=$REGISTRY_URL/$REGISTRY_NAMESPACE/$IMAGE_NAME
+# change into the app directory
+cd app
 ibmcloud cr build -t $IMAGE_URL:latest .
 
 mkdir -p $ARCHIVE_DIR
