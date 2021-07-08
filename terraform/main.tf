@@ -13,11 +13,11 @@ resource "ibm_iam_service_id" "ServiceID" {
 
 resource "ibm_iam_service_policy" "registry-policy" {
   iam_service_id = ibm_iam_service_id.ServiceID.id
-  roles        = ["Reader"]
+  roles          = ["Reader"]
 
   resources {
     service = "container-registry"
-    region = var.region
+    region  = var.region
   }
 }
 
@@ -67,7 +67,14 @@ resource "ibm_kp_key" "rootkey" {
 
 resource "ibm_iam_authorization_policy" "COSKMSpolicy" {
   source_service_name         = "cloud-object-storage"
-  source_resource_instance_id    = ibm_resource_instance.cos.guid
+  source_resource_instance_id = ibm_resource_instance.cos.guid
+  target_service_name         = "kms"
+  target_resource_instance_id = ibm_resource_instance.keyprotect.guid
+  roles                       = ["Reader"]
+}
+
+resource "ibm_iam_authorization_policy" "APPIDKMSpolicy" {
+  source_service_name         = "appid"
   target_service_name         = "kms"
   target_resource_instance_id = ibm_resource_instance.keyprotect.guid
   roles                       = ["Reader"]

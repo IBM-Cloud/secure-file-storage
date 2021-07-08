@@ -1,15 +1,15 @@
 # Locate Kubernetes cluster in VPC
 data "ibm_container_vpc_cluster" "cluster" {
-  name  = var.iks_cluster_name
+  name = var.iks_cluster_name
 }
 
 # Bind the App ID service to the cluster
 resource "ibm_container_bind_service" "bind_appid" {
-  cluster_name_id       = data.ibm_container_vpc_cluster.cluster.id
-  service_instance_id   = ibm_resource_instance.app_id.guid
-  resource_group_id     = data.ibm_resource_group.cloud_development.id
-  key                   = ibm_resource_key.RKappid.name
-  namespace_id          = kubernetes_namespace.namespace.metadata.0.name
+  cluster_name_id     = data.ibm_container_vpc_cluster.cluster.id
+  service_instance_id = ibm_resource_instance.app_id.guid
+  resource_group_id   = data.ibm_resource_group.cloud_development.id
+  key                 = ibm_resource_key.RKappid.name
+  namespace_id        = kubernetes_namespace.namespace.metadata.0.name
 }
 
 resource "ibm_container_addons" "addons" {
@@ -22,7 +22,7 @@ resource "ibm_container_addons" "addons" {
 
 # Download the cluster configuration...
 data "ibm_container_cluster_config" "mycluster" {
-  cluster_name_id   = data.ibm_container_vpc_cluster.cluster.name
+  cluster_name_id = data.ibm_container_vpc_cluster.cluster.name
 }
 
 # ... and apply it to configure the Kubernetes provider
