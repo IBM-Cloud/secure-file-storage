@@ -29,6 +29,6 @@ cat secure-file-storage.template.yaml | \
   IMAGE_REPOSITORY=$IMAGE_REPOSITORY \
   BASENAME=$BASENAME \
   TARGET_NAMESPACE=$TARGET_NAMESPACE \
-  envsubst > secure-file-storage.yaml
+  envsubst '$IMAGE_NAME $INGRESS_SECRET $INGRESS_SUBDOMAIN $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' > secure-file-storage.yaml
   #| \
   #oc apply -f - || exit 1
