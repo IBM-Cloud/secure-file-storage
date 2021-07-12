@@ -15,7 +15,7 @@ var allowAnonymousAccess = process.env.allow_anonymous || false;
 // Initialize Cloudant
 var Cloudant = require('@cloudant/cloudant');
 var cloudant = new Cloudant({
-  account: process.env.cloudant_username,
+  url: process.env.cloudant_url,
   plugins: [
     'promises',
     {

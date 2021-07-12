@@ -1,4 +1,4 @@
-An older code version for this tutorial can be found in the branch [archive_classic_tekton](https://github.com/IBM-Cloud/secure-file-storage/tree/archive_classic_tekton).
+> An older code version for this tutorial can be found in the branch [archive_classic_tekton](https://github.com/IBM-Cloud/secure-file-storage/tree/archive_classic_tekton).
 
 # Apply end to end security to a cloud application
 
@@ -6,7 +6,7 @@ The repository features a sample application that enables groups of users to upl
 
 Refer to [this tutorial](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cloud-e2e-security) for instructions.
 
-![Architecture](Architecture.png)
+![Architecture](Architecture.svg)
 
 1. The user connects to the application.
 2. [App ID](https://cloud.ibm.com/catalog/services/AppID) secures the application and redirects the user to the authentication page. Users can sign up from there too.
@@ -31,7 +31,7 @@ Please note that the Kubernetes cluster and the resources deployed via Terraform
 
 ### Deploy resources using Terraform managed by Schematics
 
-Either create the Schematics workspace automatically by clicking this ["deploy link"](https://cloud.ibm.com/schematics/workspaces/create?repository=https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform&terraform_version=terraform_v0.13). Or set it up manually by going to the [Schematics workspaces](https://cloud.ibm.com/schematics/workspaces) and using https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform as source respository including path and Terraform v0.13 as runtime.
+Either create the Schematics workspace automatically by clicking this ["deploy link"](https://cloud.ibm.com/schematics/workspaces/create?repository=https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform). Or set it up manually by going to the [Schematics workspaces](https://cloud.ibm.com/schematics/workspaces) and using https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform as source respository including path and the latest version of Terraform runtime.
 
 Configure all required variables:
 - **basename**: project basename which is used as prefix for names, e.g., secure-file-storage
@@ -74,6 +74,7 @@ In the dialog configure the git repository and the pipeline:
 - IBM Cloud API Key: click New+ (do not click Save this key in a secrets store for reuse).  The API key provides the same privileges as your user id and is used during pipeline execution
 - Region: Region matching the toolchain is the default, but should be adjusted to where you plan to deploy the app.
 - Image Registry Namespace, e.g., secure-file-storage or your username
+- Schematics Workspace ID: Can be found under `Settings` tab of Schematics Workspace
 - Docker Image name: secure-file-storage default is good
 
 Click **Create**.

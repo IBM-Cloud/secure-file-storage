@@ -10,7 +10,7 @@ variable "region" {
 
 variable "iks_cluster_name" {
   description = "Name of the existing Kubernetes cluster to deploy into"
-  default     = "mycluster"
+  default     = "secure-file-storage-cluster"
 }
 
 variable "iks_namespace" {
@@ -30,20 +30,20 @@ variable "ibmcloud_timeout" {
 
 variable "appid_plan" {
   description = "Service plan to be used for App ID"
-  default = "graduated-tier"
+  default     = "graduated-tier"
 }
 
 variable "cloudant_plan" {
   description = "Service plan to be used for Cloudant"
-  default = "lite"
+  default     = "lite"
 }
 
 variable "cos_plan" {
   description = "Service plan to be used for Cloud Object Storage"
-  default = "standard"
+  default     = "standard"
 }
 
 variable "kp_plan" {
   description = "Service plan to be used for Key Protect"
-  default = "tiered-pricing"
+  default     = "tiered-pricing"
 }

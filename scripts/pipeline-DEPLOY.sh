@@ -277,7 +277,7 @@ kubectl create secret generic $BASENAME-credentials \
   --from-literal="cos_access_key_id=$COS_ACCESS_KEY_ID" \
   --from-literal="cos_secret_access_key=$COS_SECRET_ACCESS_KEY" \
   --from-literal="cos_bucket_name=$COS_BUCKET_NAME" \
-  --from-literal="cloudant_username=$CLOUDANT_USERNAME" \
+  --from-literal="cloudant_url=$CLOUDANT_URL" \
   --from-literal="cloudant_iam_apikey=$CLOUDANT_IAM_APIKEY" \
   --from-literal="cloudant_database=$CLOUDANT_DATABASE" \
   --namespace "$TARGET_NAMESPACE" || exit 1
