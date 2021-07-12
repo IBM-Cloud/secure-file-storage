@@ -10,7 +10,7 @@ variable "region" {
 
 variable "iks_cluster_name" {
   description = "Name of the existing Kubernetes cluster to deploy into"
-  default     = "mycluster"
+  default     = "secure-file-storage-cluster"
 }
 
 variable "iks_namespace" {
