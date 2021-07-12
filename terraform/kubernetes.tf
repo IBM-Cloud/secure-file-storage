@@ -31,7 +31,6 @@ provider "kubernetes" {
   host                   = data.ibm_container_cluster_config.mycluster.host
   token                  = data.ibm_container_cluster_config.mycluster.token
   cluster_ca_certificate = data.ibm_container_cluster_config.mycluster.ca_certificate
-  version                = "~> 1.12"
 }
 
 # Kubernetes namespace, needed to bind App ID

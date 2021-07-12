@@ -1,7 +1,7 @@
 {
     "name": "schematics_secure-file-storage",
     "type": [
-      "terraform_v0.12"
+      "terraform_v0.14"
     ],
     "description": "Deploy services for solution tutorial on applying e2e security (secure file storage)",
     "tags": [
@@ -14,7 +14,7 @@
     },
     "template_data": [{
       "folder": ".",
-      "type": "terraform_v0.12",
+      "type": "terraform_v0.14",
       "variablestore": [{
           "name": "project_name",
           "value": "secure-file-storage",

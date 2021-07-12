@@ -66,7 +66,8 @@ ibmcloud resource service-key-create secure-file-storage-cloudant-acckey-$CLOUDA
     --instance-id "$CLOUDANT_INSTANCE_ID"
 
 CLOUDANT_CREDENTIALS_JSON=$(ibmcloud resource service-key secure-file-storage-cloudant-acckey-$CLOUDANT_GUID --output json)
-CLOUDANT_USERNAME=$(echo "$CLOUDANT_CREDENTIALS_JSON" | jq -r '.[].credentials.username')
+#CLOUDANT_USERNAME=$(echo "$CLOUDANT_CREDENTIALS_JSON" | jq -r '.[].credentials.username')
+CLOUDANT_URL=$(echo "$CLOUDANT_CREDENTIALS_JSON" | jq -r '.[].credentials.url')
 CLOUDANT_IAM_APIKEY=$(echo "$CLOUDANT_CREDENTIALS_JSON" | jq -r '.[].credentials.apikey')
 
 section "Recreate the secret"
@@ -82,7 +83,7 @@ kubectl create secret generic secure-file-storage-credentials \
   --from-literal="cos_access_key_id=$COS_ACCESS_KEY_ID" \
   --from-literal="cos_secret_access_key=$COS_SECRET_ACCESS_KEY" \
   --from-literal="cos_bucket_name=$COS_BUCKET_NAME" \
-  --from-literal="cloudant_username=$CLOUDANT_USERNAME" \
+  --from-literal="cloudant_url=$CLOUDANT_URL" \
   --from-literal="cloudant_iam_apikey=$CLOUDANT_IAM_APIKEY" \
   --from-literal="cloudant_database=$CLOUDANT_DATABASE" \
   --namespace "$TARGET_NAMESPACE" || exit 1
