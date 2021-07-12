@@ -9,7 +9,7 @@ resource "ibm_container_bind_service" "bind_appid" {
   service_instance_id = ibm_resource_instance.app_id.guid
   resource_group_id   = data.ibm_resource_group.cloud_development.id
   key                 = ibm_resource_key.RKappid.name
-  namespace_id        = kubernetes_namespace.namespace.metadata.0.name
+  namespace_id        = local.kubernetes_namespace
 }
 
 resource "ibm_container_addons" "addons" {
@@ -33,9 +33,22 @@ provider "kubernetes" {
   cluster_ca_certificate = data.ibm_container_cluster_config.mycluster.ca_certificate
 }
 
-# Kubernetes namespace, needed to bind App ID
-resource "kubernetes_namespace" "namespace" {
+
+data "kubernetes_namespace" "namespace" {
+  count = var.iks_namespace == "default" ? 1 : 0
   metadata {
     name = var.iks_namespace
   }
+}
+
+# Kubernetes namespace, needed to bind App ID
+resource "kubernetes_namespace" "namespace" {
+  count = var.iks_namespace == "default" ? 0 : 1
+  metadata {
+    name = var.iks_namespace
+  }
+}
+
+locals {
+  kubernetes_namespace = var.iks_namespace == "default" ? data.kubernetes_namespace.namespace.0.metadata.0.name : kubernetes_namespace.namespace.0.metadata.0.name
 }

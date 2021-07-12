@@ -28,6 +28,7 @@ resource "ibm_resource_instance" "app_id" {
   location          = var.region
   resource_group_id = data.ibm_resource_group.cloud_development.id
   service_endpoints = "private"
+  depends_on        = [ibm_iam_authorization_policy.APPIDKMSpolicy]
 }
 
 resource "ibm_resource_instance" "cloudant" {
