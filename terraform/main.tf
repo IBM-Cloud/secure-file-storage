@@ -38,6 +38,7 @@ resource "ibm_resource_instance" "cloudant" {
   location          = var.region
   resource_group_id = data.ibm_resource_group.cloud_development.id
   service_endpoints = "private"
+  parameters        = {"legacyCredentials": false}
 }
 
 resource "ibm_resource_instance" "keyprotect" {
