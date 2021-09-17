@@ -1,0 +1,33 @@
+name: Publish container image
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish_to_registry:
+    name: Build and push image to registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1.10.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3.5.0
+        with:
+          images: ${{ secrets.DOCKERHUB_ORG }}/${{ secrets.DOCKERHUB_REPOSITORY }}
+      
+      - name: Build and push image
+        uses: docker/build-push-action@v2.7.0
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
