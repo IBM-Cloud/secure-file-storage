@@ -115,10 +115,14 @@ resource "ibm_resource_key" "RKcloudantManager" {
 
   # create the database
   provisioner "local-exec" {
-    command = "curl -X PUT ${ibm_resource_key.RKcloudantManager.credentials.url}/secure-file-storage-metadata"
+    command = "./create-database.sh"
+    environment = {
+      CLOUDANT_IAM_APIKEY = nonsensitive(ibm_resource_key.RKcloudantManager.credentials.apikey)
+      CLOUDANT_URL        = nonsensitive(ibm_resource_key.RKcloudantManager.credentials.url)
+      CLOUDANT_DATABASE   = "secure-file-storage-metadata"
+    }
   }
 }
-
 
 # service access key for AppID
 resource "ibm_resource_key" "RKappid" {
