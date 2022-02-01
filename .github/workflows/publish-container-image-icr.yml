@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ICR_NAMESPACE: solution-tutorials
-      ICR_REPOSITORY: tutorial-application-log-analysis
+      ICR_REPOSITORY: tutorial-cloud-e2e-security
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -31,7 +31,8 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v2.8.0
         with:
-          context: .
+          context: ./app
+          file: ./app/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
