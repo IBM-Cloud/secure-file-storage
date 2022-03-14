@@ -114,7 +114,7 @@ spec:
 #     name: secure-file-storage-secretstore
 #     kind: SecretStore
 #   target:
-#     name: secure-file-storage-secrets-manager
+#     name: secure-file-storage-certificate
 #     template:
 #       type: kubernetes.io/tls
 #       data:
