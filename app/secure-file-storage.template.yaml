@@ -89,3 +89,44 @@ spec:
 #             name: secure-file-storage-service
 #             port:
 #               number: 8081
+# ---
+# apiVersion: external-secrets.io/v1alpha1
+# kind: SecretStore
+# metadata:
+#   name: secure-file-storage-secretstore
+# spec:
+#   provider:
+#     ibm:
+#       serviceUrl: <secrets manager api url>
+#       auth:
+#         secretRef:
+#           secretApiKeySecretRef:
+#             name: secure-file-storage-api-key
+#             key: apikey
+# ---
+# apiVersion: external-secrets.io/v1alpha1
+# kind: ExternalSecret
+# metadata:
+#   name: secure-file-storage-external-secret
+# spec:
+#   refreshInterval: 1m
+#   secretStoreRef:
+#     name: secure-file-storage-secretstore
+#     kind: SecretStore
+#   target:
+#     name: secure-file-storage-certificate
+#     template:
+#       type: kubernetes.io/tls
+#       data:
+#         tls.crt: '{{ .sfscrt | toString }}'
+#         tls.key: '{{ .sfskey | toString }}'
+#     creationPolicy: Owner
+#   data:
+#   - secretKey: sfscrt
+#     remoteRef:
+#       key: imported_cert/<certifcate ID>
+#       property: certificate
+#   - secretKey: sfskey
+#     remoteRef:
+#       key: imported_cert/<certifcate ID>
+#       property: private_key
