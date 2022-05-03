@@ -21,7 +21,7 @@ This project comes with a partially automated toolchain capable of deploying the
 
 ### Prerequisites
 
-1. Create a **standard** Kubernetes cluster in a VPC (Virtual Private Cloud) with a **Kubernetes version of 1.19** or higher.
+1. Create a **standard** Kubernetes cluster in a VPC (Virtual Private Cloud) with a **Kubernetes version of 1.19** or higher. Make sure to attach a Public Gateway for each of the subnets your worker nodes are deployed into as it is required for App ID.
 2. Have an instance of Continuous Delivery service to be used by the toolchain.
 
 3. Optionally create a specific resource group for this project
