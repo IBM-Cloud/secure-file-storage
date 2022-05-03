@@ -52,7 +52,7 @@ locals {
   kubernetes_namespace = var.iks_namespace == "default" ? data.kubernetes_namespace.namespace.0.metadata.0.name : kubernetes_namespace.namespace.0.metadata.0.name
 }
 
-resource "kubernetes_config_map" "ibm_k8s_controller_config" {
+resource "kubernetes_config_map_v1_data" "ibm_k8s_controller_config" {
   metadata {
     name      = "ibm-k8s-controller-config"
     namespace = "kube-system"
@@ -60,5 +60,6 @@ resource "kubernetes_config_map" "ibm_k8s_controller_config" {
   data = {
     allow-snippet-annotations = "true"
   }
+  force = "true"
 }
 
