@@ -16,7 +16,7 @@ resource "ibm_container_addons" "addons" {
   cluster = data.ibm_container_vpc_cluster.cluster.name
   addons {
     name    = "alb-oauth-proxy"
-    version = "1.0.0"
+    version = "2.0.0"
   }
 }
 
