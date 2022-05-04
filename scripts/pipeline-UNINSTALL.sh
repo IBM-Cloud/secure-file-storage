@@ -61,7 +61,10 @@ ibmcloud ks cluster config --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME
 # Kubernetes
 #
 section "Kubernetes"
-kubectl delete --namespace $TARGET_NAMESPACE -f secure-file-storage.template.yaml
+# kubectl delete --namespace $TARGET_NAMESPACE -f secure-file-storage.template.yaml
+kubectl delete --namespace $TARGET_NAMESPACE service secure-file-storage-service
+kubectl delete --namespace $TARGET_NAMESPACE deployment secure-file-storage-deployment
+kubectl delete --namespace $TARGET_NAMESPACE ingress ingress-for-secure-file-storage
 kubectl delete --namespace $TARGET_NAMESPACE secret $BASENAME-docker-registry
 kubectl delete --namespace $TARGET_NAMESPACE secret $BASENAME-credentials
 
