@@ -6,7 +6,7 @@ The repository features a sample application that enables groups of users to upl
 
 Refer to [this tutorial](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cloud-e2e-security) for instructions.
 
-![Architecture](Architecture.png)
+![Architecture](Architecture.svg)
 
 1. The user connects to the application.
 2. [App ID](https://cloud.ibm.com/catalog/services/AppID) secures the application and redirects the user to the authentication page. Users can sign up from there too.

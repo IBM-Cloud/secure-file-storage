@@ -17,6 +17,7 @@ local_yaml
 *.tfvars
 .terraform
 *.tfstate*
+.terraform.lock.hcl
 
 #vim swap files
 [._]*.sw[a-p]

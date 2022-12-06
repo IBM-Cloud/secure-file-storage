@@ -2,8 +2,8 @@ terraform {
   required_version = ">= 0.13"
   required_providers {
     ibm = {
-      source  = "IBM-Cloud/ibm"
-      version = ">=1.17.0"
+      source  = "ibm-cloud/ibm"
+      version = ">=1.47.1"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -19,4 +19,5 @@ provider "ibm" {
   #   ibmcloud_api_key = var.ibmcloud_api_key
   region           = var.region
   ibmcloud_timeout = var.ibmcloud_timeout
+  ibmcloud_api_key = var.ibmcloud_api_key
 }

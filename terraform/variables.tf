@@ -47,3 +47,16 @@ variable "kp_plan" {
   description = "Service plan to be used for Key Protect"
   default     = "tiered-pricing"
 }
+
+variable "ibmcloud_api_key" {}
+
+variable "vpcname" {
+  default = "vpc-sec"
+}
+
+# create or import resources? 
+# Have the resources been manually created (existing resources, set to true)
+# or should they be created (leave at false)?
+variable "existing_resources" {
+  default = false
+}
