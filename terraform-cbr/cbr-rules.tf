@@ -13,14 +13,6 @@ resource "ibm_cbr_rule" "cbr_rule_cos_vpc" {
     }
     attributes {
       name  = "networkZoneId"
-      value = ibm_cbr_zone.cbr_zone_iam_groups.id
-    }
-    attributes {
-      name  = "networkZoneId"
-      value = ibm_cbr_zone.cbr_zone_iam_users.id
-    }
-    attributes {
-      name  = "networkZoneId"
       value = ibm_cbr_zone.cbr_zone_homezone.id
     }
 
@@ -54,15 +46,6 @@ resource "ibm_cbr_rule" "cbr_rule_registry" {
       name  = "networkZoneId"
       value = ibm_cbr_zone.cbr_zone_k8s.id
     }
-    attributes {
-      name  = "networkZoneId"
-      value = ibm_cbr_zone.cbr_zone_iam_groups.id
-    }
-    attributes {
-      name  = "networkZoneId"
-      value = ibm_cbr_zone.cbr_zone_iam_users.id
-    }
-
   }
 
   description      = "restrict access to registry, limit to cluster"
@@ -106,15 +89,6 @@ resource "ibm_cbr_rule" "cbr_rule_kms" {
       name  = "networkZoneId"
       value = ibm_cbr_zone.cbr_zone_cos.id
     }
-    attributes {
-      name  = "networkZoneId"
-      value = ibm_cbr_zone.cbr_zone_iam_groups.id
-    }
-    attributes {
-      name  = "networkZoneId"
-      value = ibm_cbr_zone.cbr_zone_iam_users.id
-    }
-
   }
 
   description      = "restrict access to Key Protect"
@@ -146,14 +120,6 @@ resource "ibm_cbr_rule" "cbr_rule_kms" {
 # - home / bastion zone
 resource "ibm_cbr_rule" "cbr_rule_k8s_mgmt" {
   contexts {
-    attributes {
-      name  = "networkZoneId"
-      value = ibm_cbr_zone.cbr_zone_iam_groups.id
-    }
-    attributes {
-      name  = "networkZoneId"
-      value = ibm_cbr_zone.cbr_zone_iam_users.id
-    }
     attributes {
       name  = "networkZoneId"
       value = ibm_cbr_zone.cbr_zone_homezone.id

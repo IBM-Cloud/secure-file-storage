@@ -28,7 +28,7 @@ resource "ibm_iam_service_policy" "registry-policy" {
 
 # create the App ID instance if required
 resource "ibm_resource_instance" "app_id" {
-  count = var.existing_resources ? 0 : 1
+  count             = var.existing_resources ? 0 : 1
   name              = "${var.basename}-appid"
   service           = "appid"
   plan              = var.appid_plan
@@ -40,36 +40,36 @@ resource "ibm_resource_instance" "app_id" {
 
 # or look it up
 data "ibm_resource_instance" "data_app_id" {
-  count = var.existing_resources ? 1 : 0
-  name              = "${var.basename}-appid"
-  service           = "appid"
-  location          = var.region
+  count    = var.existing_resources ? 1 : 0
+  name     = "${var.basename}-appid"
+  service  = "appid"
+  location = var.region
 }
 
 # create the Cloudant instance if required
 resource "ibm_resource_instance" "cloudant" {
-  count = var.existing_resources ? 0 : 1
+  count             = var.existing_resources ? 0 : 1
   name              = "${var.basename}-cloudant"
   service           = "cloudantnosqldb"
   plan              = var.cloudant_plan
   location          = var.region
   resource_group_id = data.ibm_resource_group.cloud_development.id
   service_endpoints = "private"
-  parameters        = {"legacyCredentials": false}
+  parameters        = { "legacyCredentials" : false }
 }
 
 # or look it up
 data "ibm_resource_instance" "data_cloudant" {
-  count = var.existing_resources ? 1 : 0
-  name              = "${var.basename}-cloudant"
-  service           = "cloudantnosqldb"
-  location          = var.region
+  count    = var.existing_resources ? 1 : 0
+  name     = "${var.basename}-cloudant"
+  service  = "cloudantnosqldb"
+  location = var.region
 }
 
 
 # create KP instance if required
 resource "ibm_resource_instance" "keyprotect" {
-  count = var.existing_resources ? 0 : 1
+  count             = var.existing_resources ? 0 : 1
   name              = "${var.basename}-kms"
   service           = "kms"
   plan              = var.kp_plan
@@ -80,15 +80,15 @@ resource "ibm_resource_instance" "keyprotect" {
 
 # or look it up
 data "ibm_resource_instance" "data_keyprotect" {
-  count = var.existing_resources ? 1 : 0
-  name              = "${var.basename}-kms"
-  service           = "kms"
-  location          = var.region
+  count    = var.existing_resources ? 1 : 0
+  name     = "${var.basename}-kms"
+  service  = "kms"
+  location = var.region
 }
 
 # create the COS instance if required
 resource "ibm_resource_instance" "cos" {
-  count = var.existing_resources ? 0 : 1
+  count             = var.existing_resources ? 0 : 1
   name              = "${var.basename}-cos"
   service           = "cloud-object-storage"
   plan              = var.cos_plan
@@ -98,14 +98,15 @@ resource "ibm_resource_instance" "cos" {
 
 # or look it up
 data "ibm_resource_instance" "data_cos" {
-  count = var.existing_resources ? 1 : 0
-  name              = "${var.basename}-cos"
-  service           = "cloud-object-storage"
+  count   = var.existing_resources ? 1 : 0
+  name    = "${var.basename}-cos"
+  service = "cloud-object-storage"
 }
 
 
 # create root key
 resource "ibm_kp_key" "rootkey" {
+  count          = var.existing_resources ? 0 : 1
   key_protect_id = ibm_resource_instance.keyprotect[0].guid
   key_name       = "${var.basename}-rootkey"
   standard_key   = false
@@ -113,6 +114,7 @@ resource "ibm_kp_key" "rootkey" {
 }
 
 resource "ibm_iam_authorization_policy" "COSKMSpolicy" {
+  count                       = var.existing_resources ? 0 : 1
   source_service_name         = "cloud-object-storage"
   source_resource_instance_id = ibm_resource_instance.cos[0].guid
   target_service_name         = "kms"
@@ -121,6 +123,7 @@ resource "ibm_iam_authorization_policy" "COSKMSpolicy" {
 }
 
 resource "ibm_iam_authorization_policy" "APPIDKMSpolicy" {
+  count                       = var.existing_resources ? 0 : 1
   source_service_name         = "appid"
   target_service_name         = "kms"
   target_resource_instance_id = ibm_resource_instance.keyprotect[0].guid
@@ -129,6 +132,7 @@ resource "ibm_iam_authorization_policy" "APPIDKMSpolicy" {
 
 # create encrypted COS bucket using that root key
 resource "ibm_cos_bucket" "cosbucket" {
+  count                = var.existing_resources ? 0 : 1
   bucket_name          = "${var.basename}-bucket-${ibm_resource_instance.cos[0].guid}"
   resource_instance_id = ibm_resource_instance.cos[0].id
   region_location      = var.region
@@ -139,6 +143,7 @@ resource "ibm_cos_bucket" "cosbucket" {
 
 # service access key for COS
 resource "ibm_resource_key" "RKcos" {
+  count                = var.existing_resources ? 0 : 1
   name                 = "${var.basename}-accKey-cos"
   role                 = "Writer"
   resource_instance_id = ibm_resource_instance.cos[0].id
@@ -147,6 +152,7 @@ resource "ibm_resource_key" "RKcos" {
 
 # service access key for Cloudant with Writer privilege for app usage
 resource "ibm_resource_key" "RKcloudant" {
+  count                = var.existing_resources ? 0 : 1
   name                 = "${var.basename}-accKey-cloudant"
   role                 = "Writer"
   resource_instance_id = ibm_resource_instance.cloudant[0].id
@@ -154,12 +160,14 @@ resource "ibm_resource_key" "RKcloudant" {
 
 # service access key for Cloudant with Manager privilege (to create a database)
 resource "ibm_resource_key" "RKcloudantManager" {
+  count                = var.existing_resources ? 0 : 1
   name                 = "${var.basename}-accKey-cloudant-manager"
   role                 = "Manager"
   resource_instance_id = ibm_resource_instance.cloudant[0].id
 
   # create the database
   provisioner "local-exec" {
+    count   = var.existing_resources ? 0 : 1
     command = "./create-database.sh"
     environment = {
       CLOUDANT_IAM_APIKEY = nonsensitive(ibm_resource_key.RKcloudantManager.credentials.apikey)
@@ -171,6 +179,7 @@ resource "ibm_resource_key" "RKcloudantManager" {
 
 # service access key for AppID
 resource "ibm_resource_key" "RKappid" {
+  count                = var.existing_resources ? 0 : 1
   name                 = "${var.basename}-accKey-appid"
   role                 = "Writer"
   resource_instance_id = ibm_resource_instance.app_id[0].id
@@ -178,6 +187,7 @@ resource "ibm_resource_key" "RKappid" {
 
 # service access key for KP
 resource "ibm_resource_key" "RKkp" {
+  count                = var.existing_resources ? 0 : 1
   name                 = "${var.basename}-accKey-kms"
   role                 = "Writer"
   resource_instance_id = ibm_resource_instance.keyprotect[0].id
