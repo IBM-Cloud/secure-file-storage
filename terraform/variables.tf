@@ -8,6 +8,11 @@ variable "region" {
   default     = "us-south"
 }
 
+variable "vpcname" {
+  description = "Name of the existing VPC with the Kubernetes cluster"
+  default = "vpc"
+}
+
 variable "iks_cluster_name" {
   description = "Name of the existing Kubernetes cluster to deploy into"
   default     = "secure-file-storage-cluster"
@@ -48,14 +53,25 @@ variable "kp_plan" {
   default     = "tiered-pricing"
 }
 
-variable "ibmcloud_api_key" {}
-
-variable "vpcname" {
-  default = "vpc-sec"
+variable "ibmcloud_api_key" {
 }
 
+# ----------------------------------------
+# Variables for context-based restrictions
+# ----------------------------------------
 
 # deploy the CBR objects? By default false
 variable "deploy_cbr" {
   default = false
+}
+
+# configure the enforcement mode for CBR
+variable "cbr_enforcement_mode" {
+  default = "report"
+}
+
+# define a homezone or bastion zone
+# change the setting in tfvars
+variable "homezone_iprange" {
+  default = "0.0.0.0-255.255.255.255"
 }
