@@ -22,7 +22,7 @@ resource "ibm_cbr_zone" "cbr_zone_vpc" {
   account_id = data.ibm_iam_account_settings.team_iam_account_settings.account_id
   addresses {
     type  = "vpc"
-    value = data.terraform_remote_state.e2e-resources.outputs.vpc.crn
+    value = data.ibm_is_vpc.vpc.crn
   }
   description = "Zone with VPC of Kubernetes cluster"
   name        = "cbr_zone_vpc"
@@ -35,7 +35,7 @@ resource "ibm_cbr_zone" "cbr_zone_k8s" {
     type = "serviceRef"
     ref {
       account_id       = data.ibm_iam_account_settings.team_iam_account_settings.account_id
-      service_instance = data.terraform_remote_state.e2e-resources.outputs.cluster.id
+      service_instance = data.ibm_container_vpc_cluster.cluster.id
       service_name     = "containers-kubernetes"
     }
   }
@@ -50,7 +50,7 @@ resource "ibm_cbr_zone" "cbr_zone_cos" {
     type = "serviceRef"
     ref {
       account_id       = data.ibm_iam_account_settings.team_iam_account_settings.account_id
-      service_instance = data.terraform_remote_state.e2e-resources.outputs.cos.guid
+      service_instance = var.cos.guid
       service_name     = "cloud-object-storage"
     }
   }

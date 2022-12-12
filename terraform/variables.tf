@@ -54,9 +54,8 @@ variable "vpcname" {
   default = "vpc-sec"
 }
 
-# create or import resources? 
-# Have the resources been manually created (existing resources, set to true)
-# or should they be created (leave at false)?
-variable "existing_resources" {
+
+# deploy the CBR objects? By default false
+variable "deploy_cbr" {
   default = false
 }

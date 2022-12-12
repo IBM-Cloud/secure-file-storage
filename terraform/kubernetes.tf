@@ -5,16 +5,14 @@ data "ibm_container_vpc_cluster" "cluster" {
 
 # Bind the App ID service to the cluster
 resource "ibm_container_bind_service" "bind_appid" {
-    count = var.existing_resources ? 0 : 1
   cluster_name_id     = data.ibm_container_vpc_cluster.cluster.id
-  service_instance_id = ibm_resource_instance.app_id[0].guid
+  service_instance_id = ibm_resource_instance.app_id.guid
   resource_group_id   = data.ibm_resource_group.cloud_development.id
   key                 = ibm_resource_key.RKappid.name
   namespace_id        = local.kubernetes_namespace
 }
 
 resource "ibm_container_addons" "addons" {
-    count = var.existing_resources ? 0 : 1
   cluster = data.ibm_container_vpc_cluster.cluster.name
   addons {
     name    = "alb-oauth-proxy"
@@ -55,7 +53,6 @@ locals {
 }
 
 resource "kubernetes_config_map_v1_data" "ibm_k8s_controller_config" {
-    count = var.existing_resources ? 0 : 1
   metadata {
     name      = "ibm-k8s-controller-config"
     namespace = "kube-system"
@@ -65,4 +62,3 @@ resource "kubernetes_config_map_v1_data" "ibm_k8s_controller_config" {
   }
   force = "true"
 }
-

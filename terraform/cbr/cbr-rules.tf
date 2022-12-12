@@ -28,7 +28,7 @@ resource "ibm_cbr_rule" "cbr_rule_cos_vpc" {
     attributes {
       name     = "serviceInstance"
       operator = "stringEquals"
-      value    = data.terraform_remote_state.e2e-resources.outputs.cos.guid
+      value    = var.cos.guid
     }
     attributes {
       name     = "serviceName"
@@ -101,7 +101,7 @@ resource "ibm_cbr_rule" "cbr_rule_kms" {
     attributes {
       name     = "serviceInstance"
       operator = "stringEquals"
-      value    = data.terraform_remote_state.e2e-resources.outputs.keyprotect.guid
+      value    = var.keyprotect.guid
     }
     attributes {
       name     = "serviceName"
@@ -141,7 +141,7 @@ resource "ibm_cbr_rule" "cbr_rule_k8s_mgmt" {
     attributes {
       name     = "serviceInstance"
       operator = "stringEquals"
-      value    = data.terraform_remote_state.e2e-resources.outputs.cluster.id
+      value    = data.ibm_container_vpc_cluster.cluster.id
     }
     attributes {
       name     = "serviceName"

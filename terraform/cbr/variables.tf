@@ -1,5 +1,3 @@
-variable "ibmcloud_api_key" {}
-
 variable "basename" {
   description = "Prefix for named resources"
   default     = "secure-file-storage"
@@ -19,4 +17,22 @@ variable "cbr_enforcement_mode" {
 # change the setting in tfvars
 variable "homezone_iprange" {
   default = "0.0.0.0-255.255.255.255"
+}
+
+variable "vpcname" {
+  default = "vpc-sec"
+}
+
+variable "iks_cluster_name" {
+  description = "Name of the existing Kubernetes cluster to deploy into"
+  default     = "secure-file-storage-cluster"
+}
+
+
+
+# Variables to hold information about resource instances
+variable "cos" {
+}
+
+variable "keyprotect" {
 }
