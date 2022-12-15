@@ -2,6 +2,7 @@
 data "ibm_iam_account_settings" "team_iam_account_settings" {
 }
 
+# retrieve the VPC information
 data "ibm_is_vpc" "vpc" {
   name = var.vpcname
 }

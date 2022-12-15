@@ -10,7 +10,6 @@ variable "region" {
 
 variable "vpcname" {
   description = "Name of the existing VPC with the Kubernetes cluster"
-  default = "vpc"
 }
 
 variable "iks_cluster_name" {
@@ -51,9 +50,6 @@ variable "cos_plan" {
 variable "kp_plan" {
   description = "Service plan to be used for Key Protect"
   default     = "tiered-pricing"
-}
-
-variable "ibmcloud_api_key" {
 }
 
 # ----------------------------------------
