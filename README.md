@@ -36,7 +36,6 @@ Either create the Schematics workspace automatically by clicking this ["deploy l
 Configure all required variables:
 - **basename**: project basename which is used as prefix for names, e.g., secure-file-storage
 - **region** is where the resources will be deployed and the location of the existing Kubernetes cluster: us-south, eu-de, ...
-- **vpcname**: name of the VPC that hosts the Kubernetes cluster
 - **iks_cluster_name**: name of your existing VPC-based Kubernetes cluster
 - **iks_namespace**: Kubernetes namespace into which to deploy the app. It will be created if it does not exist.
 - **resource_group** is the name of the IBM Cloud resource group where to deploy the services into.

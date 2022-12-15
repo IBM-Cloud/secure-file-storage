@@ -8,10 +8,6 @@ variable "region" {
   default     = "us-south"
 }
 
-variable "vpcname" {
-  description = "Name of the existing VPC with the Kubernetes cluster"
-}
-
 variable "iks_cluster_name" {
   description = "Name of the existing Kubernetes cluster to deploy into"
   default     = "secure-file-storage-cluster"

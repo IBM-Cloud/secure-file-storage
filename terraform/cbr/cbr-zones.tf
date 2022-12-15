@@ -17,16 +17,17 @@ resource "ibm_cbr_zone" "cbr_zone_homezone" {
   name        = "cbr_zone_homenetwork"
 }
 
+# NOT NEEDED
 # Zone for the VPC that hosts the Kubernetes cluster
-resource "ibm_cbr_zone" "cbr_zone_vpc" {
-  account_id = data.ibm_iam_account_settings.team_iam_account_settings.account_id
-  addresses {
-    type  = "vpc"
-    value = data.ibm_is_vpc.vpc.crn
-  }
-  description = "Zone with VPC of Kubernetes cluster"
-  name        = "cbr_zone_vpc"
-}
+#resource "ibm_cbr_zone" "cbr_zone_vpc" {
+#  account_id = data.ibm_iam_account_settings.team_iam_account_settings.account_id
+#  addresses {
+#    type  = "vpc"
+#    value = data.ibm_is_vpc.vpc.crn
+#  }
+#  description = "Zone with VPC of Kubernetes cluster"
+#  name        = "cbr_zone_vpc"
+#}
 
 # Zone with the Kubernetes cluster
 resource "ibm_cbr_zone" "cbr_zone_k8s" {

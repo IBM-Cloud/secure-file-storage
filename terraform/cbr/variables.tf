@@ -9,9 +9,6 @@ variable "homezone_iprange" {
   default = "0.0.0.0-255.255.255.255"
 }
 
-variable "vpcname" {
-}
-
 variable "iks_cluster_name" {
   description = "Name of the existing Kubernetes cluster to deploy into"
   default     = "secure-file-storage-cluster"

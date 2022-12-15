@@ -5,7 +5,7 @@
 # The rules cover resources from the mentioned tutorial.
 
 # COS access
-resource "ibm_cbr_rule" "cbr_rule_cos_vpc" {
+resource "ibm_cbr_rule" "cbr_rule_cos_k8s" {
   contexts {
     attributes {
       name  = "networkZoneId"

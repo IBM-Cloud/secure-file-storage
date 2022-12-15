@@ -2,7 +2,6 @@
 module "cbr_objects" {
   count                = var.deploy_cbr ? 1 : 0
   source               = "./cbr"
-  vpcname              = var.vpcname
   iks_cluster_name     = var.iks_cluster_name
   cbr_enforcement_mode = var.cbr_enforcement_mode
   cos                  = ibm_resource_instance.cos
