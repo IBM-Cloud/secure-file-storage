@@ -4,31 +4,50 @@ set -e
 set -o pipefail
 
 if [[ -z "$INGRESS_SUBDOMAIN" ]]; then
-  echo "Ingress subdomain cannot be empty"
+  echo "INGRESS_SUBDOMAIN must be in the environment"
+  exit 1
 fi
 
 if [[ -z "$IMAGE_REPOSITORY" ]]; then
-  echo "Image repository cannot be empty"
+  echo "IMAGE_REPOSITORY must be in the environment"
+  exit 1
 fi
 
 if [[ -z "$INGRESS_SECRET" ]]; then
-  echo "Ingress secret cannot be empty"
+  echo "INGRESS_SECRET must be in the environment"
+  exit 1
 fi
 
 if [[ -z "$BASENAME" ]]; then
-  BASENAME=secure-file-storage
+  export BASENAME=secure-file-storage
 fi
 
 if [[ -z "$TARGET_NAMESPACE" ]]; then
-  TARGET_NAMESPACE=default
+  export TARGET_NAMESPACE=default
+fi
+
+
+if [[ -z "$PUBLIC_CERT_ID" ]] && [[ -z "$SECRETS_MANAGER_API_URL" ]] && [[ -z "$MYDOMAIN" ]]; then
+  cat secure-file-storage.template.yaml | \
+    envsubst '$IMAGE_NAME $INGRESS_SECRET $INGRESS_SUBDOMAIN $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' > secure-file-storage.yaml
+  exit
+fi
+
+if [[ -z "$PUBLIC_CERT_ID" ]]; then
+  echo "PUBLIC_CERT_ID must be in the environment"
+  exit 1
+fi
+
+if [[ -z "$SECRETS_MANAGER_API_URL" ]]; then
+  echo "SECRETS_MANAGER_API_URL must be in the environment"
+  exit 1
+fi
+
+if [[ -z "$MYDOMAIN" ]]; then
+  echo "MYDOMAIN must be in the environment"
+  exit 1
 fi
 
 cat secure-file-storage.template.yaml | \
-  INGRESS_SUBDOMAIN=$INGRESS_SUBDOMAIN \
-  INGRESS_SECRET=$INGRESS_SECRET \
-  IMAGE_REPOSITORY=$IMAGE_REPOSITORY \
-  BASENAME=$BASENAME \
-  TARGET_NAMESPACE=$TARGET_NAMESPACE \
-  envsubst '$IMAGE_NAME $INGRESS_SECRET $INGRESS_SUBDOMAIN $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' > secure-file-storage.yaml
-  #| \
-  #oc apply -f - || exit 1
+  sed -e 's/^# //' |
+  envsubst '$PUBLIC_CERT_ID $SECRETS_MANAGER_API_URL $MYDOMAIN $IMAGE_NAME $INGRESS_SECRET $INGRESS_SUBDOMAIN $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' > secure-file-storage.yaml
