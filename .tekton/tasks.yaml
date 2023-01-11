@@ -20,7 +20,7 @@ spec:
     - name: git-branch
   steps:
     - name: execute-script
-      image: ibmcom/pipeline-base-image:2.9
+      image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:latest
       envFrom:
         - configMapRef:
             name: environment-properties
@@ -90,7 +90,7 @@ spec:
     - name: image-repository
   steps:
     - name: execute-script
-      image: ibmcom/pipeline-base-image:2.9
+      image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:latest
       envFrom:
         - configMapRef:
             name: environment-properties
@@ -134,7 +134,7 @@ spec:
     - name: image-name
   steps:
     - name: execute-script
-      image: ibmcom/pipeline-base-image:2.9
+      image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:latest
       envFrom:
         - configMapRef:
             name: environment-properties
