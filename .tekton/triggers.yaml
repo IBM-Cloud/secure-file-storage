@@ -15,12 +15,6 @@ spec:
     - name: registry-region
     - name: image-name
   resourcetemplates:
-    - apiVersion: tekton.dev/v1alpha1
-      kind: PipelineResource
-      metadata:
-        name: image-to-build
-      spec:
-        type: image
     - apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
@@ -41,8 +35,8 @@ spec:
           name: pipeline-build-deploy
         resources:
           - name: app-image
-            resourceRef:
-              name: image-to-build
+            resourceSpec:
+              type: image
         params:
           - name: git-repository
             value: $(params.git-repository)

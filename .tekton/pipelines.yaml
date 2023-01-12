@@ -47,9 +47,9 @@ spec:
       name: icr-containerize
     params:
     - name: path-to-context
-      value: "/app"
+      value: "app"
     - name: path-to-dockerfile
-      value: "/app"
+      value: "app"
     - name: additional-tags
       value: "latest"
     - name: properties-file
