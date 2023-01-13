@@ -47,3 +47,38 @@ variable "kp_plan" {
   description = "Service plan to be used for Key Protect"
   default     = "tiered-pricing"
 }
+
+# variables for the toolchain
+
+variable "toolchain_schematics_workspace_id" {
+  description = "ID of this Schematics workspace"
+}
+
+variable "toolchain_registry_namespace" {
+  description = "namespace in the Container Registry to store the container image"
+}
+
+variable "toolchain_registry_region" {
+  description = "region of the Container Registry"
+  default = "ibm:yp:us-south"
+}
+
+variable "toolchain_image_name" {
+  description = "name of the container image"
+  default = "secure-file-storage"
+}
+
+variable "toolchain_git_repository" {
+  description = "repository with app source code"
+  default = "https://github.com/IBM-Cloud/secure-file-storage"
+}
+
+variable "toolchain_git_branch" {
+  description = "branch with app source code"
+  default = "master"
+}
+
+variable "toolchain_apikey" {
+  description = "IBM Cloud API key to build and deploy the app"
+  type = "sensitive"
+}
