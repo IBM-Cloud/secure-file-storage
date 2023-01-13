@@ -73,12 +73,24 @@ resource "ibm_cd_tekton_pipeline_definition" "cd_tekton_pipeline_definition_inst
   }
 }
 
-# Create a manual trigger and link it to the listener
-resource "ibm_cd_tekton_pipeline_trigger" "cd_tekton_pipeline_trigger_instance" {
+# Create a manual trigger and link it to the listener from the pipeline
+resource "ibm_cd_tekton_pipeline_trigger" "cd_tekton_pipeline_trigger_manual_builddeploy" {
   pipeline_id    = ibm_cd_tekton_pipeline.cd_pipeline_instance.pipeline_id
   type           = "manual"
-  name           = "manual-trigger"
+  name           = "manual-trigger-builddeploy"
   event_listener = "manual-listener-builddeploy"
+  worker {
+    id = "public"
+  }
+  max_concurrent_runs = 1
+}
+
+# Create a manual trigger and link it to the listener
+resource "ibm_cd_tekton_pipeline_trigger" "cd_tekton_pipeline_trigger_manual_uninstall" {
+  pipeline_id    = ibm_cd_tekton_pipeline.cd_pipeline_instance.pipeline_id
+  type           = "manual"
+  name           = "manual-trigger-uninstall"
+  event_listener = "manual-listener-uninstall"
   worker {
     id = "public"
   }
