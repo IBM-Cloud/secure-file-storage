@@ -80,5 +80,5 @@ variable "toolchain_git_branch" {
 
 variable "toolchain_apikey" {
   description = "IBM Cloud API key to build and deploy the app"
-  type = "sensitive"
+  sensitive = true
 }
