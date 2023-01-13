@@ -39,7 +39,6 @@ Configure all required variables:
 - **iks_cluster_name**: name of your existing (VPC-based) Kubernetes cluster
 - **iks_namespace**: Kubernetes namespace into which to deploy the app. It will be created if it does not exist.
 - **resource_group** is the name of the IBM Cloud resource group where to deploy the services into.
-- **toolchain_schematics_workspace_id** is the ID which you find in the workspace settings.
 - **toolchain_registry_namespace**: The namespace in the Container Registry to use.
 - **toolchain_registry_region**: The Container Registry region
 - **toolchain_apikey**: An IBM Cloud API key to use for building the container image with the app, pushing it to the Container Registry, and deploying it to the Kubernetes cluster.

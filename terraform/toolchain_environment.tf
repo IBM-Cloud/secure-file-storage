@@ -6,7 +6,7 @@ resource "ibm_cd_tekton_pipeline_property" "cd_env_schematics_workspace_id" {
   pipeline_id = ibm_cd_tekton_pipeline.cd_pipeline_instance.pipeline_id
   name        = "schematics-workspace-id"
   type        = "text"
-  value       = var.toolchain_schematics_workspace_id
+  value       = var.IC_SCHEMATICS_WORKSPACE_ID
 }
 
 resource "ibm_cd_tekton_pipeline_property" "cd_env_registry_namespace" {
