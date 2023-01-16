@@ -50,9 +50,9 @@ variable "kp_plan" {
 
 # variables for the toolchain
 
-variable "IC_SCHEMATICS_WORKSPACE_ID" {
-  description = "ID of this Schematics workspace, filled automatically, LEAVE EMPTY"
-}
+#variable "IC_SCHEMATICS_WORKSPACE_ID" {
+#  description = "ID of this Schematics workspace, filled automatically, LEAVE EMPTY"
+#}
 
 variable "toolchain_registry_namespace" {
   description = "namespace in the Container Registry to store the container image"
