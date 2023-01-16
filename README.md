@@ -39,7 +39,6 @@ Configure all required variables:
 - **iks_cluster_name**: name of your existing (VPC-based) Kubernetes cluster
 - **iks_namespace**: Kubernetes namespace into which to deploy the app. It will be created if it does not exist.
 - **resource_group** is the name of the IBM Cloud resource group where to deploy the services into.
-- **toolchain_schematics_workspace_id** is the ID which you find in the workspace settings.
 - **toolchain_registry_namespace**: The namespace in the Container Registry to use.
 - **toolchain_registry_region**: The Container Registry region
 - **toolchain_apikey**: An IBM Cloud API key to use for building the container image with the app, pushing it to the Container Registry, and deploying it to the Kubernetes cluster.
@@ -55,7 +54,7 @@ Next, optionally click "**Generate plan**" to verify everything would be working
 **Note:** By default, services are provisioned with service plans that should work in typical accounts. It means that paid plans are used. If you want to change to lite plans, you may configure different plans by changing values for variables like **cos_plan**, **appid_plan**, etc.
 
 ### Run the deployment pipeline
-Go to the [toolchains](https://cloud.ibm.com/devops/toolchains) page. Make sure to be in the correct region. Click on the toolchain **secure-file-storage-toolchain**. Finally, **Run Pipeline** and choose the manual trigger to build and deploy the app.
+Go to the [toolchains](https://cloud.ibm.com/devops/toolchains) page. Make sure to be in the correct region. Click on the toolchain **secure-file-storage-toolchain**, then on the delivery pipeline **secure-file-storage-pipeline**. Finally, **Run Pipeline** and choose the manual trigger **manual-trigger-builddeploy** to build and deploy the app. You can click on the details of the pipeline run to see and examine the diagnostic logs.
 
 ### Uninstall
 The toolchain includes a trigger to uninstall the app. Click **Run Pipeline** and select that trigger. Thereafter, switch to the [Schematics workspace](https://cloud.ibm.com/schematics/workspaces) and select the action to **Destroy** the resources. As an alternative, you could also select **Delete**. This will offer to only delete the workspace and leave the resources deployed, to delete (destroy) the resources and keep the workspace, or to delete both.
