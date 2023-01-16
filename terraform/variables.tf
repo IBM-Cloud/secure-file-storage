@@ -52,7 +52,6 @@ variable "kp_plan" {
 
 variable "IC_SCHEMATICS_WORKSPACE_ID" {
   description = "ID of this Schematics workspace, filled automatically, LEAVE EMPTY"
-  hidden = true
 }
 
 variable "toolchain_registry_namespace" {
