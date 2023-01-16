@@ -51,7 +51,8 @@ variable "kp_plan" {
 # variables for the toolchain
 
 variable "IC_SCHEMATICS_WORKSPACE_ID" {
-  description = "ID of this Schematics workspace, filled automatically"
+  description = "ID of this Schematics workspace, filled automatically, LEAVE EMPTY"
+  hidden = true
 }
 
 variable "toolchain_registry_namespace" {
@@ -80,5 +81,6 @@ variable "toolchain_git_branch" {
 
 variable "toolchain_apikey" {
   description = "IBM Cloud API key to build and deploy the app"
+  default = ""
   sensitive = true
 }
