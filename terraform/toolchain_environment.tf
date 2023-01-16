@@ -1,6 +1,9 @@
 ## Environment variables / configuration for the toolchain with
 ## the delivery pipeline
 
+# This is a "hack" to obtain the workspace ID without creating a variable.
+# Else, it would be exposed as editable variable in Schematics which we
+# don't want to avoid confusion and errors.
 data "external" "env" {
   program = ["jq", "-n", "env"]
 }
@@ -9,6 +12,7 @@ resource "ibm_cd_tekton_pipeline_property" "cd_env_schematics_workspace_id" {
   pipeline_id = ibm_cd_tekton_pipeline.cd_pipeline_instance.pipeline_id
   name        = "schematics-workspace-id"
   type        = "text"
+  # extract the workspace ID, see above
   value       = "${lookup(data.external.env.result, "TF_VAR_IC_SCHEMATICS_WORKSPACE_ID")}"
 }
 
