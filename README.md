@@ -1,4 +1,4 @@
-> An older code version for this tutorial can be found in the branch [archive_classic_tekton](https://github.com/IBM-Cloud/secure-file-storage/tree/archive_classic_tekton).
+> Older code versions for this tutorial can be found in the branches [archive_classic_tekton](https://github.com/IBM-Cloud/secure-file-storage/tree/archive_classic_tekton) and [classic_pipeline_RETIRED](https://github.com/IBM-Cloud/secure-file-storage/tree/classic_pipeline_RETIRED).
 
 # Apply end to end security to a cloud application
 
