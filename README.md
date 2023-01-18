@@ -39,13 +39,13 @@ Configure all required variables:
 - **iks_cluster_name**: name of your existing (VPC-based) Kubernetes cluster
 - **iks_namespace**: Kubernetes namespace into which to deploy the app. It will be created if it does not exist.
 - **resource_group** is the name of the IBM Cloud resource group where to deploy the services into.
-- **toolchain_registry_namespace**: The namespace in the Container Registry to use.
+- **toolchain_registry_namespace**: The existing namespace in the Container Registry to use.
 - **toolchain_registry_region**: The Container Registry region
 - **toolchain_apikey**: An IBM Cloud API key to use for building the container image with the app, pushing it to the Container Registry, and deploying it to the Kubernetes cluster.
 
 Be sure to click "**Save**".
 
-Next, optionally click "**Generate plan**" to verify everything would be working ok. Or directly click on "Apply plan" to deploy the configured resources, authorizations and service keys as well as the toolchain:
+Next, optionally click "**Generate plan**" to verify everything would be working ok. Or directly click on **Apply plan** to deploy the configured resources, authorizations and service keys as well as the toolchain:
 - App ID
 - Cloud Object Storage
 - Cloudant NoSQL database
@@ -57,7 +57,7 @@ Next, optionally click "**Generate plan**" to verify everything would be working
 Go to the [toolchains](https://cloud.ibm.com/devops/toolchains) page. Make sure to be in the correct region. Click on the toolchain **secure-file-storage-toolchain**, then on the delivery pipeline **secure-file-storage-pipeline**. Finally, **Run Pipeline** and choose the manual trigger **manual-trigger-builddeploy** to build and deploy the app. You can click on the details of the pipeline run to see and examine the diagnostic logs.
 
 ### Uninstall
-The toolchain includes a trigger to uninstall the app. Click **Run Pipeline** and select that trigger. Thereafter, switch to the [Schematics workspace](https://cloud.ibm.com/schematics/workspaces) and select the action to **Destroy** the resources. As an alternative, you could also select **Delete**. This will offer to only delete the workspace and leave the resources deployed, to delete (destroy) the resources and keep the workspace, or to delete both.
+The toolchain includes a trigger to uninstall the app. Click **Run Pipeline**, select the trigger **manual-trigger-uninstall** and run the pipeline. When it has finished, switch to the [Schematics workspace](https://cloud.ibm.com/schematics/workspaces) and select the action to **Destroy resources**. As an alternative, you could also select **Delete workspace** which removes the resources and the workspace.
 
 ## Code Structure
 The file for the Infrastructure as Code, the Continuous Delivery pipeline, and the app itself are organized in several directories.
