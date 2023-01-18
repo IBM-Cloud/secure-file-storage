@@ -71,6 +71,7 @@ kubectl delete --namespace $TARGET_NAMESPACE secret $BASENAME-credentials
 #
 # Docker image
 #
+ibmcloud cr region-set $REGISTRY_REGION
 REGISTRY_URL=$(ibmcloud cr info | grep -m1 -i '^Container Registry' | awk '{print $3;}')
 IMAGE_URL="${REGISTRY_URL}/${REGISTRY_NAMESPACE}/${IMAGE_NAME}"
 

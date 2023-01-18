@@ -132,6 +132,7 @@ spec:
     - name: git-branch
     - name: registry-namespace
     - name: image-name
+    - name: registry-region
   steps:
     - name: execute-script
       image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:latest
@@ -153,6 +154,8 @@ spec:
         value: $(params.image-name)
       - name: REGISTRY_NAMESPACE
         value: $(params.registry-namespace)
+      - name: REGISTRY_REGION
+        value: $(params.registry-region)
       - name: PIPELINE_APIKEY
         valueFrom:
           secretKeyRef:
@@ -170,5 +173,7 @@ spec:
           fi
           # if REGION is in the format 'ibm:yp:<region>' just keep the region part
           export REGION=$(echo $REGION | awk -F ':' '{print $NF;}')
+          # if REGISTRY_REGION is in the format 'ibm:yp:<region>' just keep the region part
+          export REGISTRY_REGION=$(echo $REGISTRY_REGION | awk -F ':' '{print $NF;}')
           ibmcloud login -a cloud.ibm.com -r $REGION --apikey $PIPELINE_APIKEY
           source ./scripts/pipeline-UNINSTALL.sh
