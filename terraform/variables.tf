@@ -60,7 +60,7 @@ variable "toolchain_registry_namespace" {
 
 variable "toolchain_registry_region" {
   description = "region of the Container Registry"
-  default = "ibm:yp:us-south"
+  default = "us-south"
 }
 
 variable "toolchain_image_name" {

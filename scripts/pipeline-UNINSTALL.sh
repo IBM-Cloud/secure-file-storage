@@ -12,6 +12,8 @@ if [ -z "$REGION" ]; then
 fi
 echo "REGION=$REGION"
 
+echo "REGISTRY_REGION=$REGISTRY_REGION"
+
 # Get the workspace information
 WORKSPACE_INFO=$(ibmcloud schematics workspace get --id $SCHEMATICS_WORKSPACE_NAME --output json)
 
@@ -71,6 +73,8 @@ kubectl delete --namespace $TARGET_NAMESPACE secret $BASENAME-credentials
 #
 # Docker image
 #
+section "Container image"
+ibmcloud cr region-set $REGISTRY_REGION
 REGISTRY_URL=$(ibmcloud cr info | grep -m1 -i '^Container Registry' | awk '{print $3;}')
 IMAGE_URL="${REGISTRY_URL}/${REGISTRY_NAMESPACE}/${IMAGE_NAME}"
 
