@@ -21,10 +21,10 @@ This project comes with a partially automated toolchain capable of deploying the
 
 ### Prerequisites
 
-1. Create a **standard** Kubernetes cluster in a VPC (Virtual Private Cloud) with a **Kubernetes version of 1.19** or higher. Make sure to attach a Public Gateway for each of the subnets your worker nodes are deployed into as it is required for App ID.
-2. Have an instance of Continuous Delivery service to be used by the toolchain.
-
-3. Optionally create a specific resource group for this project
+1. [Create a **standard** Kubernetes cluster](https://cloud.ibm.com/kubernetes/catalog/create) in a VPC (Virtual Private Cloud) with a **Kubernetes version of 1.19** or higher. Make sure to attach a Public Gateway for each of the subnets your worker nodes are deployed into as it is required for App ID.
+2. Have an instance of [Continuous Delivery](https://cloud.ibm.com/catalog/services/continuous-delivery) service to be used by the toolchain.
+3. Have an existing [namespace in the IBM Cloud Container Registry](https://cloud.ibm.com/registry/namespaces).
+4. Optionally create a specific [resource group](https://cloud.ibm.com/account/resource-groups) for this project.
 
 
 Please note that the Kubernetes cluster and the resources deployed via Terraform / Schematics have to be in the same region and resource group. The app is deployed to the Kubernetes cluster and hence in the same region and resource group, too.
