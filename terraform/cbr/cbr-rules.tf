@@ -11,11 +11,12 @@ resource "ibm_cbr_rule" "cbr_rule_cos_k8s" {
       name  = "networkZoneId"
       value = ibm_cbr_zone.cbr_zone_k8s.id
     }
+  }
+  contexts {
     attributes {
       name  = "networkZoneId"
       value = ibm_cbr_zone.cbr_zone_homezone.id
     }
-
   }
 
   description      = "restrict COS access, limit to cluster"
@@ -85,6 +86,8 @@ resource "ibm_cbr_rule" "cbr_rule_kms" {
       name  = "networkZoneId"
       value = ibm_cbr_zone.cbr_zone_k8s.id
     }
+  }
+  contexts {
     attributes {
       name  = "networkZoneId"
       value = ibm_cbr_zone.cbr_zone_cos.id
