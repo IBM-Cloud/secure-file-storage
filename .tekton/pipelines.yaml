@@ -47,9 +47,9 @@ spec:
       name: icr-containerize
     params:
     - name: path-to-context
-      value: "/app"
+      value: "app"
     - name: path-to-dockerfile
-      value: "/app"
+      value: "app"
     - name: additional-tags
       value: "latest"
     - name: properties-file
@@ -110,6 +110,7 @@ spec:
     - name: git-branch
     - name: registry-namespace
     - name: image-name
+    - name: registry-region
   tasks:
   - name: uninstall-app
     workspaces:
@@ -128,5 +129,7 @@ spec:
       value: $(params.registry-namespace)
     - name: image-name
       value: $(params.image-name)
+    - name: registry-region
+      value: $(params.registry-region)
     taskRef:
        name: task-uninstall-app

@@ -22,3 +22,6 @@ local_yaml
 #vim swap files
 [._]*.sw[a-p]
 terraform/.terraform.lock.hcl
+
+#
+local.env

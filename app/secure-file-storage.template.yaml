@@ -27,10 +27,10 @@ spec:
       labels:
         app: secure-file-storage
     spec:
-# Uncomment only if you are not deploying to the default namespace
-# In this case, make sure to create a Docker registry secret
-#      imagePullSecrets:
-#        - name: $IMAGE_PULL_SECRET
+## Uncomment only if you are not deploying to the default namespace, remove ##
+## In this case, make sure to create a Docker registry secret
+##      imagePullSecrets:
+##        - name: $IMAGE_PULL_SECRET
       containers:
       - name: secure-file-storage-container
         image: $IMAGE_REPOSITORY:latest
@@ -63,9 +63,9 @@ spec:
   - hosts:
     - secure-file-storage.$INGRESS_SUBDOMAIN
     secretName: $INGRESS_SECRET
-# Uncomment below if you are using a custom domain
+## Uncomment below if you are using a custom domain.  Remove '# '
 #   - hosts:
-#     - secure-file-storage.<your custom domain>
+#     - secure-file-storage.$MYDOMAIN
 #     secretName: secure-file-storage-certificate
   rules:
   - host: secure-file-storage.$INGRESS_SUBDOMAIN
@@ -78,8 +78,8 @@ spec:
             name: secure-file-storage-service
             port: 
               number: 8081
-# Uncomment below if you are using a custom domain
-#   - host: secure-file-storage.<your custom domain>
+## Uncomment below if you are using a custom domain. Remove '# '
+#   - host: secure-file-storage.$MYDOMAIN
 #     http:
 #       paths:
 #       - path: /
@@ -90,21 +90,21 @@ spec:
 #             port:
 #               number: 8081
 # ---
-# apiVersion: external-secrets.io/v1alpha1
+# apiVersion: external-secrets.io/v1beta1
 # kind: SecretStore
 # metadata:
 #   name: secure-file-storage-secretstore
 # spec:
 #   provider:
 #     ibm:
-#       serviceUrl: <secrets manager api url>
+#       serviceUrl: $SECRETS_MANAGER_API_URL
 #       auth:
 #         secretRef:
 #           secretApiKeySecretRef:
 #             name: secure-file-storage-api-key
 #             key: apikey
 # ---
-# apiVersion: external-secrets.io/v1alpha1
+# apiVersion: external-secrets.io/v1beta1
 # kind: ExternalSecret
 # metadata:
 #   name: secure-file-storage-external-secret
@@ -124,9 +124,9 @@ spec:
 #   data:
 #   - secretKey: sfscrt
 #     remoteRef:
-#       key: imported_cert/<certifcate ID>
+#       key: public_cert/$PUBLIC_CERT_ID
 #       property: certificate
 #   - secretKey: sfskey
 #     remoteRef:
-#       key: imported_cert/<certifcate ID>
+#       key: public_cert/$PUBLIC_CERT_ID
 #       property: private_key

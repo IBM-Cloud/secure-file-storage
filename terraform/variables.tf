@@ -67,3 +67,39 @@ variable "cbr_enforcement_mode" {
 variable "homezone_iprange" {
   default = "0.0.0.0-255.255.255.255"
 }
+
+# variables for the toolchain
+
+#variable "IC_SCHEMATICS_WORKSPACE_ID" {
+#  description = "ID of this Schematics workspace, filled automatically, LEAVE EMPTY"
+#}
+
+variable "toolchain_registry_namespace" {
+  description = "namespace in the Container Registry to store the container image"
+}
+
+variable "toolchain_registry_region" {
+  description = "region of the Container Registry"
+  default = "us-south"
+}
+
+variable "toolchain_image_name" {
+  description = "name of the container image"
+  default = "secure-file-storage"
+}
+
+variable "toolchain_git_repository" {
+  description = "repository with app source code"
+  default = "https://github.com/IBM-Cloud/secure-file-storage"
+}
+
+variable "toolchain_git_branch" {
+  description = "branch with app source code"
+  default = "master"
+}
+
+variable "toolchain_apikey" {
+  description = "IBM Cloud API key to build and deploy the app"
+  default = ""
+  sensitive = true
+}
