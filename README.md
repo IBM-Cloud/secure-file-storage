@@ -57,7 +57,7 @@ Next, optionally click "**Generate plan**" to verify everything would be working
 Go to the [toolchains](https://cloud.ibm.com/devops/toolchains) page. Make sure to be in the correct region. Click on the toolchain **secure-file-storage-toolchain**, then on the delivery pipeline **secure-file-storage-pipeline**. Finally, **Run Pipeline** and choose the manual trigger **manual-trigger-builddeploy** to build and deploy the app. You can click on the details of the pipeline run to see and examine the diagnostic logs.
 
 ### Uninstall
-The toolchain includes a trigger to uninstall the app. Click **Run Pipeline**, select the trigger **manual-trigger-uninstall** and run the pipeline. When it has finished, switch to the [Schematics workspace](https://cloud.ibm.com/schematics/workspaces) and select the action to **Destroy resources**. As an alternative, you could also select **Delete workspace** which removes the resources and the workspace.
+The toolchain includes a trigger to uninstall the app. Click **Run Pipeline**, select the trigger **manual-trigger-uninstall** and run the pipeline. When it has finished, switch to the [Schematics workspace](https://cloud.ibm.com/schematics/workspaces) and select the action to **Destroy resources**. Thereafter, select **Delete workspace** which removes the workspace itself. Only deleting the workspace keeps the resources.
 
 ## Code Structure
 The file for the Infrastructure as Code, the Continuous Delivery pipeline, and the app itself are organized in several directories.
