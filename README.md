@@ -1,5 +1,9 @@
 > Older code versions for this tutorial can be found in the branches [archive_classic_tekton](https://github.com/IBM-Cloud/secure-file-storage/tree/archive_classic_tekton) and [classic_pipeline_RETIRED](https://github.com/IBM-Cloud/secure-file-storage/tree/classic_pipeline_RETIRED).
 
+This repository is used by two IBM Cloud solution tutorials:
+- [Apply end to end security to a cloud application](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cloud-e2e-security)
+- [Enhance cloud security by applying context-based restrictions](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cbr-security)
+
 # Apply end to end security to a cloud application
 
 The repository features a sample application that enables groups of users to upload files to a common storage pool and to provide access to those files via shareable links. The application is written in Node.js and deployed as Docker container to the IBM Cloud Kubernetes service. It leverages several security-related services and features to improve app security. It includes data encrypted with your own keys, user authentication, and security auditing.
@@ -14,6 +18,14 @@ Refer to [this tutorial](https://cloud.ibm.com/docs/solution-tutorials?topic=sol
 4. Files uploaded by the user are stored in [Cloud Object Storage](https://cloud.ibm.com/catalog/services/cloud-object-storage).
 5. The bucket where the files are stored is using a user-provided key to encrypt the data.
 6. All activities related to managing the solution are logged by [Cloud Activity Tracker with LogDNA](https://cloud.ibm.com/catalog/services/logdnaat).
+
+The application can be deployed using a toolchain.
+
+# Enhance cloud security by applying context-based restrictions
+To further enhance security, context-based restrictions are implemented on top the deployed resources as shown.
+![](Architecture_cbr.png)
+
+Refer to the tutorial [Enhance cloud security by applying context-based restrictions](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cbr-security) for details and instructions.
 
 ## Deploy with a toolchain and Terraform
 
