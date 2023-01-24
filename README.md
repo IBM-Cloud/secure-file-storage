@@ -2,7 +2,7 @@
 
 This repository is used by two IBM Cloud solution tutorials:
 - [Apply end to end security to a cloud application](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cloud-e2e-security)
-- [Enhance cloud security by applying context-based restrictions](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cbr-security)
+- [Enhance cloud security by applying context-based restrictions](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cbr-enhanced-security)
 
 # Apply end to end security to a cloud application
 
@@ -25,7 +25,7 @@ The application can be deployed using a toolchain.
 To further enhance security, context-based restrictions are implemented on top the deployed resources as shown.
 ![](Architecture_cbr.png)
 
-Refer to the tutorial [Enhance cloud security by applying context-based restrictions](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cbr-security) for details and instructions.
+Refer to the tutorial [Enhance cloud security by applying context-based restrictions](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cbr-enhanced-security) for details and instructions.
 
 ## Deploy with a toolchain and Terraform
 
