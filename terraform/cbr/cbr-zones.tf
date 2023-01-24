@@ -11,7 +11,7 @@ resource "ibm_cbr_zone" "cbr_zone_homezone" {
   account_id = data.ibm_iam_account_settings.team_iam_account_settings.account_id
   addresses {
     type  = "ipRange"
-    value = var.homezone_iprange
+    value = var.cbr_homezone_iprange
   }
   description = "Zone for typical home network"
   name        = "cbr_zone_homenetwork"

@@ -42,6 +42,9 @@ Configure all required variables:
 - **toolchain_registry_namespace**: The existing namespace in the Container Registry to use.
 - **toolchain_registry_region**: The Container Registry region
 - **toolchain_apikey**: An IBM Cloud API key to use for building the container image with the app, pushing it to the Container Registry, and deploying it to the Kubernetes cluster.
+- **deploy_cbr**: Indicates whether the CBR zones and rules should be deployed. `false` by default and can be set to `true`.
+- **cbr_enforcement_mode**: By default, the CBR rules are in `report` mode only. Change and set to `enforced` or `disabled`.
+- **cbr_homezone_iprange**: Can be set to the IP range of your home or bastion network. 
 
 Be sure to click "**Save**".
 

@@ -111,8 +111,6 @@ resource "ibm_cbr_rule" "cbr_rule_kms" {
       operator = "stringEquals"
       value    = "kms"
     }
-
-
   }
 }
 

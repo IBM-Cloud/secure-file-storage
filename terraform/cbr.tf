@@ -6,5 +6,5 @@ module "cbr_objects" {
   cbr_enforcement_mode = var.cbr_enforcement_mode
   cos                  = ibm_resource_instance.cos
   keyprotect           = ibm_resource_instance.keyprotect
-  homezone_iprange     = var.homezone_iprange
+  cbr_homezone_iprange = var.cbr_homezone_iprange
 }

@@ -64,7 +64,7 @@ variable "cbr_enforcement_mode" {
 
 # define a homezone or bastion zone
 # change the setting in tfvars
-variable "homezone_iprange" {
+variable "cbr_homezone_iprange" {
   default = "0.0.0.0-255.255.255.255"
 }
 
