@@ -62,4 +62,3 @@ resource "kubernetes_config_map_v1_data" "ibm_k8s_controller_config" {
   }
   force = "true"
 }
-

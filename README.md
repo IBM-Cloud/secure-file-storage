@@ -6,7 +6,7 @@ The repository features a sample application that enables groups of users to upl
 
 Refer to [this tutorial](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cloud-e2e-security) for instructions.
 
-![Architecture](Architecture.png)
+![Architecture](Architecture.svg)
 
 1. The user connects to the application.
 2. [App ID](https://cloud.ibm.com/catalog/services/AppID) secures the application and redirects the user to the authentication page. Users can sign up from there too.
@@ -36,12 +36,15 @@ Either create the Schematics workspace automatically by clicking this ["deploy l
 Configure all required variables:
 - **basename**: project basename which is used as prefix for names, e.g., secure-file-storage
 - **region** is where the resources will be deployed and the location of the existing Kubernetes cluster: us-south, eu-de, ...
-- **iks_cluster_name**: name of your existing (VPC-based) Kubernetes cluster
+- **iks_cluster_name**: name of your existing VPC-based Kubernetes cluster
 - **iks_namespace**: Kubernetes namespace into which to deploy the app. It will be created if it does not exist.
 - **resource_group** is the name of the IBM Cloud resource group where to deploy the services into.
 - **toolchain_registry_namespace**: The existing namespace in the Container Registry to use.
 - **toolchain_registry_region**: The Container Registry region
 - **toolchain_apikey**: An IBM Cloud API key to use for building the container image with the app, pushing it to the Container Registry, and deploying it to the Kubernetes cluster.
+- **deploy_cbr**: Indicates whether the CBR zones and rules should be deployed. `false` by default and can be set to `true`.
+- **cbr_enforcement_mode**: By default, the CBR rules are in `report` mode only. Change and set to `enforced` or `disabled`.
+- **cbr_homezone_iprange**: Can be set to the IP range of your home or bastion network. 
 
 Be sure to click "**Save**".
 
@@ -57,7 +60,7 @@ Next, optionally click "**Generate plan**" to verify everything would be working
 Go to the [toolchains](https://cloud.ibm.com/devops/toolchains) page. Make sure to be in the correct region. Click on the toolchain **secure-file-storage-toolchain**, then on the delivery pipeline **secure-file-storage-pipeline**. Finally, **Run Pipeline** and choose the manual trigger **manual-trigger-builddeploy** to build and deploy the app. You can click on the details of the pipeline run to see and examine the diagnostic logs.
 
 ### Uninstall
-The toolchain includes a trigger to uninstall the app. Click **Run Pipeline**, select the trigger **manual-trigger-uninstall** and run the pipeline. When it has finished, switch to the [Schematics workspace](https://cloud.ibm.com/schematics/workspaces) and select the action to **Destroy resources**. As an alternative, you could also select **Delete workspace** which removes the resources and the workspace.
+The toolchain includes a trigger to uninstall the app. Click **Run Pipeline**, select the trigger **manual-trigger-uninstall** and run the pipeline. When it has finished, switch to the [Schematics workspace](https://cloud.ibm.com/schematics/workspaces) and select the action to **Destroy resources**. Thereafter, select **Delete workspace** which removes the workspace itself. Only deleting the workspace keeps the resources.
 
 ## Code Structure
 The file for the Infrastructure as Code, the Continuous Delivery pipeline, and the app itself are organized in several directories.

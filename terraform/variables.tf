@@ -48,6 +48,26 @@ variable "kp_plan" {
   default     = "tiered-pricing"
 }
 
+# ----------------------------------------
+# Variables for context-based restrictions
+# ----------------------------------------
+
+# deploy the CBR objects? By default false
+variable "deploy_cbr" {
+  default = false
+}
+
+# configure the enforcement mode for CBR
+variable "cbr_enforcement_mode" {
+  default = "report"
+}
+
+# define a homezone or bastion zone
+# change the setting in tfvars
+variable "cbr_homezone_iprange" {
+  default = "0.0.0.0-255.255.255.255"
+}
+
 # variables for the toolchain
 
 #variable "IC_SCHEMATICS_WORKSPACE_ID" {

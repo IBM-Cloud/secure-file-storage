@@ -2,6 +2,11 @@ data "ibm_resource_group" "cloud_development" {
   name = var.resource_group
 }
 
+# NOT NEEDED
+#data "ibm_is_vpc" "vpc" {
+#  name = var.vpcname
+#}
+
 # Create a service ID for security resources.
 # The name is appended by the target resource group to distinguish
 # between deployment environments
