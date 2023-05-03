@@ -78,6 +78,8 @@ spec:
       value: $(tasks.build.results.image-repository)
     - name: image-digest
       value: $(tasks.build.results.image-digest)
+    - name: fail-on-scanned-issues
+      value: $(params.fail-on-scanned-issues)
     workspaces:
     - name: artifacts
       workspace: pipeline-ws

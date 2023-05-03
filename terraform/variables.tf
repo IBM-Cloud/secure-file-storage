@@ -103,3 +103,8 @@ variable "toolchain_apikey" {
   default = ""
   sensitive = true
 }
+
+variable "toolchain_failscan" {
+  description = "fail when image scan finds issues"
+  default = "true"
+}
