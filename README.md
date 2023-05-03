@@ -105,7 +105,7 @@ Located in the [app](app) directory:
 
 
 ### To test locally
-The app can be tested and developed locally with a deployed app in place. The reason is that access is guarded by an access token. That token can only be issued in the Kubernetes environment with App ID intercepting requests.
+The app can be tested and developed locally, however it requires a version (same or different to the local version) of the app to be deployed in Kubernetes. The reason is that access is guarded by an access token. That token can only be issued in the Kubernetes environment with App ID intercepting requests.
 
 To test locally:
 1. Follow the tutorial instructions to have the app deployed to a cluster. Specially the sections to create all the services and to populate the `credentials.env` file. You will need the public instead of the private COS endpoint in order to access Cloud Object Storage from your machine.
