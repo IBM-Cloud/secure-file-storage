@@ -13,19 +13,20 @@ require('dotenv').config({
 var allowAnonymousAccess = process.env.allow_anonymous || false;
 
 // Initialize Cloudant
-var Cloudant = require('@cloudant/cloudant');
-var cloudant = new Cloudant({
-  url: process.env.cloudant_url,
-  plugins: [
-    'promises',
-    {
-      iamauth: {
-        iamApiKey: process.env.cloudant_iam_apikey
-      }
-    }
-  ]
+CLOUDANT_APIKEY=process.env.cloudant_iam_apikey;
+CLOUDANT_URL=process.env.cloudant_url;
+CLOUDANT_DB=process.env.cloudant_database || 'secure-file-storage-metadata';
+const { IamAuthenticator } = require('ibm-cloud-sdk-core');
+const authenticator = new IamAuthenticator({
+  apikey: CLOUDANT_APIKEY
 });
-var db = cloudant.db.use(process.env.cloudant_database || 'secure-file-storage-metadata');
+
+const { CloudantV1 } = require('@ibm-cloud/cloudant');
+
+const cloudant = CloudantV1.newInstance({authenticator: authenticator});
+cloudant.setServiceUrl(CLOUDANT_URL);
+
+
 
 var CloudObjectStorage = require('ibm-cos-sdk');
 
@@ -126,38 +127,52 @@ function getSub(req) {
 
 // Returns all files associated to the current user
 app.get('/api/files', async function (req, res) {
-  try {
-    const body = await db.find({
-      selector: {
-        userId: getSub(req),
-      }
-    });
-    res.send(body.docs.map(function (item) {
+  // filter on the userId which is the subject in the access token
+  const selector= {
+    userId: {
+      '$eq':  getSub(req)
+    }
+  };
+  // Cloudant API to find documents
+  cloudant.postFind({
+    db: CLOUDANT_DB,
+    selector: selector,
+  }).then(response => {
+    // remove some metadata
+    res.send(response.result.docs.map(function (item) {
       item.id = item._id
       delete item._id;
       delete item._rev;
       return item;
     }));
-  } catch (err) {
-    console.log(err);
-    res.status(500).send(err);
-  }
+  }).catch(error => {
+      console.log(error.status, error.message);
+      res.status(500).send(error.message);
+    }
+  );
 });
+  
 
 // Generates a pre-signed URL to access a file owned by the current user
 app.get('/api/files/:id/url', async function (req, res) {
-  try {
-    const result = await db.find({
-      selector: {
-        _id: req.params.id,
-        userId: getSub(req),
-      }
-    });
-    if (result.docs.length === 0) {
+  const selector= {
+    userId: {
+      '$eq':  getSub(req)
+    },
+    _id: {
+      '$eq': req.params.id,
+    }
+  };
+  // Cloudant API to find documents
+  cloudant.postFind({
+    db: CLOUDANT_DB,
+    selector: selector,
+  }).then(response => {
+    if (response.result.docs.length === 0) {
       res.status(404).send({ message: 'Document not found' });
       return;
     }
-    const doc = result.docs[0];
+    const doc = response.result.docs[0];
     const url = cosUrlGenerator.getSignedUrl('getObject', {
       Bucket: COS_BUCKET_NAME,
       Key: `${doc.userId}/${doc._id}/${doc.name}`,
@@ -166,10 +181,10 @@ app.get('/api/files/:id/url', async function (req, res) {
 
     console.log(`[OK] Built signed url for ${req.params.id}`);
     res.send({ url });
-  } catch (err) {
+  }).catch(error => {
     console.log(`[KO] Could not retrieve document ${req.params.id}`, err);
     res.status(500).send(err);
-  }
+  });
 });
 
 // Uploads files, associating them to the current user
@@ -191,69 +206,90 @@ app.post('/api/files', function (req, res) {
       userId: getSub(req),
     };
 
-    try {
       console.log(`New file to upload: ${fileDetails.name} (${fileDetails.size} bytes)`);
 
       // create Cloudant document
-      const doc = await db.insert(fileDetails);
-      fileDetails.id = doc.id;
-
+      cloudant.postDocument({
+        db: CLOUDANT_DB,
+        document: fileDetails
+      }).then(async response => {
+        console.log(response);
+        fileDetails.id = response.result.id;        
+      
       // upload to COS
       await cos.upload({
         Bucket: COS_BUCKET_NAME,
         Key: `${fileDetails.userId}/${fileDetails.id}/${fileDetails.name}`,
         Body: fs.createReadStream(file.path),
         ContentType: fileDetails.type,
-      }).promise();
+      }).promise()
 
       // reply with the document
       console.log(`[OK] Document ${fileDetails.id} uploaded to storage`);
       res.send(fileDetails);
-    } catch (err) {
-      console.log(`[KO] Failed to upload ${fileDetails.name}`, err);
-      res.status(500).send(err);
-    }
-
-    // delete the file once uploaded
-    fs.unlink(file.path, (err) => {
-      if (err) { console.log(err) }
+            // delete the file once uploaded
+            fs.unlink(file.path, (err) => {
+              if (err) { console.log(err) }
+              });
+    }).catch (error => {
+      console.log(`[KO] Failed to upload ${fileDetails.name}`, error.message);
+      res.status(500).send(error.status, error.message);
     });
   });
 });
 
+
 // Deletes a file associated with the current user
 app.delete('/api/files/:id', async function (req, res) {
-  try {
-    console.log(`Deleting document ${req.params.id}`);
-
-    // get the doc from cloudant, ensuring it is owned by the current user
-    const result = await db.find({
-      selector: {
-        _id: req.params.id,
-        userId: getSub(req),
-      }
-    });
-    if (result.docs.length === 0) {
+  
+  console.log(`Deleting document ${req.params.id}`);
+  // get the doc from cloudant, ensuring it is owned by the current user
+  // filter on the userId which is the subject in the access token
+  // AND the document ID
+  const selector= {
+    userId: {
+      '$eq':  getSub(req)
+    },
+    _id: {
+      '$eq': req.params.id,
+    }
+  };
+  // Cloudant API to find documents
+  cloudant.postFind({
+    db: CLOUDANT_DB,
+    selector: selector
+  }).then(response => {
+    if (response.result.docs.length === 0) {
       res.status(404).send({ message: 'Document not found' });
       return;
     }
-    const doc = result.docs[0];
-
-    // remove the COS object
-    console.log(`Removing file ${doc.userId}/${doc._id}/${doc.name}`);
-    await cos.deleteObject({
-      Bucket: COS_BUCKET_NAME,
-      Key: `${doc.userId}/${doc._id}/${doc.name}`
-    }).promise();
-
+    const doc = response.result.docs[0];
+          // remove the COS object
+      console.log(`Removing file ${doc.userId}/${doc._id}/${doc.name}`);
+    
+      cos.deleteObject({
+        Bucket: COS_BUCKET_NAME,
+        Key: `${doc.userId}/${doc._id}/${doc.name}`
+      }).promise();
+  
     // remove the cloudant object
-    await db.destroy(doc._id, doc._rev);
+    cloudant.deleteDocument({
+      db: CLOUDANT_DB,
+      docId: doc._id,
+      rev: doc._rev
+    }).then(response => {
+      console.log(`[OK] Successfully deleted ${doc._id}`);
+      res.status(204).send();
+    }).catch(error => {
+      console.log(error.status, error.message);
+      res.status(500).send(error.message);
+    });
 
-    console.log(`[OK] Successfully deleted ${doc._id}`);
-    res.status(204).send();
-  } catch (err) {
-    res.status(500).send(err);
-  }
+  }).catch(error => {
+    console.log(error.status, error.message);
+    res.status(500).send(error.message);
+  });
+  
 });
 
 // Called by App ID when the authorization flow completes
