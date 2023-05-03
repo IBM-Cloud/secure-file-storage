@@ -54,6 +54,8 @@ spec:
             value: $(params.registry-region)
           - name: image-name
             value: $(params.image-name)
+          - name: fail-on-scanned-issues
+            value: $(params.fail-on-scanned-issues)
         workspaces:
           - name: pipeline-ws
             persistentVolumeClaim:
