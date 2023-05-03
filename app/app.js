@@ -1,3 +1,12 @@
+// Sample app to store and access files securely 
+// 
+// The app provides a simple web-based service to upload, store, and access
+// files. Files can be shared via an expiring file link.
+// The app uses IBM Cloudant to store file metadata and IBM Cloud Object Storage
+// for the actual file object.
+//
+// The API functions are called from client-side JavaScript
+
 var express = require('express'),
   formidable = require('formidable'),
   cookieParser = require('cookie-parser'),
@@ -12,10 +21,20 @@ require('dotenv').config({
 
 var allowAnonymousAccess = process.env.allow_anonymous || false;
 
+// some values taken from the environment
+const CLOUDANT_APIKEY = process.env.cloudant_iam_apikey;
+const CLOUDANT_URL = process.env.cloudant_url;
+const CLOUDANT_DB = process.env.cloudant_database || 'secure-file-storage-metadata';
+
+const COS_BUCKET_NAME = process.env.cos_bucket_name;
+const COS_ENDPOINT = process.env.cos_endpoint;
+const COS_APIKEY = process.env.cos_apiKey;
+const COS_IAM_AUTH_ENDPOINT = process.env.cos_ibmAuthEndpoint || 'https://iam.cloud.ibm.com/identity/token';
+const COS_INSTANCE_ID = process.env.cos_resourceInstanceID;
+const COS_ACCESS_KEY_ID = process.env.cos_access_key_id;
+const COS_SECRET_ACCESS_KEY = process.env.cos_secret_access_key;
+
 // Initialize Cloudant
-CLOUDANT_APIKEY=process.env.cloudant_iam_apikey;
-CLOUDANT_URL=process.env.cloudant_url;
-CLOUDANT_DB=process.env.cloudant_database || 'secure-file-storage-metadata';
 const { IamAuthenticator } = require('ibm-cloud-sdk-core');
 const authenticator = new IamAuthenticator({
   apikey: CLOUDANT_APIKEY
@@ -23,20 +42,17 @@ const authenticator = new IamAuthenticator({
 
 const { CloudantV1 } = require('@ibm-cloud/cloudant');
 
-const cloudant = CloudantV1.newInstance({authenticator: authenticator});
+const cloudant = CloudantV1.newInstance({ authenticator: authenticator });
 cloudant.setServiceUrl(CLOUDANT_URL);
 
-
-
-var CloudObjectStorage = require('ibm-cos-sdk');
-
 // Initialize the COS connection.
+var CloudObjectStorage = require('ibm-cos-sdk');
 // This connection is used when interacting with the bucket from the app to upload/delete files.
 var config = {
-  endpoint: process.env.cos_endpoint,
-  apiKeyId: process.env.cos_apiKey,
-  ibmAuthEndpoint: process.env.cos_ibmAuthEndpoint || 'https://iam.cloud.ibm.com/identity/token',
-  serviceInstanceId: process.env.cos_resourceInstanceID,
+  endpoint: COS_ENDPOINT,
+  apiKeyId: COS_APIKEY,
+  ibmAuthEndpoint: COS_IAM_AUTH_ENDPOINT,
+  serviceInstanceId: COS_INSTANCE_ID,
 };
 var cos = new CloudObjectStorage.S3(config);
 
@@ -45,7 +61,7 @@ var cos = new CloudObjectStorage.S3(config);
 // able to access the content from their own computer.
 //
 // We derive the COS public endpoint from what should be the private/direct endpoint.
-let cosPublicEndpoint = process.env.cos_endpoint;
+let cosPublicEndpoint = COS_ENDPOINT;
 if (cosPublicEndpoint.startsWith('s3.private')) {
   cosPublicEndpoint = `s3${cosPublicEndpoint.substring('s3.private'.length)}`;
 } else if (cosPublicEndpoint.startsWith('s3.direct')) {
@@ -56,16 +72,15 @@ console.log('Public endpoint for COS is', cosPublicEndpoint);
 var cosUrlGenerator = new CloudObjectStorage.S3({
   endpoint: cosPublicEndpoint,
   credentials: new CloudObjectStorage.Credentials(
-    process.env.cos_access_key_id,
-    process.env.cos_secret_access_key, sessionToken = null),
+    COS_ACCESS_KEY_ID,
+    COS_SECRET_ACCESS_KEY, sessionToken = null),
   signatureVersion: 'v4',
 });
 
-const COS_BUCKET_NAME = process.env.cos_bucket_name;
-
-// Define routes
+// Simple Express setup
 var app = express();
 app.use(cookieParser());
+// Define routes
 app.use('/', express.static(__dirname + '/public'));
 
 // Decodes access and identity tokens sent by App ID in the Authorization header
@@ -115,6 +130,7 @@ app.use('/api/', (req, res, next) => {
   }
 });
 
+// Extract the subject out of the access token
 function getSub(req) {
   if (req.appIdAuthorizationContext) {
     return req.appIdAuthorizationContext.access_token.sub;
@@ -128,9 +144,9 @@ function getSub(req) {
 // Returns all files associated to the current user
 app.get('/api/files', async function (req, res) {
   // filter on the userId which is the subject in the access token
-  const selector= {
+  const selector = {
     userId: {
-      '$eq':  getSub(req)
+      '$eq': getSub(req)
     }
   };
   // Cloudant API to find documents
@@ -146,18 +162,18 @@ app.get('/api/files', async function (req, res) {
       return item;
     }));
   }).catch(error => {
-      console.log(error.status, error.message);
-      res.status(500).send(error.message);
-    }
+    console.log(error.status, error.message);
+    res.status(500).send(error.message);
+  }
   );
 });
-  
+
 
 // Generates a pre-signed URL to access a file owned by the current user
 app.get('/api/files/:id/url', async function (req, res) {
-  const selector= {
+  const selector = {
     userId: {
-      '$eq':  getSub(req)
+      '$eq': getSub(req)
     },
     _id: {
       '$eq': req.params.id,
@@ -206,16 +222,16 @@ app.post('/api/files', function (req, res) {
       userId: getSub(req),
     };
 
-      console.log(`New file to upload: ${fileDetails.name} (${fileDetails.size} bytes)`);
+    console.log(`New file to upload: ${fileDetails.name} (${fileDetails.size} bytes)`);
 
-      // create Cloudant document
-      cloudant.postDocument({
-        db: CLOUDANT_DB,
-        document: fileDetails
-      }).then(async response => {
-        console.log(response);
-        fileDetails.id = response.result.id;        
-      
+    // create Cloudant document
+    cloudant.postDocument({
+      db: CLOUDANT_DB,
+      document: fileDetails
+    }).then(async response => {
+      console.log(response);
+      fileDetails.id = response.result.id;
+
       // upload to COS
       await cos.upload({
         Bucket: COS_BUCKET_NAME,
@@ -227,11 +243,11 @@ app.post('/api/files', function (req, res) {
       // reply with the document
       console.log(`[OK] Document ${fileDetails.id} uploaded to storage`);
       res.send(fileDetails);
-            // delete the file once uploaded
-            fs.unlink(file.path, (err) => {
-              if (err) { console.log(err) }
-              });
-    }).catch (error => {
+      // delete the file once uploaded
+      fs.unlink(file.path, (err) => {
+        if (err) { console.log(err) }
+      });
+    }).catch(error => {
       console.log(`[KO] Failed to upload ${fileDetails.name}`, error.message);
       res.status(500).send(error.status, error.message);
     });
@@ -241,14 +257,14 @@ app.post('/api/files', function (req, res) {
 
 // Deletes a file associated with the current user
 app.delete('/api/files/:id', async function (req, res) {
-  
+
   console.log(`Deleting document ${req.params.id}`);
   // get the doc from cloudant, ensuring it is owned by the current user
   // filter on the userId which is the subject in the access token
   // AND the document ID
-  const selector= {
+  const selector = {
     userId: {
-      '$eq':  getSub(req)
+      '$eq': getSub(req)
     },
     _id: {
       '$eq': req.params.id,
@@ -264,14 +280,14 @@ app.delete('/api/files/:id', async function (req, res) {
       return;
     }
     const doc = response.result.docs[0];
-          // remove the COS object
-      console.log(`Removing file ${doc.userId}/${doc._id}/${doc.name}`);
-    
-      cos.deleteObject({
-        Bucket: COS_BUCKET_NAME,
-        Key: `${doc.userId}/${doc._id}/${doc.name}`
-      }).promise();
-  
+    // remove the COS object
+    console.log(`Removing file ${doc.userId}/${doc._id}/${doc.name}`);
+
+    cos.deleteObject({
+      Bucket: COS_BUCKET_NAME,
+      Key: `${doc.userId}/${doc._id}/${doc.name}`
+    }).promise();
+
     // remove the cloudant object
     cloudant.deleteDocument({
       db: CLOUDANT_DB,
@@ -289,7 +305,7 @@ app.delete('/api/files/:id', async function (req, res) {
     console.log(error.status, error.message);
     res.status(500).send(error.message);
   });
-  
+
 });
 
 // Called by App ID when the authorization flow completes
@@ -301,7 +317,7 @@ app.get('/api/tokens', function (req, res) {
   res.send(req.appIdAuthorizationContext);
 });
 
-app.get('/api/user', function(req, res) {
+app.get('/api/user', function (req, res) {
   let result = {};
   if (req.appIdAuthorizationContext) {
     result = {
@@ -316,6 +332,7 @@ app.get('/api/user', function(req, res) {
   res.send(result);
 });
 
+// start the server
 const server = app.listen(process.env.PORT || 8081, () => {
   console.log(`Listening on port http://0.0.0.0:${server.address().port}`);
 });
