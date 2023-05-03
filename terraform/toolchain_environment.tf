@@ -64,3 +64,10 @@ resource "ibm_cd_tekton_pipeline_property" "cd_env_deployment_apikey" {
   type        = "secure"
   value       = var.toolchain_apikey
 }
+
+resource "ibm_cd_tekton_pipeline_property" "cd_env_deployment_failscan" {
+  pipeline_id = ibm_cd_tekton_pipeline.cd_pipeline_instance.pipeline_id
+  name        = "fail-on-scanned-issues"
+  type        = "text"
+  value       = var.toolchain_failscan
+}

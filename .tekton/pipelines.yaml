@@ -14,6 +14,7 @@ spec:
     - name: registry-namespace
     - name: image-name
     - name: registry-region
+    - name: fail-on-scanned-issues
   resources:
     - name: app-image
       type: image
@@ -78,6 +79,8 @@ spec:
       value: $(tasks.build.results.image-repository)
     - name: image-digest
       value: $(tasks.build.results.image-digest)
+    - name: fail-on-scanned-issues
+      value: $(params.fail-on-scanned-issues)
     workspaces:
     - name: artifacts
       workspace: pipeline-ws

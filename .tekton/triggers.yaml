@@ -14,6 +14,8 @@ spec:
     - name: registry-namespace
     - name: registry-region
     - name: image-name
+    - name: fail-on-scanned-issues
+      description: fail if image determined insecure
   resourcetemplates:
     - apiVersion: v1
       kind: PersistentVolumeClaim
@@ -52,6 +54,8 @@ spec:
             value: $(params.registry-region)
           - name: image-name
             value: $(params.image-name)
+          - name: fail-on-scanned-issues
+            value: $(params.fail-on-scanned-issues)
         workspaces:
           - name: pipeline-ws
             persistentVolumeClaim:

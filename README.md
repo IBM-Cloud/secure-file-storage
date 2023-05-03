@@ -105,14 +105,17 @@ Located in the [app](app) directory:
 
 
 ### To test locally
+The app can be tested and developed locally, however it requires a version (same or different to the local version) of the app to be deployed in Kubernetes. The reason is that access is guarded by an access token. That token can only be issued in the Kubernetes environment with App ID intercepting requests.
 
+To test locally:
 1. Follow the tutorial instructions to have the app deployed to a cluster. Specially the sections to create all the services and to populate the `credentials.env` file. You will need the public instead of the private COS endpoint in order to access Cloud Object Storage from your machine.
 1. Access the tokens with `https://secure-file-storage.<INGRESS_SUBDOMAIN>/api/tokens`. This will shows the raw App ID authorization header together with the decode JWT tokens for your session.
 1. In your local shell:
    ```
    export TEST_AUTHORIZATION_HEADER="<value of the header attribute 'Bearer ... ...'>"
    ```
-1. npm start
+1. `npm start` or `node app.js` to start the app.
+1. Access the local app through the shown URL. Now, you can change the app source code and test locally.
 
 
 ## License
