@@ -213,30 +213,30 @@ app.post('/api/files', function (req, res) {
     res.status(500).send(err);
   });
 
-  form.on('file', async (name, file) => {
+  form.on('file', (name, file) => {
+    console.log(file);
     var fileDetails = {
-      name: file.name,
+      name: file.originalFilename,
       type: file.type,
       size: file.size,
       createdAt: new Date(),
       userId: getSub(req),
     };
 
-    console.log(`New file to upload: ${fileDetails.name} (${fileDetails.size} bytes)`);
+    console.log(`New file to upload: ${fileDetails.originalFilename} (${fileDetails.size} bytes)`);
 
     // create Cloudant document
     cloudant.postDocument({
       db: CLOUDANT_DB,
       document: fileDetails
     }).then(async response => {
-      console.log(response);
       fileDetails.id = response.result.id;
 
       // upload to COS
       await cos.upload({
         Bucket: COS_BUCKET_NAME,
-        Key: `${fileDetails.userId}/${fileDetails.id}/${fileDetails.name}`,
-        Body: fs.createReadStream(file.path),
+        Key: `${fileDetails.userId}/${fileDetails.id}/${fileDetails.originalFilename}`,
+        Body: fs.createReadStream(file.filepath),
         ContentType: fileDetails.type,
       }).promise()
 
@@ -244,7 +244,7 @@ app.post('/api/files', function (req, res) {
       console.log(`[OK] Document ${fileDetails.id} uploaded to storage`);
       res.send(fileDetails);
       // delete the file once uploaded
-      fs.unlink(file.path, (err) => {
+      fs.unlink(file.filepath, (err) => {
         if (err) { console.log(err) }
       });
     }).catch(error => {
