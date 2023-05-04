@@ -235,7 +235,7 @@ app.post('/api/files', function (req, res) {
       // upload to COS
       await cos.upload({
         Bucket: COS_BUCKET_NAME,
-        Key: `${fileDetails.userId}/${fileDetails.id}/${fileDetails.originalFilename}`,
+        Key: `${fileDetails.userId}/${fileDetails.id}/${fileDetails.name}`,
         Body: fs.createReadStream(file.filepath),
         ContentType: fileDetails.type,
       }).promise()
