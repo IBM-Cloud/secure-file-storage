@@ -26,10 +26,13 @@ if [[ -z "$TARGET_NAMESPACE" ]]; then
   export TARGET_NAMESPACE=default
 fi
 
+if [[ -z "$APPID_INSTANCE" ]]; then
+  export APPID_INSTANCE=sfsappid
+fi
 
 if [[ -z "$PUBLIC_CERT_ID" ]] && [[ -z "$SECRETS_MANAGER_API_URL" ]] && [[ -z "$MYDOMAIN" ]]; then
   cat secure-file-storage.template.yaml | \
-    envsubst '$IMAGE_NAME $INGRESS_SECRET $INGRESS_SUBDOMAIN $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' > secure-file-storage.yaml
+    envsubst '$APPID_INSTANCE $IMAGE_NAME $INGRESS_SECRET $INGRESS_SUBDOMAIN $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' > secure-file-storage.yaml
   exit
 fi
 
@@ -50,4 +53,4 @@ fi
 
 cat secure-file-storage.template.yaml | \
   sed -e 's/^# //' |
-  envsubst '$PUBLIC_CERT_ID $SECRETS_MANAGER_API_URL $MYDOMAIN $IMAGE_NAME $INGRESS_SECRET $INGRESS_SUBDOMAIN $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' > secure-file-storage.yaml
+  envsubst '$APPID_INSTANCE $PUBLIC_CERT_ID $SECRETS_MANAGER_API_URL $MYDOMAIN $IMAGE_NAME $INGRESS_SECRET $INGRESS_SUBDOMAIN $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' > secure-file-storage.yaml
