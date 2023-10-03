@@ -35,10 +35,6 @@ spec:
       spec:
         pipelineRef:
           name: pipeline-build-deploy
-        resources:
-          - name: app-image
-            resourceSpec:
-              type: image
         params:
           - name: git-repository
             value: $(params.git-repository)
