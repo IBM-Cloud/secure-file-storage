@@ -212,7 +212,7 @@ curl -X PUT \
   --header 'Content-Type: application/json' \
   --header 'Accept: application/json' \
   --header "Authorization: Bearer $APPID_ACCESS_TOKEN" \
-  -d '{ "redirectUris": [ "https://secure-file-storage.'$INGRESS_SUBDOMAIN'/oauth2-'$BASENAME'-appid/callback" ] }' \
+  -d '{ "redirectUris": [ "https://secure-file-storage.'$INGRESS_SUBDOMAIN'/oauth2-sfsappid/callback" ] }' \
   $APPID_MANAGEMENT_URL/config/redirect_uris
 
 #
