@@ -15,9 +15,6 @@ spec:
     - name: image-name
     - name: registry-region
     - name: fail-on-scanned-issues
-  resources:
-    - name: app-image
-      type: image
   workspaces:
   - name: pipeline-ws
   tasks:
@@ -64,10 +61,6 @@ spec:
     workspaces:
     - name: source
       workspace: pipeline-ws
-    resources:
-       outputs:
-        - name: built-image
-          resource: app-image
   - name: va-scan
     taskRef:
        name: icr-check-va-scan
