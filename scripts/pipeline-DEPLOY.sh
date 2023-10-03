@@ -186,8 +186,8 @@ API_KEY_VALUE=$(echo "$API_KEY_OUT" | jq -r '.apikey')
 # App ID
 #
 section "App ID"
-APPID_INSTANCE_ID=$(get_instance_id $BASENAME-appid)
-APPID_GUID=$(get_guid $BASENAME-appid)
+APPID_INSTANCE_ID=$(get_instance_id sfsappid)
+APPID_GUID=$(get_guid sfsappid)
 echo "APPID_INSTANCE_ID=$APPID_INSTANCE_ID"
 echo "APPID_GUID=$APPID_GUID"
 check_value "$APPID_INSTANCE_ID"
