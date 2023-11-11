@@ -15,7 +15,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ibm-cloud/cloudant": "^0.5.4",
+    "@ibm-cloud/cloudant": "^0.7.2",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.3",
     "async": "^3.2.4",
