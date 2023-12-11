@@ -7,17 +7,25 @@
 //
 // The API functions are called from client-side JavaScript
 
+
 var express = require('express'),
+  session=require('express-session')
   formidable = require('formidable'),
-  cookieParser = require('cookie-parser'),
   util = require('util'),
   fs = require("fs"),
   async = require('async');
+
+const {Strategy, Issuer} = require('openid-client');
 
 // Load environment variables from .env file
 require('dotenv').config({
   path: 'credentials.env'
 });
+var CloudObjectStorage = require('ibm-cos-sdk');
+const { IamAuthenticator } = require('ibm-cloud-sdk-core');
+const { CloudantV1 } = require('@ibm-cloud/cloudant');
+const passport = require('passport');
+
 
 var allowAnonymousAccess = process.env.allow_anonymous || false;
 
@@ -34,19 +42,62 @@ const COS_INSTANCE_ID = process.env.cos_resourceInstanceID;
 const COS_ACCESS_KEY_ID = process.env.cos_access_key_id;
 const COS_SECRET_ACCESS_KEY = process.env.cos_secret_access_key;
 
+const APPID_OAUTH_SERVER_URL= process.env.appid_oauth_server_url;
+const APPID_TENANT_ID= process.env.appid_tenant_id;
+const APPID_CLIENT_ID= process.env.appid_client_id;
+const APPID_SECRET= process.env.appid_secret;
+const APPID_APP_URL=process.env.appid_app_url;
+
+const LOGIN_URL = "/ibm/cloud/appid/login";
+const CALLBACK_URL = "/ibm/cloud/appid/callback";
+const LOGOUT_URL = "/ibm/cloud/appid/logout";
+const LANDING_PAGE_URL = "/";
+
+
+// Express setup, including session and passport support
+var app = express();
+app.use(session({
+  secret:'keyboard cat',
+  resave: true,
+  saveUninitialized: true}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Discover the OpenID Connect provider (issuer) from the well-known path
+// This makes it easier to configure
+(async () => {
+  const issuer = await Issuer.discover(APPID_OAUTH_SERVER_URL) // connect to oidc application
+  const client = new issuer.Client({ // Initialize issuer information
+      client_id: APPID_CLIENT_ID,
+      client_secret: APPID_SECRET
+  });
+  const params = {
+      redirect_uri: APPID_APP_URL+'/redirect_uri',
+      scope:'openid',
+      grant_type:'authorization_code',
+      response_type:'code',
+  }
+
+// Want to know more about the OpenID Connect provider? Uncomment the next line...
+// console.log('Discovered issuer %s %O', issuer.issuer, issuer.metadata);
+
+
+// Register oidc strategy with passport
+passport.use('oidc', new Strategy({ client, params }, (tokenset, userinfo, done) => {
+  return done(null, userinfo); // return user information
+}));
+
+
 // Initialize Cloudant
-const { IamAuthenticator } = require('ibm-cloud-sdk-core');
 const authenticator = new IamAuthenticator({
   apikey: CLOUDANT_APIKEY
 });
-
-const { CloudantV1 } = require('@ibm-cloud/cloudant');
 
 const cloudant = CloudantV1.newInstance({ authenticator: authenticator });
 cloudant.setServiceUrl(CLOUDANT_URL);
 
 // Initialize the COS connection.
-var CloudObjectStorage = require('ibm-cos-sdk');
+
 // This connection is used when interacting with the bucket from the app to upload/delete files.
 var config = {
   endpoint: COS_ENDPOINT,
@@ -77,76 +128,65 @@ var cosUrlGenerator = new CloudObjectStorage.S3({
   signatureVersion: 'v4',
 });
 
-// Simple Express setup
-var app = express();
-app.use(cookieParser());
-// Define routes
-app.use('/', express.static(__dirname + '/public'));
-
-// Decodes access and identity tokens sent by App ID in the Authorization header
-//
-// The token signature or expiration date are not verified here,
-// the App ID / Kubernetes integration does this for us.
-// The endpoint forbids API calls if the tokens are not found or
-// can not be decoded - which should not never happen in the context
-// of the App ID / Kubernetes integration.
-app.use('/api/', (req, res, next) => {
-  const auth = req.header('authorization') || process.env.TEST_AUTHORIZATION_HEADER;
-  if (!auth) {
-    if (allowAnonymousAccess) {
-      next();
-    } else {
-      res.status(403).send();
-    }
-  } else {
-    // authorization should be "Bearer <access_token> <identity_token>"
-    const parts = auth.split(' ');
-    if (parts.length !== 3) {
-      res.status(403).send({ message: 'Invalid Authorization header. Expecting "Bearer access_token identity_token".' })
-      return;
-    }
-    if (parts[0].toLowerCase() !== 'bearer') {
-      res.status(403).send({ message: 'Invalid Authorization header. Bearer not found.' });
-      return;
-    }
-    const jwt = require('jsonwebtoken');
-    const access_token = jwt.decode(parts[1]);
-    if (!access_token) {
-      res.status(403).send({ message: 'Invalid access token' });
-      return;
-    }
-    const identity_token = jwt.decode(parts[2]);
-    if (!identity_token) {
-      res.status(403).send({ message: 'Invalid identity token' });
-      return;
-    }
-
-    req.appIdAuthorizationContext = {
-      header: auth,
-      access_token,
-      identity_token,
-    };
-    next();
-  }
+// serialize and deserialize the user information
+passport.serializeUser(function(user, done) {
+  done(null, {
+    id: user["id"],
+    userName: user["userName"],
+    email: user["email"],
+    picture: user["picture"],
+  });
 });
 
-// Extract the subject out of the access token
-function getSub(req) {
-  if (req.appIdAuthorizationContext) {
-    return req.appIdAuthorizationContext.access_token.sub;
-  } else if (allowAnonymousAccess) {
-    return '__anonymous__';
-  } else {
-    throw new Error(403);
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
+
+
+
+// default protected route /authtest
+app.get('/authtest', (req, res, next) => {
+  passport.authenticate('oidc')(req, res, next);
+});
+
+// callback for the OpenID Connect identity provider
+// in the case of an error go back to authentication
+app.get('/redirect_uri', (req, res, next) => {
+  passport.authenticate('oidc', {
+    successRedirect: '/',
+    failureRedirect: '/authtest'
+  })(req, res, next);
+});
+
+
+// check that the user is authenticated, else redirect
+var checkAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) { 
+      return next() 
   }
+  res.redirect("/authtest")
 }
+
+//
+// Define routes
+//
+
+// The index document already is protected
+app.use('/', checkAuthenticated, express.static(__dirname + '/public'));
+
+
+// Makes sure that all requests to /api are authenticated
+app.use('/api/',checkAuthenticated , (req, res, next) => {
+  next();
+});
+
 
 // Returns all files associated to the current user
 app.get('/api/files', async function (req, res) {
-  // filter on the userId which is the subject in the access token
+  // filter on the userId (email)
   const selector = {
     userId: {
-      '$eq': getSub(req)
+      '$eq': req.user.email
     }
   };
   // Cloudant API to find documents
@@ -173,7 +213,7 @@ app.get('/api/files', async function (req, res) {
 app.get('/api/files/:id/url', async function (req, res) {
   const selector = {
     userId: {
-      '$eq': getSub(req)
+      '$eq': req.user.email,
     },
     _id: {
       '$eq': req.params.id,
@@ -214,16 +254,16 @@ app.post('/api/files', function (req, res) {
   });
 
   form.on('file', (name, file) => {
-    console.log(file);
+    //console.log(file);
     var fileDetails = {
       name: file.originalFilename,
       type: file.type,
       size: file.size,
       createdAt: new Date(),
-      userId: getSub(req),
+      userId: req.user.email,
     };
 
-    console.log(`New file to upload: ${fileDetails.originalFilename} (${fileDetails.size} bytes)`);
+    console.log(`New file to upload: ${fileDetails.name} (${fileDetails.size} bytes)`);
 
     // create Cloudant document
     cloudant.postDocument({
@@ -243,7 +283,7 @@ app.post('/api/files', function (req, res) {
       // reply with the document
       console.log(`[OK] Document ${fileDetails.id} uploaded to storage`);
       res.send(fileDetails);
-      // delete the file once uploaded
+      // delete the local file copy once uploaded
       fs.unlink(file.filepath, (err) => {
         if (err) { console.log(err) }
       });
@@ -259,12 +299,11 @@ app.post('/api/files', function (req, res) {
 app.delete('/api/files/:id', async function (req, res) {
 
   console.log(`Deleting document ${req.params.id}`);
-  // get the doc from cloudant, ensuring it is owned by the current user
-  // filter on the userId which is the subject in the access token
-  // AND the document ID
+  // get the doc from Cloudant, ensuring it is owned by the current user
+  // filter on the userId (email) AND the document ID
   const selector = {
     userId: {
-      '$eq': getSub(req)
+      '$eq': req.user.email
     },
     _id: {
       '$eq': req.params.id,
@@ -288,7 +327,7 @@ app.delete('/api/files/:id', async function (req, res) {
       Key: `${doc.userId}/${doc._id}/${doc.name}`
     }).promise();
 
-    // remove the cloudant object
+    // remove the Cloudant object
     cloudant.deleteDocument({
       db: CLOUDANT_DB,
       docId: doc._id,
@@ -308,31 +347,15 @@ app.delete('/api/files/:id', async function (req, res) {
 
 });
 
-// Called by App ID when the authorization flow completes
-app.get('/appid_callback', function (req, res) {
-  res.send('OK');
-});
-
-app.get('/api/tokens', function (req, res) {
-  res.send(req.appIdAuthorizationContext);
-});
-
+// return user information
 app.get('/api/user', function (req, res) {
-  let result = {};
-  if (req.appIdAuthorizationContext) {
-    result = {
-      name: req.appIdAuthorizationContext.identity_token.name,
-      picture: req.appIdAuthorizationContext.identity_token.picture,
-    }
-  } else if (allowAnonymousAccess) {
-    result = {
-      name: 'Anonymous',
-    }
-  }
-  res.send(result);
+  res.send(req.user);
 });
 
 // start the server
-const server = app.listen(process.env.PORT || 8081, () => {
+const server = app.listen(process.env.PORT || 5000, () => {
   console.log(`Listening on port http://0.0.0.0:${server.address().port}`);
 });
+
+
+})()
