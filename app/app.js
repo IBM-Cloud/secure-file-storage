@@ -353,7 +353,7 @@ app.get('/api/user', function (req, res) {
 });
 
 // start the server
-const server = app.listen(process.env.PORT || 5000, () => {
+const server = app.listen(process.env.PORT || 8081, () => {
   console.log(`Listening on port http://0.0.0.0:${server.address().port}`);
 });
 
