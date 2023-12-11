@@ -2,24 +2,6 @@
 data "ibm_container_vpc_cluster" "cluster" {
   name = var.iks_cluster_name
 }
-
-# Bind the App ID service to the cluster
-resource "ibm_container_bind_service" "bind_appid" {
-  cluster_name_id     = data.ibm_container_vpc_cluster.cluster.id
-  service_instance_id = ibm_resource_instance.app_id.guid
-  # resource_group_id   = data.ibm_resource_group.cloud_development.id
-  key          = ibm_resource_key.RKappid.name
-  namespace_id = local.kubernetes_namespace
-}
-
-resource "ibm_container_addons" "addons" {
-  cluster = data.ibm_container_vpc_cluster.cluster.name
-  addons {
-    name    = "alb-oauth-proxy"
-    version = "2.0.0"
-  }
-}
-
 # Download the cluster configuration...
 data "ibm_container_cluster_config" "mycluster" {
   cluster_name_id = data.ibm_container_vpc_cluster.cluster.name
