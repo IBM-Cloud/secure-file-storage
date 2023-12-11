@@ -48,20 +48,6 @@ metadata:
   namespace: $TARGET_NAMESPACE
   annotations:
     kubernetes.io/ingress.class: "public-iks-k8s-nginx"
-    nginx.ingress.kubernetes.io/auth-url: https://oauth2-$APPID_INSTANCE.default.svc.cluster.local/oauth2-$APPID_INSTANCE/auth
-    nginx.ingress.kubernetes.io/auth-signin: https://$host/oauth2-$APPID_INSTANCE/start?rd=$escaped_request_uri
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      auth_request_set $_oauth2_${APPID_INSTANCE}_upstream_1 $upstream_cookie__oauth2_${APPID_INSTANCE}_1;
-      auth_request_set $access_token $upstream_http_x_auth_request_access_token;
-      auth_request_set $id_token $upstream_http_authorization;
-      access_by_lua_block {
-        if ngx.var._oauth2_${APPID_INSTANCE}_upstream_1 ~= "" then
-          ngx.header["Set-Cookie"] = "_oauth2_${APPID_INSTANCE}_1=" .. ngx.var._oauth2_${APPID_INSTANCE}_upstream_1 .. ngx.var.auth_cookie:match("(; .*)")
-        end
-        if ngx.var.id_token ~= "" and ngx.var.access_token ~= "" then
-          ngx.req.set_header("Authorization", "Bearer " .. ngx.var.access_token .. " " .. ngx.var.id_token:match("%s*Bearer%s*(.*)"))
-        end
-      }      
 spec:
   tls:
   - hosts:
