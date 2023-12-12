@@ -9,10 +9,10 @@
 
 
 var express = require('express'),
-  session=require('express-session')
+  session=require('cookie-session'),
   formidable = require('formidable'),
-  util = require('util'),
-  fs = require("fs"),
+  //util = require('util'),
+  //fs = require("fs"),
   async = require('async');
 
 const {Strategy, Issuer} = require('openid-client');
