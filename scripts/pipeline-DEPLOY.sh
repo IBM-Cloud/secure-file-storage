@@ -212,7 +212,7 @@ curl -X PUT \
   --header 'Content-Type: application/json' \
   --header 'Accept: application/json' \
   --header "Authorization: Bearer $APPID_ACCESS_TOKEN" \
-  -d '{ "redirectUris": [ "https://secure-file-storage.'$INGRESS_SUBDOMAIN'/oauth2-sfsappid/callback" ] }' \
+  -d '{ "redirectUris": [ "https://secure-file-storage.'$INGRESS_SUBDOMAIN'/redirect_uri" ] }' \
   $APPID_MANAGEMENT_URL/config/redirect_uris
 
 #
@@ -248,22 +248,7 @@ else
 fi
 
 #
-# Bind App ID to the cluster
-#
-# this should be done by TF because it is related to the existing cluster and service
-# Keep it here to fix wrong bindings: delete the ingress binding and redeploy
-if kubectl get secret binding-$BASENAME-appid --namespace $TARGET_NAMESPACE; then
-  echo "App ID service already bound to namespace"
-else
-  ibmcloud ks cluster service bind \
-    --cluster "$PIPELINE_KUBERNETES_CLUSTER_NAME" \
-    --namespace "$TARGET_NAMESPACE" \
-    --key "$BASENAME-accKey-appid" \
-    --service "$APPID_GUID" || exit 1
-fi
-
-#
-# Create a secret in the cluster holding the credentials for Cloudant and COS
+# Create a secret in the cluster holding the credentials for Cloudant, COS, and App ID
 #
 if kubectl get secret $BASENAME-credentials --namespace "$TARGET_NAMESPACE"; then
   kubectl delete secret $BASENAME-credentials --namespace "$TARGET_NAMESPACE"
@@ -280,6 +265,11 @@ kubectl create secret generic $BASENAME-credentials \
   --from-literal="cloudant_url=$CLOUDANT_URL" \
   --from-literal="cloudant_iam_apikey=$CLOUDANT_IAM_APIKEY" \
   --from-literal="cloudant_database=$CLOUDANT_DATABASE" \
+  --from-literal="appid_oauth_server_url=$APPID_OAUTH_SERVER_URL" \
+  --from-literal="appid_tenant_id=$APPID_TENANT_ID" \
+  --from-literal="appid_client_id=$APPID_CLIENT_ID" \
+  --from-literal="appid_secret=$APPID_SECRET" \
+  --from-literal="appid_app_url=https://secure-file-storage.$INGRESS_SUBDOMAIN" \
   --namespace "$TARGET_NAMESPACE" || exit 1
 
 #
