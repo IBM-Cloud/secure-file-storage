@@ -198,6 +198,7 @@ APPID_CREDENTIALS=$(ibmcloud resource service-key $BASENAME-accKey-appid)
 APPID_MANAGEMENT_URL=$(echo "$APPID_CREDENTIALS" | grep managementUrl  | awk '{ print $2 }')
 APPID_API_KEY=$(echo "$APPID_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ print $2 }')
 APPID_ACCESS_TOKEN=$(get_access_token $APPID_API_KEY)
+APPID_OAUTH_SERVER_URL=$(echo "$APPID_CREDENTIALS" | sort | grep "oauthServerUrl:" -m 1 | awk '{ print $2 }')
 
 # Set the redirect URL on App ID
 if [ -z ${VPC} ]; then
