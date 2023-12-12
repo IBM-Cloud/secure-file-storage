@@ -43,16 +43,9 @@ const COS_ACCESS_KEY_ID = process.env.cos_access_key_id;
 const COS_SECRET_ACCESS_KEY = process.env.cos_secret_access_key;
 
 const APPID_OAUTH_SERVER_URL= process.env.appid_oauth_server_url;
-const APPID_TENANT_ID= process.env.appid_tenant_id;
 const APPID_CLIENT_ID= process.env.appid_client_id;
 const APPID_SECRET= process.env.appid_secret;
 const APPID_APP_URL=process.env.appid_app_url;
-
-const LOGIN_URL = "/ibm/cloud/appid/login";
-const CALLBACK_URL = "/ibm/cloud/appid/callback";
-const LOGOUT_URL = "/ibm/cloud/appid/logout";
-const LANDING_PAGE_URL = "/";
-
 
 // Express setup, including session and passport support
 var app = express();

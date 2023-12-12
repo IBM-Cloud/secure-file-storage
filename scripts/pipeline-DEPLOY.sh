@@ -197,8 +197,11 @@ check_value "$APPID_GUID"
 APPID_CREDENTIALS=$(ibmcloud resource service-key $BASENAME-accKey-appid)
 APPID_MANAGEMENT_URL=$(echo "$APPID_CREDENTIALS" | grep managementUrl  | awk '{ print $2 }')
 APPID_API_KEY=$(echo "$APPID_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ print $2 }')
+APPID_OAUTH_SERVER_URL=$(echo "$APPID_CREDENTIALS" | grep oauthServerUrl | awk '{ print $2 }')
+APPID_SECRET=$(echo "$APPID_CREDENTIALS" | grep secret | awk '{ print $2 }')
+APPID_CLIENT_ID=$(echo "$APPID_CREDENTIALS" | grep clientId | awk '{ print $2 }')
 APPID_ACCESS_TOKEN=$(get_access_token $APPID_API_KEY)
-APPID_OAUTH_SERVER_URL=$(echo "$APPID_CREDENTIALS" | sort | grep "oauthServerUrl:" -m 1 | awk '{ print $2 }')
+
 
 # Set the redirect URL on App ID
 if [ -z ${VPC} ]; then
@@ -267,7 +270,6 @@ kubectl create secret generic $BASENAME-credentials \
   --from-literal="cloudant_iam_apikey=$CLOUDANT_IAM_APIKEY" \
   --from-literal="cloudant_database=$CLOUDANT_DATABASE" \
   --from-literal="appid_oauth_server_url=$APPID_OAUTH_SERVER_URL" \
-  --from-literal="appid_tenant_id=$APPID_TENANT_ID" \
   --from-literal="appid_client_id=$APPID_CLIENT_ID" \
   --from-literal="appid_secret=$APPID_SECRET" \
   --from-literal="appid_app_url=https://secure-file-storage.$INGRESS_SUBDOMAIN" \
