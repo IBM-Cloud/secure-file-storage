@@ -72,7 +72,7 @@ app.use(passport.session());
   }
 
 // Want to know more about the OpenID Connect provider? Uncomment the next line...
-// console.log('Discovered issuer %s %O', issuer.issuer, issuer.metadata);
+console.log('Discovered issuer %s %O', issuer.issuer, issuer.metadata);
 
 
 // Register oidc strategy with passport
