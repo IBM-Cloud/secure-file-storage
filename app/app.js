@@ -58,6 +58,7 @@ app.use(passport.session());
 
 // Discover the OpenID Connect provider (issuer) from the well-known path
 // This makes it easier to configure
+/*
 (async () => {
   try {
   const issuer = await Issuer.discover(APPID_OAUTH_SERVER_URL) // connect to oidc application
@@ -71,15 +72,36 @@ app.use(passport.session());
       grant_type:'authorization_code',
       response_type:'code',
   }
+*/
+async function configureOIDC(req, res, next) {
+  if (req.app.authIssuer) {
+    return next();
+  }
+  const issuer = await Issuer.discover(APPID_OAUTH_SERVER_URL) // connect to oidc application
+  const client = new issuer.Client({ // Initialize issuer information
+      client_id: APPID_CLIENT_ID,
+      client_secret: APPID_SECRET
+  });
+  const params = {
+      redirect_uri: APPID_APP_URL+'/redirect_uri',
+      scope:'openid',
+      grant_type:'authorization_code',
+      response_type:'code',
+  }
+  req.app.authIssuer = issuer;
+  req.app.authClient = client;
 
-// Want to know more about the OpenID Connect provider? Uncomment the next line...
-console.log('Discovered issuer %s %O', issuer.issuer, issuer.metadata);
+  // Register oidc strategy with passport
+  passport.use('oidc', new Strategy({ client, params }, (tokenset, userinfo, done) => {
+    return done(null, userinfo); // return user information
+  }));
+
+  // Want to know more about the OpenID Connect provider? Uncomment the next line...
+  // console.log('Discovered issuer %s %O', issuer.issuer, issuer.metadata);
+  next();
+}
 
 
-// Register oidc strategy with passport
-passport.use('oidc', new Strategy({ client, params }, (tokenset, userinfo, done) => {
-  return done(null, userinfo); // return user information
-}));
 
 
 // Initialize Cloudant
@@ -136,7 +158,7 @@ passport.deserializeUser(function(user, done) {
   done(null, user);
 });
 
-
+app.use(configureOIDC);
 
 // default protected route /authtest
 app.get('/authtest', (req, res, next) => {
@@ -350,10 +372,3 @@ app.get('/api/user', function (req, res) {
 const server = app.listen(process.env.PORT || 8081, () => {
   console.log(`Listening on port http://0.0.0.0:${server.address().port}`);
 });
-
-  }
-  catch(error) 
-  {
-    console.log(error);
-  }
-})()
