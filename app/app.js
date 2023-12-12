@@ -9,10 +9,10 @@
 
 
 var express = require('express'),
-  session=require('cookie-session'),
+  session=require('express-session'),
   formidable = require('formidable'),
   //util = require('util'),
-  //fs = require("fs"),
+  fs = require("fs"),
   async = require('async');
 
 const {Strategy, Issuer} = require('openid-client');
@@ -56,23 +56,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Discover the OpenID Connect provider (issuer) from the well-known path
-// This makes it easier to configure
-/*
-(async () => {
-  try {
-  const issuer = await Issuer.discover(APPID_OAUTH_SERVER_URL) // connect to oidc application
-  const client = new issuer.Client({ // Initialize issuer information
-      client_id: APPID_CLIENT_ID,
-      client_secret: APPID_SECRET
-  });
-  const params = {
-      redirect_uri: APPID_APP_URL+'/redirect_uri',
-      scope:'openid',
-      grant_type:'authorization_code',
-      response_type:'code',
-  }
-*/
+// Configure the OIDC client
 async function configureOIDC(req, res, next) {
   if (req.app.authIssuer) {
     return next();
