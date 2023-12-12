@@ -59,6 +59,7 @@ app.use(passport.session());
 // Discover the OpenID Connect provider (issuer) from the well-known path
 // This makes it easier to configure
 (async () => {
+  try {
   const issuer = await Issuer.discover(APPID_OAUTH_SERVER_URL) // connect to oidc application
   const client = new issuer.Client({ // Initialize issuer information
       client_id: APPID_CLIENT_ID,
@@ -350,5 +351,9 @@ const server = app.listen(process.env.PORT || 8081, () => {
   console.log(`Listening on port http://0.0.0.0:${server.address().port}`);
 });
 
-
+  }
+  catch(error) 
+  {
+    console.log(error);
+  }
 })()
