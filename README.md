@@ -99,9 +99,9 @@ Located in the [app](app) directory:
 | File | Description |
 | ---- | ----------- |
 |[app.js](app/app.js)|Implementation of the application.|
-|[app/credentials.template.env](credentials.template.env)|To be copied to `credentials.env` and filled with credentials to access services. `credentials.env` is used when running the app locally and to create a Kubernetes secret before deploying the application to a cluster manually.|
-|[app/Dockerfile](Dockerfile)|Docker image description file.|
-|[app/secure-file-storage.template.yaml](secure-file-storage.template.yaml)|Kubernetes deployment file with placeholders. To be copied to `secure-file-storage.yaml` and edited to match your environment.|
+|[app/credentials.template.env](app/credentials.template.env)|To be copied to `credentials.env` and filled with credentials to access services. `credentials.env` is used when running the app locally and to create a Kubernetes secret before deploying the application to a cluster manually.|
+|[app/Dockerfile](app/Dockerfile)|Docker image description file.|
+|[app/secure-file-storage.template.yaml](app/secure-file-storage.template.yaml)|Kubernetes deployment file with placeholders. To be copied to `secure-file-storage.yaml` and edited to match your environment.|
 
 
 ### To test locally
