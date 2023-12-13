@@ -43,7 +43,7 @@ Please note that the Kubernetes cluster and the resources deployed via Terraform
 
 ### Deploy resources using Terraform managed by Schematics
 
-Either create the Schematics workspace automatically by clicking this ["deploy link"](https://cloud.ibm.com/schematics/workspaces/create?repository=https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform&terraform_version=terraform_v1.2). Or set it up manually by going to the [Schematics workspaces](https://cloud.ibm.com/schematics/workspaces) and using https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform as source respository including the path and the latest version of Terraform runtime.
+Either create the Schematics workspace automatically by clicking this ["deploy link"](https://cloud.ibm.com/schematics/workspaces/create?repository=https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform&terraform_version=terraform_v1.5). Or set it up manually by going to the [Schematics workspaces](https://cloud.ibm.com/schematics/workspaces) and using https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform as source respository including the path and the latest version of Terraform runtime.
 
 Configure all required variables:
 - **basename**: project basename which is used as prefix for names, e.g., secure-file-storage
