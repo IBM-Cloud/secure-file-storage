@@ -23,7 +23,7 @@ The application can be deployed using a toolchain.
 
 # Enhance cloud security by applying context-based restrictions
 To further enhance security, context-based restrictions are implemented on top the deployed resources as shown.
-![](Architecture_cbr.png)
+![](Architecture_cbr.svg)
 
 Refer to the tutorial [Enhance cloud security by applying context-based restrictions](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cbr-enhanced-security) for details and instructions.
 
