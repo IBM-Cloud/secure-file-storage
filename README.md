@@ -13,11 +13,12 @@ Refer to [this tutorial](https://cloud.ibm.com/docs/solution-tutorials?topic=sol
 ![Architecture](Architecture.svg)
 
 1. The user connects to the application.
-2. [App ID](https://cloud.ibm.com/catalog/services/AppID) secures the application and redirects the user to the authentication page. Users can sign up from there too.
-3. The application is running in a [Kubernetes cluster](https://cloud.ibm.com/containers-kubernetes/catalog/cluster) from an image stored in the [container registry](https://cloud.ibm.com/containers-kubernetes/launchRegistryView). The image is automatically scanned for vulnerabilities.
-4. Files uploaded by the user are stored in [Cloud Object Storage](https://cloud.ibm.com/catalog/services/cloud-object-storage).
-5. The bucket where the files are stored is using a user-provided key to encrypt the data.
-6. All activities related to managing the solution are logged by [Cloud Activity Tracker with LogDNA](https://cloud.ibm.com/catalog/services/logdnaat).
+2. Optionally [Secrets Manager](https://cloud.ibm.com/catalog/services/secrets-manager) is used to store/retrieve certificates.
+3. [App ID](https://cloud.ibm.com/catalog/services/AppID) secures the application and redirects the user to the authentication page. Users can sign up from there too.
+4. The application is running in a [Kubernetes cluster](https://cloud.ibm.com/containers-kubernetes/catalog/cluster) from an image stored in the [container registry](https://cloud.ibm.com/containers-kubernetes/launchRegistryView). The image is automatically scanned for vulnerabilities.
+5. Files uploaded by the user are stored in [Cloud Object Storage](https://cloud.ibm.com/catalog/services/cloud-object-storage).
+6. The bucket where the files are stored is using a user-provided key to encrypt the data.
+7. All activities related to managing the solution are logged by [Cloud Activity Tracker with LogDNA](https://cloud.ibm.com/catalog/services/logdnaat).
 
 The application can be deployed using a toolchain.
 
