@@ -105,17 +105,12 @@ Located in the [app](app) directory:
 
 
 ### To test locally
-The app can be tested and developed locally, however it requires a version (same or different to the local version) of the app to be deployed in Kubernetes. The reason is that access is guarded by an access token. That token can only be issued in the Kubernetes environment with App ID intercepting requests.
+The app can be tested and developed locally, either directly by using `npm start` or by building and running a container by leveraging the `Dockerfile`. 
 
-To test locally:
-1. Follow the tutorial instructions to have the app deployed to a cluster. Specially the sections to create all the services and to populate the `credentials.env` file. You will need the public instead of the private COS endpoint in order to access Cloud Object Storage from your machine.
-1. Access the tokens with `https://secure-file-storage.<INGRESS_SUBDOMAIN>/api/tokens`. This will shows the raw App ID authorization header together with the decode JWT tokens for your session.
-1. In your local shell:
-   ```
-   export TEST_AUTHORIZATION_HEADER="<value of the header attribute 'Bearer ... ...'>"
-   ```
-1. `npm start` or `node app.js` to start the app.
-1. Access the local app through the shown URL. Now, you can change the app source code and test locally.
+1. Follow the tutorial instructions to create all the services and to populate the `credentials.env` file. You will need the public instead of the private COS endpoint in order to access Cloud Object Storage from your machine.
+2. Add `http://0.0.0.0/redirect_uri` to App ID as Web redirect URI. See the [section in tutorial](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cloud-e2e-security#cloud-e2e-security-11) for details.
+3. `npm start` or `node app.js` to start the app. To use a container, utilize `docker build` and `docker run` commands.
+4. Access the local app through the shown URL. Now, you can change the app source code and test locally.
 
 
 ## License
