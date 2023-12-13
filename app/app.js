@@ -122,9 +122,10 @@ var cosUrlGenerator = new CloudObjectStorage.S3({
 
 // serialize and deserialize the user information
 passport.serializeUser(function(user, done) {
+  console.log("Got authenticated user", JSON.stringify(user));
   done(null, {
     id: user["id"],
-    userName: user["userName"],
+    name: user["name"],
     email: user["email"],
     picture: user["picture"],
   });
