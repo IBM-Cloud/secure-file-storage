@@ -11,9 +11,7 @@
 var express = require('express'),
   session=require('express-session'),
   formidable = require('formidable'),
-  //util = require('util'),
-  fs = require("fs"),
-  async = require('async');
+  fs = require("fs");
 
 const {Strategy, Issuer} = require('openid-client');
 
@@ -25,9 +23,6 @@ var CloudObjectStorage = require('ibm-cos-sdk');
 const { IamAuthenticator } = require('ibm-cloud-sdk-core');
 const { CloudantV1 } = require('@ibm-cloud/cloudant');
 const passport = require('passport');
-
-
-var allowAnonymousAccess = process.env.allow_anonymous || false;
 
 // some values taken from the environment
 const CLOUDANT_APIKEY = process.env.cloudant_iam_apikey;
@@ -84,9 +79,6 @@ async function configureOIDC(req, res, next) {
   // console.log('Discovered issuer %s %O', issuer.issuer, issuer.metadata);
   next();
 }
-
-
-
 
 // Initialize Cloudant
 const authenticator = new IamAuthenticator({
