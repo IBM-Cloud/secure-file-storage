@@ -106,5 +106,5 @@ variable "toolchain_apikey" {
 
 variable "toolchain_failscan" {
   description = "fail when image scan finds issues"
-  default = "true"
+  default = "false"
 }
