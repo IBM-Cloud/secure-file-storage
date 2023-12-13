@@ -3,8 +3,8 @@ ENV NODE_ENV production
 
 # updates to fix vulnerabilities
 RUN apt-get update; \
-  apt-get install -yy libgnutls30; \
-  apt-get remove -yy libtiff-dev libde265-0 libnghttp2-14 perl; \
+  apt-get install -yy libgnutls30 perl; \
+  apt-get remove -yy libtiff6 libtiff-dev libde265-0 libnghttp2-14; \
   apt-get clean
 
 # put app in /usr/src/app
