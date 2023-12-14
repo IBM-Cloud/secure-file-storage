@@ -13,17 +13,18 @@ Refer to [this tutorial](https://cloud.ibm.com/docs/solution-tutorials?topic=sol
 ![Architecture](Architecture.svg)
 
 1. The user connects to the application.
-2. [App ID](https://cloud.ibm.com/catalog/services/AppID) secures the application and redirects the user to the authentication page. Users can sign up from there too.
-3. The application is running in a [Kubernetes cluster](https://cloud.ibm.com/containers-kubernetes/catalog/cluster) from an image stored in the [container registry](https://cloud.ibm.com/containers-kubernetes/launchRegistryView). The image is automatically scanned for vulnerabilities.
-4. Files uploaded by the user are stored in [Cloud Object Storage](https://cloud.ibm.com/catalog/services/cloud-object-storage).
-5. The bucket where the files are stored is using a user-provided key to encrypt the data.
-6. All activities related to managing the solution are logged by [Cloud Activity Tracker with LogDNA](https://cloud.ibm.com/catalog/services/logdnaat).
+2. Optionally [Secrets Manager](https://cloud.ibm.com/catalog/services/secrets-manager) is used to store/retrieve certificates.
+3. [App ID](https://cloud.ibm.com/catalog/services/AppID) secures the application and redirects the user to the authentication page. Users can sign up from there too.
+4. The application is running in a [Kubernetes cluster](https://cloud.ibm.com/containers-kubernetes/catalog/cluster) from an image stored in the [container registry](https://cloud.ibm.com/containers-kubernetes/launchRegistryView). The image is automatically scanned for vulnerabilities.
+5. Files uploaded by the user are stored in [Cloud Object Storage](https://cloud.ibm.com/catalog/services/cloud-object-storage).
+6. The bucket where the files are stored is using a user-provided key to encrypt the data.
+7. All activities related to managing the solution are logged by [Cloud Activity Tracker with LogDNA](https://cloud.ibm.com/catalog/services/logdnaat).
 
 The application can be deployed using a toolchain.
 
 # Enhance cloud security by applying context-based restrictions
 To further enhance security, context-based restrictions are implemented on top the deployed resources as shown.
-![](Architecture_cbr.png)
+![](Architecture_cbr.svg)
 
 Refer to the tutorial [Enhance cloud security by applying context-based restrictions](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cbr-enhanced-security) for details and instructions.
 
@@ -43,7 +44,7 @@ Please note that the Kubernetes cluster and the resources deployed via Terraform
 
 ### Deploy resources using Terraform managed by Schematics
 
-Either create the Schematics workspace automatically by clicking this ["deploy link"](https://cloud.ibm.com/schematics/workspaces/create?repository=https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform&terraform_version=terraform_v1.2). Or set it up manually by going to the [Schematics workspaces](https://cloud.ibm.com/schematics/workspaces) and using https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform as source respository including the path and the latest version of Terraform runtime.
+Either create the Schematics workspace automatically by clicking this ["deploy link"](https://cloud.ibm.com/schematics/workspaces/create?repository=https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform&terraform_version=terraform_v1.5). Or set it up manually by going to the [Schematics workspaces](https://cloud.ibm.com/schematics/workspaces) and using https://github.com/IBM-Cloud/secure-file-storage/tree/master/terraform as source respository including the path and the latest version of Terraform runtime.
 
 Configure all required variables:
 - **basename**: project basename which is used as prefix for names, e.g., secure-file-storage
@@ -54,6 +55,7 @@ Configure all required variables:
 - **toolchain_registry_namespace**: The existing namespace in the Container Registry to use.
 - **toolchain_registry_region**: The Container Registry region
 - **toolchain_apikey**: An IBM Cloud API key to use for building the container image with the app, pushing it to the Container Registry, and deploying it to the Kubernetes cluster.
+- **toolchain_failscan**: Set to false to not fail in case vulnerabilities are detected.
 - **deploy_cbr**: Indicates whether the CBR zones and rules should be deployed. `false` by default and can be set to `true`.
 - **cbr_enforcement_mode**: By default, the CBR rules are in `report` mode only. Change and set to `enforced` or `disabled`.
 - **cbr_homezone_iprange**: Can be set to the IP range of your home or bastion network. 
@@ -99,23 +101,18 @@ Located in the [app](app) directory:
 | File | Description |
 | ---- | ----------- |
 |[app.js](app/app.js)|Implementation of the application.|
-|[app/credentials.template.env](credentials.template.env)|To be copied to `credentials.env` and filled with credentials to access services. `credentials.env` is used when running the app locally and to create a Kubernetes secret before deploying the application to a cluster manually.|
-|[app/Dockerfile](Dockerfile)|Docker image description file.|
-|[app/secure-file-storage.template.yaml](secure-file-storage.template.yaml)|Kubernetes deployment file with placeholders. To be copied to `secure-file-storage.yaml` and edited to match your environment.|
+|[app/credentials.template.env](app/credentials.template.env)|To be copied to `credentials.env` and filled with credentials to access services. `credentials.env` is used when running the app locally and to create a Kubernetes secret before deploying the application to a cluster manually.|
+|[app/Dockerfile](app/Dockerfile)|Docker image description file.|
+|[app/secure-file-storage.template.yaml](app/secure-file-storage.template.yaml)|Kubernetes deployment file with placeholders. To be copied to `secure-file-storage.yaml` and edited to match your environment.|
 
 
 ### To test locally
-The app can be tested and developed locally, however it requires a version (same or different to the local version) of the app to be deployed in Kubernetes. The reason is that access is guarded by an access token. That token can only be issued in the Kubernetes environment with App ID intercepting requests.
+The app can be tested and developed locally, either directly by using `npm start` or by building and running a container by leveraging the `Dockerfile`. 
 
-To test locally:
-1. Follow the tutorial instructions to have the app deployed to a cluster. Specially the sections to create all the services and to populate the `credentials.env` file. You will need the public instead of the private COS endpoint in order to access Cloud Object Storage from your machine.
-1. Access the tokens with `https://secure-file-storage.<INGRESS_SUBDOMAIN>/api/tokens`. This will shows the raw App ID authorization header together with the decode JWT tokens for your session.
-1. In your local shell:
-   ```
-   export TEST_AUTHORIZATION_HEADER="<value of the header attribute 'Bearer ... ...'>"
-   ```
-1. `npm start` or `node app.js` to start the app.
-1. Access the local app through the shown URL. Now, you can change the app source code and test locally.
+1. Follow the tutorial instructions to create all the services and to populate the `credentials.env` file. You will need the public instead of the private COS endpoint in order to access Cloud Object Storage from your machine.
+2. Add `http://0.0.0.0/redirect_uri` to App ID as Web redirect URI. See the [section in tutorial](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-cloud-e2e-security#cloud-e2e-security-11) for details.
+3. `npm start` or `node app.js` to start the app. To use a container, utilize `docker build` and `docker run` commands.
+4. Access the local app through the shown URL. Now, you can change the app source code and test locally.
 
 
 ## License

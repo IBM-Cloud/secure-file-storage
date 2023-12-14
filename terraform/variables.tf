@@ -10,7 +10,6 @@ variable "region" {
 
 variable "iks_cluster_name" {
   description = "Name of the existing Kubernetes cluster to deploy into"
-  default     = "secure-file-storage-cluster"
 }
 
 variable "iks_namespace" {
@@ -20,7 +19,6 @@ variable "iks_namespace" {
 
 variable "resource_group" {
   description = "Name of the existing resource group to deploy into."
-  default     = "default"
 }
 
 variable "ibmcloud_timeout" {

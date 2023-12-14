@@ -39,3 +39,18 @@ cos_access_key_id=$COS_ACCESS_KEY_ID
 cos_secret_access_key=$COS_SECRET_ACCESS_KEY
 cos_bucket_name=$COS_BUCKET_NAME
 "
+
+APPID_GUID=$(ibmcloud resource service-instance --id secure-file-storage-appid | awk '{print $2}')
+APPID_CREDENTIALS=$(ibmcloud resource service-key secure-file-storage-appid-acckey-$APPID_GUID)
+APPID_OAUTH_SERVER_URL=$(echo "$APPID_CREDENTIALS" | grep "oauthServerUrl:" -m 1 | awk '{ print $2 }')
+APPID_TENANT_ID=$(echo "$APPID_CREDENTIALS" | grep "tenantId:" -m 1 | awk '{ print $2 }')
+APPID_CLIENT_ID=$(echo "$APPID_CREDENTIALS" | grep "clientId:" -m 1 | awk '{ print $2 }')
+APPID_SECRET=$(echo "$APPID_CREDENTIALS" | grep "secret:" -m 1 | awk '{ print $2 }')
+#APPID_APP_URL=process.env.appid_app_url;
+
+echo "# App ID Credentials
+appid_oauth_server_url=$APPID_OAUTH_SERVER_URL
+appid_tenant_id=$APPID_TENANT_ID
+appid_client_id=$APPID_CLIENT_ID
+appid_secret=$APPID_SECRET
+"

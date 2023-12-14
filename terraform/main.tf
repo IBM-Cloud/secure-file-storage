@@ -27,7 +27,7 @@ resource "ibm_iam_service_policy" "registry-policy" {
 }
 
 resource "ibm_resource_instance" "app_id" {
-  name              = "sfsappid"
+  name              = "${var.basename}-appid"
   service           = "appid"
   plan              = var.appid_plan
   location          = var.region

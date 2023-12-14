@@ -186,8 +186,8 @@ API_KEY_VALUE=$(echo "$API_KEY_OUT" | jq -r '.apikey')
 # App ID
 #
 section "App ID"
-APPID_INSTANCE_ID=$(get_instance_id sfsappid)
-APPID_GUID=$(get_guid sfsappid)
+APPID_INSTANCE_ID=$(get_instance_id $BASENAME-appid)
+APPID_GUID=$(get_guid $BASENAME-appid)
 echo "APPID_INSTANCE_ID=$APPID_INSTANCE_ID"
 echo "APPID_GUID=$APPID_GUID"
 check_value "$APPID_INSTANCE_ID"
@@ -197,7 +197,11 @@ check_value "$APPID_GUID"
 APPID_CREDENTIALS=$(ibmcloud resource service-key $BASENAME-accKey-appid)
 APPID_MANAGEMENT_URL=$(echo "$APPID_CREDENTIALS" | grep managementUrl  | awk '{ print $2 }')
 APPID_API_KEY=$(echo "$APPID_CREDENTIALS" | sort | grep "apikey:" -m 1 | awk '{ print $2 }')
+APPID_OAUTH_SERVER_URL=$(echo "$APPID_CREDENTIALS" | grep oauthServerUrl | awk '{ print $2 }')
+APPID_SECRET=$(echo "$APPID_CREDENTIALS" | grep secret | awk '{ print $2 }')
+APPID_CLIENT_ID=$(echo "$APPID_CREDENTIALS" | grep clientId | awk '{ print $2 }')
 APPID_ACCESS_TOKEN=$(get_access_token $APPID_API_KEY)
+
 
 # Set the redirect URL on App ID
 if [ -z ${VPC} ]; then
@@ -212,7 +216,7 @@ curl -X PUT \
   --header 'Content-Type: application/json' \
   --header 'Accept: application/json' \
   --header "Authorization: Bearer $APPID_ACCESS_TOKEN" \
-  -d '{ "redirectUris": [ "https://secure-file-storage.'$INGRESS_SUBDOMAIN'/oauth2-sfsappid/callback" ] }' \
+  -d '{ "redirectUris": [ "https://secure-file-storage.'$INGRESS_SUBDOMAIN'/redirect_uri" ] }' \
   $APPID_MANAGEMENT_URL/config/redirect_uris
 
 #
@@ -248,22 +252,7 @@ else
 fi
 
 #
-# Bind App ID to the cluster
-#
-# this should be done by TF because it is related to the existing cluster and service
-# Keep it here to fix wrong bindings: delete the ingress binding and redeploy
-if kubectl get secret binding-$BASENAME-appid --namespace $TARGET_NAMESPACE; then
-  echo "App ID service already bound to namespace"
-else
-  ibmcloud ks cluster service bind \
-    --cluster "$PIPELINE_KUBERNETES_CLUSTER_NAME" \
-    --namespace "$TARGET_NAMESPACE" \
-    --key "$BASENAME-accKey-appid" \
-    --service "$APPID_GUID" || exit 1
-fi
-
-#
-# Create a secret in the cluster holding the credentials for Cloudant and COS
+# Create a secret in the cluster holding the credentials for Cloudant, COS, and App ID
 #
 if kubectl get secret $BASENAME-credentials --namespace "$TARGET_NAMESPACE"; then
   kubectl delete secret $BASENAME-credentials --namespace "$TARGET_NAMESPACE"
@@ -280,6 +269,10 @@ kubectl create secret generic $BASENAME-credentials \
   --from-literal="cloudant_url=$CLOUDANT_URL" \
   --from-literal="cloudant_iam_apikey=$CLOUDANT_IAM_APIKEY" \
   --from-literal="cloudant_database=$CLOUDANT_DATABASE" \
+  --from-literal="appid_oauth_server_url=$APPID_OAUTH_SERVER_URL" \
+  --from-literal="appid_client_id=$APPID_CLIENT_ID" \
+  --from-literal="appid_secret=$APPID_SECRET" \
+  --from-literal="appid_app_url=https://secure-file-storage.$INGRESS_SUBDOMAIN" \
   --namespace "$TARGET_NAMESPACE" || exit 1
 
 #
@@ -312,8 +305,7 @@ cat secure-file-storage.yaml | \
   IMAGE_REPOSITORY=$IMAGE_REPOSITORY \
   TARGET_NAMESPACE=$TARGET_NAMESPACE \
   BASENAME=$BASENAME \
-  APPID_INSTANCE=sfsappid \
-  envsubst '$APPID_INSTANCE $IMAGE_NAME $INGRESS_SECRET $INGRESS_SUBDOMAIN $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' \
+  envsubst '$IMAGE_NAME $INGRESS_SECRET $INGRESS_SUBDOMAIN $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' \
   | \
   kubectl apply --namespace $TARGET_NAMESPACE -f - || exit 1
 
