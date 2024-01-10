@@ -1,0 +1,59 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: secure-file-storage-route
+  namespace: $TARGET_NAMESPACE
+spec:
+  host: >-
+    secure-file-storage.$INGRESS_SUBDOMAIN
+  to:
+    kind: Service
+    name: secure-file-storage-service
+    weight: 100
+  port:
+    targetPort: 8081
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+# ---
+# apiVersion: external-secrets.io/v1beta1
+# kind: SecretStore
+# metadata:
+#   name: secure-file-storage-secretstore
+# spec:
+#   provider:
+#     ibm:
+#       serviceUrl: $SECRETS_MANAGER_API_URL
+#       auth:
+#         secretRef:
+#           secretApiKeySecretRef:
+#             name: secure-file-storage-api-key
+#             key: apikey
+# ---
+# apiVersion: external-secrets.io/v1beta1
+# kind: ExternalSecret
+# metadata:
+#   name: secure-file-storage-external-secret
+# spec:
+#   refreshInterval: 1m
+#   secretStoreRef:
+#     name: secure-file-storage-secretstore
+#     kind: SecretStore
+#   target:
+#     name: secure-file-storage-certificate
+#     template:
+#       type: kubernetes.io/tls
+#       data:
+#         tls.crt: '{{ .sfscrt | toString }}'
+#         tls.key: '{{ .sfskey | toString }}'
+#     creationPolicy: Owner
+#   data:
+#   - secretKey: sfscrt
+#     remoteRef:
+#       key: public_cert/$PUBLIC_CERT_ID
+#       property: certificate
+#   - secretKey: sfskey
+#     remoteRef:
+#       key: public_cert/$PUBLIC_CERT_ID
+#       property: private_key
