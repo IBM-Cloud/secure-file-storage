@@ -59,7 +59,8 @@ async function configureOIDC(req, res, next) {
   const issuer = await Issuer.discover(APPID_OAUTH_SERVER_URL) // connect to oidc application
   const client = new issuer.Client({ // Initialize issuer information
       client_id: APPID_CLIENT_ID,
-      client_secret: APPID_SECRET
+      client_secret: APPID_SECRET,
+      redirect_uris: [APPID_APP_URL+'/redirect_uri', 'http://sfs.4loeser.net/redirect_uri','http://0.0.0.0:8081/redirect_uri']
   });
   const params = {
       redirect_uri: APPID_APP_URL+'/redirect_uri',
@@ -71,7 +72,7 @@ async function configureOIDC(req, res, next) {
   req.app.authClient = client;
 
   // Register oidc strategy with passport
-  passport.use('oidc', new Strategy({ client, params }, (tokenset, userinfo, done) => {
+  passport.use('oidc', new Strategy({ client }, (tokenset, userinfo, done) => {
     return done(null, userinfo); // return user information
   }));
 
@@ -122,7 +123,7 @@ var cosUrlGenerator = new CloudObjectStorage.S3({
 
 // serialize and deserialize the user information
 passport.serializeUser(function(user, done) {
-  console.log("Got authenticated user", JSON.stringify(user));
+  //console.log("Got authenticated user", JSON.stringify(user));
   done(null, {
     id: user["id"],
     name: user["name"],
@@ -139,13 +140,16 @@ app.use(configureOIDC);
 
 // default protected route /authtest
 app.get('/authtest', (req, res, next) => {
-  passport.authenticate('oidc')(req, res, next);
+  passport.authenticate('oidc', {
+    redirect_uri: `http://${req.headers.host}/redirect_uri`,
+  })(req, res, next);
 });
 
 // callback for the OpenID Connect identity provider
 // in the case of an error go back to authentication
 app.get('/redirect_uri', (req, res, next) => {
   passport.authenticate('oidc', {
+    redirect_uri: `http://${req.headers.host}/redirect_uri`,
     successRedirect: '/',
     failureRedirect: '/authtest'
   })(req, res, next);
