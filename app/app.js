@@ -40,7 +40,10 @@ const COS_SECRET_ACCESS_KEY = process.env.cos_secret_access_key;
 const APPID_OAUTH_SERVER_URL= process.env.appid_oauth_server_url;
 const APPID_CLIENT_ID= process.env.appid_client_id;
 const APPID_SECRET= process.env.appid_secret;
-const APPID_REDIRECT_URIS=process.env.appid_redirect_uris.split(',');;
+const APPID_REDIRECT_URIS=process.env.appid_redirect_uris.split(',');
+const DEBUG_FLAG=process.env.LOCAL_DEBUG;
+
+console.log(DEBUG_FLAG);
 
 // Express setup, including session and passport support
 var app = express();
@@ -141,7 +144,7 @@ app.use(configureOIDC);
 // default protected route /authtest
 app.get('/authtest', (req, res, next) => {
   passport.authenticate('oidc', {
-    redirect_uri: req.secure ? 'https' : 'http'+`://${req.headers.host}/redirect_uri`,
+    redirect_uri: `${DEBUG_FLAG ? 'http' : 'https'}` + `://${req.headers.host}/redirect_uri`,
   })(req, res, next);
 });
 
@@ -149,7 +152,7 @@ app.get('/authtest', (req, res, next) => {
 // in the case of an error go back to authentication
 app.get('/redirect_uri', (req, res, next) => {
   passport.authenticate('oidc', {
-    redirect_uri: req.secure ? 'https' : 'http'+`://${req.headers.host}/redirect_uri`,
+    redirect_uri: `${DEBUG_FLAG ? 'http' : 'https'}`+`://${req.headers.host}/redirect_uri`,
     successRedirect: '/',
     failureRedirect: '/authtest'
   })(req, res, next);
@@ -169,13 +172,23 @@ var checkAuthenticated = (req, res, next) => {
 //
 
 // The index document already is protected
-app.use('/', checkAuthenticated, express.static(__dirname + '/public'));
+app.use('/secure', checkAuthenticated, express.static(__dirname + '/public'));
 
 
 // Makes sure that all requests to /api are authenticated
 app.use('/api/',checkAuthenticated , (req, res, next) => {
   next();
 });
+
+// Returns all files associated to the current user
+app.get('/health', async function (req, res) {
+  res.send(req.headers);
+});
+
+app.get('/', async function (req, res) {
+  res.redirect("/secure")
+});
+
 
 
 // Returns all files associated to the current user

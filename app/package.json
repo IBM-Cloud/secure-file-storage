@@ -3,7 +3,8 @@
   "version": "2.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "dev": "LOCAL_DEBUG=true node app.js"
   },
   "engines": {
     "node": ">=20"
