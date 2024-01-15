@@ -40,7 +40,7 @@ const COS_SECRET_ACCESS_KEY = process.env.cos_secret_access_key;
 const APPID_OAUTH_SERVER_URL= process.env.appid_oauth_server_url;
 const APPID_CLIENT_ID= process.env.appid_client_id;
 const APPID_SECRET= process.env.appid_secret;
-const APPID_APP_URL=process.env.appid_app_url;
+const APPID_REDIRECT_URIS=process.env.appid_redirect_uris.split(',');;
 
 // Express setup, including session and passport support
 var app = express();
@@ -60,10 +60,10 @@ async function configureOIDC(req, res, next) {
   const client = new issuer.Client({ // Initialize issuer information
       client_id: APPID_CLIENT_ID,
       client_secret: APPID_SECRET,
-      redirect_uris: [APPID_APP_URL+'/redirect_uri', 'http://sfs.4loeser.net/redirect_uri','http://0.0.0.0:8081/redirect_uri']
+      redirect_uris: APPID_REDIRECT_URIS
   });
   const params = {
-      redirect_uri: APPID_APP_URL+'/redirect_uri',
+      redirect_uri: APPID_REDIRECT_URIS[0],
       scope:'openid',
       grant_type:'authorization_code',
       response_type:'code',
@@ -351,5 +351,6 @@ app.get('/api/user', function (req, res) {
 
 // start the server
 const server = app.listen(process.env.PORT || 8081, () => {
+  console.log(APPID_REDIRECT_URIS[0]);
   console.log(`Listening on port http://localhost:${server.address().port}`);
 });
