@@ -141,7 +141,7 @@ app.use(configureOIDC);
 // default protected route /authtest
 app.get('/authtest', (req, res, next) => {
   passport.authenticate('oidc', {
-    redirect_uri: `http://${req.headers.host}/redirect_uri`,
+    redirect_uri: req.secure ? 'https' : 'http'+`://${req.headers.host}/redirect_uri`,
   })(req, res, next);
 });
 
@@ -149,7 +149,7 @@ app.get('/authtest', (req, res, next) => {
 // in the case of an error go back to authentication
 app.get('/redirect_uri', (req, res, next) => {
   passport.authenticate('oidc', {
-    redirect_uri: `http://${req.headers.host}/redirect_uri`,
+    redirect_uri: req.secure ? 'https' : 'http'+`://${req.headers.host}/redirect_uri`,
     successRedirect: '/',
     failureRedirect: '/authtest'
   })(req, res, next);
