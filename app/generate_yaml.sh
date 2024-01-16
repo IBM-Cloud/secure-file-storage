@@ -56,6 +56,3 @@ fi
 cat secure-file-storage-ingress.template.yaml | \
   sed -e 's/^# //' |
   envsubst '$PUBLIC_CERT_ID $SECRETS_MANAGER_API_URL $MYDOMAIN $INGRESS_SECRET $INGRESS_SUBDOMAIN $TARGET_NAMESPACE $BASENAME' > secure-file-storage-ingress.yaml
-cat secure-file-storage-route.template.yaml | \
-  sed -e 's/^# //' |
-  envsubst '$PUBLIC_CERT_ID $SECRETS_MANAGER_API_URL $MYDOMAIN $INGRESS_SECRET $INGRESS_SUBDOMAIN $TARGET_NAMESPACE $BASENAME' > secure-file-storage-route.yaml  

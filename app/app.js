@@ -143,6 +143,8 @@ app.use(configureOIDC);
 
 // default protected route /authtest
 app.get('/authtest', (req, res, next) => {
+  // instead of looking for the debug flag, another option would be to 
+  // evaluate "x-forwarded-proto" or "req.secure"
   passport.authenticate('oidc', {
     redirect_uri: `${DEBUG_FLAG ? 'http' : 'https'}` + `://${req.headers.host}/redirect_uri`,
   })(req, res, next);
@@ -171,7 +173,7 @@ var checkAuthenticated = (req, res, next) => {
 // Define routes
 //
 
-// The index document already is protected
+// The index document is redirected here and protected
 app.use('/secure', checkAuthenticated, express.static(__dirname + '/public'));
 
 
@@ -180,11 +182,12 @@ app.use('/api/',checkAuthenticated , (req, res, next) => {
   next();
 });
 
-// Returns all files associated to the current user
+// Return the headers as health info
 app.get('/health', async function (req, res) {
   res.send(req.headers);
 });
 
+// Redirect the index to a secure path
 app.get('/', async function (req, res) {
   res.redirect("/secure")
 });

@@ -1,10 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: secure-file-storage-service
+  namespace: $TARGET_NAMESPACE
+spec:
+  ports:
+  - port: 8081
+    targetPort: 8081
+    protocol: TCP
+  type: ClusterIP
+  selector:
+    app: secure-file-storage
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-for-secure-file-storage
   namespace: $TARGET_NAMESPACE
-  annotations:
-    kubernetes.io/ingress.class: public-iks-k8s-nginx
 spec:
   tls:
   - hosts:
@@ -36,44 +48,3 @@ spec:
 #             name: secure-file-storage-service
 #             port:
 #               number: 8081
-# ---
-# apiVersion: external-secrets.io/v1beta1
-# kind: SecretStore
-# metadata:
-#   name: secure-file-storage-secretstore
-# spec:
-#   provider:
-#     ibm:
-#       serviceUrl: $SECRETS_MANAGER_API_URL
-#       auth:
-#         secretRef:
-#           secretApiKeySecretRef:
-#             name: secure-file-storage-api-key
-#             key: apikey
-# ---
-# apiVersion: external-secrets.io/v1beta1
-# kind: ExternalSecret
-# metadata:
-#   name: secure-file-storage-external-secret
-# spec:
-#   refreshInterval: 1m
-#   secretStoreRef:
-#     name: secure-file-storage-secretstore
-#     kind: SecretStore
-#   target:
-#     name: secure-file-storage-certificate
-#     template:
-#       type: kubernetes.io/tls
-#       data:
-#         tls.crt: '{{ .sfscrt | toString }}'
-#         tls.key: '{{ .sfskey | toString }}'
-#     creationPolicy: Owner
-#   data:
-#   - secretKey: sfscrt
-#     remoteRef:
-#       key: public_cert/$PUBLIC_CERT_ID
-#       property: certificate
-#   - secretKey: sfskey
-#     remoteRef:
-#       key: public_cert/$PUBLIC_CERT_ID
-#       property: private_key
