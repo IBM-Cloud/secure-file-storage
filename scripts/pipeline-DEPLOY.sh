@@ -272,7 +272,7 @@ kubectl create secret generic $BASENAME-credentials \
   --from-literal="appid_oauth_server_url=$APPID_OAUTH_SERVER_URL" \
   --from-literal="appid_client_id=$APPID_CLIENT_ID" \
   --from-literal="appid_secret=$APPID_SECRET" \
-  --from-literal="appid_app_url=https://secure-file-storage.$INGRESS_SUBDOMAIN" \
+  --from-literal="appid_redirect_uris=https://secure-file-storage.$INGRESS_SUBDOMAIN" \
   --namespace "$TARGET_NAMESPACE" || exit 1
 
 #
@@ -299,14 +299,23 @@ sed -i 's/#        - name: $IMAGE_PULL_SECRET/        - name: $IMAGE_PULL_SECRET
 
 cat secure-file-storage.yaml | \
   IMAGE_NAME=$IMAGE_NAME \
-  INGRESS_SECRET=$INGRESS_SECRET \
-  INGRESS_SUBDOMAIN=$INGRESS_SUBDOMAIN \
   IMAGE_PULL_SECRET=$BASENAME-docker-registry \
   IMAGE_REPOSITORY=$IMAGE_REPOSITORY \
   TARGET_NAMESPACE=$TARGET_NAMESPACE \
   BASENAME=$BASENAME \
-  envsubst '$IMAGE_NAME $INGRESS_SECRET $INGRESS_SUBDOMAIN $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' \
+  envsubst '$IMAGE_NAME $IMAGE_PULL_SECRET $IMAGE_REPOSITORY $TARGET_NAMESPACE $BASENAME' \
   | \
   kubectl apply --namespace $TARGET_NAMESPACE -f - || exit 1
+
+cp secure-file-storage-ingress.template.yaml secure-file-storage-ingress.yaml
+cat secure-file-storage.yaml | \
+  INGRESS_SECRET=$INGRESS_SECRET \
+  INGRESS_SUBDOMAIN=$INGRESS_SUBDOMAIN \
+  TARGET_NAMESPACE=$TARGET_NAMESPACE \
+  BASENAME=$BASENAME \
+  envsubst '$INGRESS_SECRET $INGRESS_SUBDOMAIN $TARGET_NAMESPACE $BASENAME' \
+  | \
+  kubectl apply --namespace $TARGET_NAMESPACE -f - || exit 1
+
 
 echo "Your app is available at https://secure-file-storage.$INGRESS_SUBDOMAIN/"

@@ -40,7 +40,10 @@ const COS_SECRET_ACCESS_KEY = process.env.cos_secret_access_key;
 const APPID_OAUTH_SERVER_URL= process.env.appid_oauth_server_url;
 const APPID_CLIENT_ID= process.env.appid_client_id;
 const APPID_SECRET= process.env.appid_secret;
-const APPID_APP_URL=process.env.appid_app_url;
+const APPID_REDIRECT_URIS=process.env.appid_redirect_uris.split(',');
+const DEBUG_FLAG=process.env.LOCAL_DEBUG;
+
+console.log(DEBUG_FLAG);
 
 // Express setup, including session and passport support
 var app = express();
@@ -59,10 +62,11 @@ async function configureOIDC(req, res, next) {
   const issuer = await Issuer.discover(APPID_OAUTH_SERVER_URL) // connect to oidc application
   const client = new issuer.Client({ // Initialize issuer information
       client_id: APPID_CLIENT_ID,
-      client_secret: APPID_SECRET
+      client_secret: APPID_SECRET,
+      redirect_uris: APPID_REDIRECT_URIS
   });
   const params = {
-      redirect_uri: APPID_APP_URL+'/redirect_uri',
+      redirect_uri: APPID_REDIRECT_URIS[0],
       scope:'openid',
       grant_type:'authorization_code',
       response_type:'code',
@@ -71,7 +75,7 @@ async function configureOIDC(req, res, next) {
   req.app.authClient = client;
 
   // Register oidc strategy with passport
-  passport.use('oidc', new Strategy({ client, params }, (tokenset, userinfo, done) => {
+  passport.use('oidc', new Strategy({ client }, (tokenset, userinfo, done) => {
     return done(null, userinfo); // return user information
   }));
 
@@ -122,7 +126,7 @@ var cosUrlGenerator = new CloudObjectStorage.S3({
 
 // serialize and deserialize the user information
 passport.serializeUser(function(user, done) {
-  console.log("Got authenticated user", JSON.stringify(user));
+  //console.log("Got authenticated user", JSON.stringify(user));
   done(null, {
     id: user["id"],
     name: user["name"],
@@ -139,13 +143,18 @@ app.use(configureOIDC);
 
 // default protected route /authtest
 app.get('/authtest', (req, res, next) => {
-  passport.authenticate('oidc')(req, res, next);
+  // instead of looking for the debug flag, another option would be to 
+  // evaluate "x-forwarded-proto" or "req.secure"
+  passport.authenticate('oidc', {
+    redirect_uri: `${DEBUG_FLAG ? 'http' : 'https'}` + `://${req.headers.host}/redirect_uri`,
+  })(req, res, next);
 });
 
 // callback for the OpenID Connect identity provider
 // in the case of an error go back to authentication
 app.get('/redirect_uri', (req, res, next) => {
   passport.authenticate('oidc', {
+    redirect_uri: `${DEBUG_FLAG ? 'http' : 'https'}`+`://${req.headers.host}/redirect_uri`,
     successRedirect: '/',
     failureRedirect: '/authtest'
   })(req, res, next);
@@ -164,14 +173,25 @@ var checkAuthenticated = (req, res, next) => {
 // Define routes
 //
 
-// The index document already is protected
-app.use('/', checkAuthenticated, express.static(__dirname + '/public'));
+// The index document is redirected here and protected
+app.use('/secure', checkAuthenticated, express.static(__dirname + '/public'));
 
 
 // Makes sure that all requests to /api are authenticated
 app.use('/api/',checkAuthenticated , (req, res, next) => {
   next();
 });
+
+// Return the headers as health info
+app.get('/health', async function (req, res) {
+  res.send(req.headers);
+});
+
+// Redirect the index to a secure path
+app.get('/', async function (req, res) {
+  res.redirect("/secure")
+});
+
 
 
 // Returns all files associated to the current user
@@ -347,5 +367,6 @@ app.get('/api/user', function (req, res) {
 
 // start the server
 const server = app.listen(process.env.PORT || 8081, () => {
+  console.log(APPID_REDIRECT_URIS[0]);
   console.log(`Listening on port http://localhost:${server.address().port}`);
 });

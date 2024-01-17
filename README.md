@@ -104,7 +104,7 @@ Located in the [app](app) directory:
 |[app/credentials.template.env](app/credentials.template.env)|To be copied to `credentials.env` and filled with credentials to access services. `credentials.env` is used when running the app locally and to create a Kubernetes secret before deploying the application to a cluster manually.|
 |[app/Dockerfile](app/Dockerfile)|Docker image description file.|
 |[app/secure-file-storage.template.yaml](app/secure-file-storage.template.yaml)|Kubernetes deployment file with placeholders. To be copied to `secure-file-storage.yaml` and edited to match your environment.|
-
+|[app/secure-file-storage-ingress.template.yaml](app/secure-file-storage-ingress.template.yaml)|Kubernetes network configuration file with placeholders. To be copied to `secure-file-storage-ingress.yaml` and edited to match your environment.|
 
 ### To test locally
 The app can be tested and developed locally, either directly by using `npm start` or by building and running a container by leveraging the `Dockerfile`. 

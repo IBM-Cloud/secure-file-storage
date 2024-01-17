@@ -12,6 +12,7 @@ yarn-debug.log*
 yarn-error.log*
 local_yaml
 /app/secure-file-storage.yaml
+/app/secure-file-storage-ingress.yaml
 
 # Terraform
 *.tfvars

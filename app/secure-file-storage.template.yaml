@@ -1,17 +1,3 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: secure-file-storage-service
-  namespace: $TARGET_NAMESPACE
-spec:
-  ports:
-  - port: 8081
-    targetPort: 8081
-    protocol: TCP
-  type: ClusterIP
-  selector:
-    app: secure-file-storage
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -27,10 +13,10 @@ spec:
       labels:
         app: secure-file-storage
     spec:
-## Uncomment only if you aren't deploying to the default namespace, remove ##
-## In this case, make sure to create a Docker registry secret
-##      imagePullSecrets:
-##        - name: $IMAGE_PULL_SECRET
+# Uncomment only if you aren't deploying to the default namespace, remove #
+# In this case, make sure to create a Docker registry secret
+#      imagePullSecrets:
+#        - name: $IMAGE_PULL_SECRET
       containers:
       - name: secure-file-storage-container
         image: $IMAGE_REPOSITORY:latest
@@ -40,83 +26,3 @@ spec:
         envFrom:
          - secretRef:
             name: $BASENAME-credentials
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: ingress-for-sfs
-  namespace: $TARGET_NAMESPACE
-  annotations:
-    kubernetes.io/ingress.class: public-iks-k8s-nginx
-spec:
-  tls:
-  - hosts:
-    - secure-file-storage.$INGRESS_SUBDOMAIN
-    secretName: $INGRESS_SECRET
-## Uncomment below if you are using a custom domain. Remove '# '
-#   - hosts:
-#     - secure-file-storage.$MYDOMAIN
-#     secretName: secure-file-storage-certificate
-  rules:
-  - host: secure-file-storage.$INGRESS_SUBDOMAIN
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: secure-file-storage-service
-            port: 
-              number: 8081
-## Uncomment below if you are using a custom domain. Remove '# '
-#   - host: secure-file-storage.$MYDOMAIN
-#     http:
-#       paths:
-#       - path: /
-#         pathType: Prefix
-#         backend:
-#           service:
-#             name: secure-file-storage-service
-#             port:
-#               number: 8081
-# ---
-# apiVersion: external-secrets.io/v1beta1
-# kind: SecretStore
-# metadata:
-#   name: secure-file-storage-secretstore
-# spec:
-#   provider:
-#     ibm:
-#       serviceUrl: $SECRETS_MANAGER_API_URL
-#       auth:
-#         secretRef:
-#           secretApiKeySecretRef:
-#             name: secure-file-storage-api-key
-#             key: apikey
-# ---
-# apiVersion: external-secrets.io/v1beta1
-# kind: ExternalSecret
-# metadata:
-#   name: secure-file-storage-external-secret
-# spec:
-#   refreshInterval: 1m
-#   secretStoreRef:
-#     name: secure-file-storage-secretstore
-#     kind: SecretStore
-#   target:
-#     name: secure-file-storage-certificate
-#     template:
-#       type: kubernetes.io/tls
-#       data:
-#         tls.crt: '{{ .sfscrt | toString }}'
-#         tls.key: '{{ .sfskey | toString }}'
-#     creationPolicy: Owner
-#   data:
-#   - secretKey: sfscrt
-#     remoteRef:
-#       key: public_cert/$PUBLIC_CERT_ID
-#       property: certificate
-#   - secretKey: sfskey
-#     remoteRef:
-#       key: public_cert/$PUBLIC_CERT_ID
-#       property: private_key
