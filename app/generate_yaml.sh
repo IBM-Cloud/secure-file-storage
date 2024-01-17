@@ -33,8 +33,6 @@ cat secure-file-storage.template.yaml | \
 if [[ -z "$PUBLIC_CERT_ID" ]] && [[ -z "$SECRETS_MANAGER_API_URL" ]] && [[ -z "$MYDOMAIN" ]]; then
   cat secure-file-storage-ingress.template.yaml | \
     envsubst '$INGRESS_SECRET $INGRESS_SUBDOMAIN $TARGET_NAMESPACE $BASENAME' > secure-file-storage-ingress.yaml
-  cat secure-file-storage-route.template.yaml | \
-    envsubst '$INGRESS_SECRET $INGRESS_SUBDOMAIN $TARGET_NAMESPACE $BASENAME' > secure-file-storage-route.yaml
   exit
 fi
 
