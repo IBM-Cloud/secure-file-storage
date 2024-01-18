@@ -251,6 +251,7 @@ else
   else
     echo "Ingress secret without CRN, copying with kubectl"
     kubectl get secret $INGRESS_SECRET --namespace=ibm-cert-store -oyaml | grep -v '^\s*namespace:\s'| kubectl apply  --namespace=$TARGET_NAMESPACE -f -
+  fi
 fi
 
 
