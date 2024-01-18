@@ -65,7 +65,7 @@ echo "REGISTRY_URL=$REGISTRY_URL"
 CLUSTER_INFO=$(ibmcloud ks cluster get --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --output json)
 
 # download and set cluster context
-ibmcloud ks cluster config --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME
+ibmcloud ks cluster config --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --admin
 
 # show available contexts for debugging reasons
 # kubectl config get-contexts

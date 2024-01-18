@@ -50,7 +50,7 @@ echo TARGET_NAMESPACE=$TARGET_NAMESPACE
 
 # download and set cluster context
 echo "getting cluster config"
-ibmcloud ks cluster config --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME
+ibmcloud ks cluster config --cluster $PIPELINE_KUBERNETES_CLUSTER_NAME --admin
 
 # this should be done by TF as it is not really app-related
 # echo "unbindng appid"
