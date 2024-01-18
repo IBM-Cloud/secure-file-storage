@@ -258,6 +258,7 @@ if kubectl get secret $BASENAME-credentials --namespace "$TARGET_NAMESPACE"; the
   kubectl delete secret $BASENAME-credentials --namespace "$TARGET_NAMESPACE"
 fi
 
+echo "Creating secret $BASENAME-credentials"
 kubectl create secret generic $BASENAME-credentials \
   --from-literal="cos_endpoint=$COS_ENDPOINT" \
   --from-literal="cos_ibmAuthEndpoint=$COS_IBMAUTHENDPOINT" \
@@ -272,7 +273,7 @@ kubectl create secret generic $BASENAME-credentials \
   --from-literal="appid_oauth_server_url=$APPID_OAUTH_SERVER_URL" \
   --from-literal="appid_client_id=$APPID_CLIENT_ID" \
   --from-literal="appid_secret=$APPID_SECRET" \
-  --from-literal="appid_redirect_uris=https://secure-file-storage.$INGRESS_SUBDOMAIN" \
+  --from-literal="appid_redirect_uris=https://secure-file-storage.$INGRESS_SUBDOMAIN/redirect_uri" \
   --namespace "$TARGET_NAMESPACE" || exit 1
 
 #
@@ -281,6 +282,8 @@ kubectl create secret generic $BASENAME-credentials \
 if kubectl get secret $BASENAME-docker-registry --namespace $TARGET_NAMESPACE; then
   kubectl delete secret $BASENAME-docker-registry --namespace "$TARGET_NAMESPACE"
 fi
+
+echo "Creating secret $BASENAME-docker-registry"
 kubectl --namespace $TARGET_NAMESPACE create secret docker-registry $BASENAME-docker-registry \
     --docker-server=${REGISTRY_URL} \
     --docker-username=iamapikey \
@@ -291,12 +294,14 @@ kubectl --namespace $TARGET_NAMESPACE create secret docker-registry $BASENAME-do
 #
 # Deploy the app
 #
+echo "deploying the app"
 
 # uncomment the imagePullSecrets
 cp secure-file-storage.template.yaml secure-file-storage.yaml
 sed -i 's/#      imagePullSecrets:/      imagePullSecrets:/g' secure-file-storage.yaml
 sed -i 's/#        - name: $IMAGE_PULL_SECRET/        - name: $IMAGE_PULL_SECRET/g' secure-file-storage.yaml
 
+echo "creating deployment from secure-file-storage.yaml"
 cat secure-file-storage.yaml | \
   IMAGE_NAME=$IMAGE_NAME \
   IMAGE_PULL_SECRET=$BASENAME-docker-registry \
@@ -308,7 +313,8 @@ cat secure-file-storage.yaml | \
   kubectl apply --namespace $TARGET_NAMESPACE -f - || exit 1
 
 cp secure-file-storage-ingress.template.yaml secure-file-storage-ingress.yaml
-cat secure-file-storage.yaml | \
+echo "creating ingress and service from secure-file-storage-ingress.yaml"
+cat secure-file-storage-ingress.yaml | \
   INGRESS_SECRET=$INGRESS_SECRET \
   INGRESS_SUBDOMAIN=$INGRESS_SUBDOMAIN \
   TARGET_NAMESPACE=$TARGET_NAMESPACE \
