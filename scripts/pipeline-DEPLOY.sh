@@ -224,26 +224,6 @@ curl -X PUT \
 #
 section "Kubernetes"
 
-if [ -z ${VPC} ]; then
-  INGRESS_SECRET=$(echo $CLUSTER_INFO | jq -r 'select(.ingressSecretName) | .ingressSecretName')
-else
-  INGRESS_SECRET=$(echo $CLUSTER_INFO | jq -r 'select(.ingress.secretName) | .ingress.secretName')
-fi
-
-# we need to create an Ingress secret if deploying to non-default namespace
-if [ "$TARGET_NAMESPACE" != "default" ]; then
-  INGRESS_SECRET_IN_NAMESPACE=$(ibmcloud ks ingress secret ls -c $PIPELINE_KUBERNETES_CLUSTER_NAME --output json | jq -r '.[] | select(.namespace=="'$TARGET_NAMESPACE'" and .name=="'$INGRESS_SECRET'").name')
-  if [ "$INGRESS_SECRET" == "$INGRESS_SECRET_IN_NAMESPACE" ] ; then
-    echo "copied Ingress secret exists"
-  else
-    echo "copying Ingress secret to namespace $TARGET_NAMESPACE"
-    INGRESS_SECRET_CRN=$(ibmcloud ks ingress secret get -c $PIPELINE_KUBERNETES_CLUSTER_NAME -n default --name $INGRESS_SECRET --output json | jq -r .crn)
-    ibmcloud ks ingress secret create -c $PIPELINE_KUBERNETES_CLUSTER_NAME -n $TARGET_NAMESPACE --name $INGRESS_SECRET --cert-crn $INGRESS_SECRET_CRN
-  fi
-fi
-echo "INGRESS_SECRET=${INGRESS_SECRET}"
-check_value "$INGRESS_SECRET"
-
 if kubectl get namespace $TARGET_NAMESPACE; then
   echo "Namespace $TARGET_NAMESPACE already exists"
 else
@@ -251,6 +231,31 @@ else
   kubectl create namespace $TARGET_NAMESPACE || exit 1
 fi
 
+
+if [ -z ${VPC} ]; then
+  INGRESS_SECRET=$(echo $CLUSTER_INFO | jq -r 'select(.ingressSecretName) | .ingressSecretName')
+else
+  INGRESS_SECRET=$(echo $CLUSTER_INFO | jq -r 'select(.ingress.secretName) | .ingress.secretName')
+fi
+
+# we need to create an Ingress secret if deploying to non-default namespace or to default namespace on ROKS
+INGRESS_SECRET_IN_NAMESPACE=$(ibmcloud ks ingress secret ls -c $PIPELINE_KUBERNETES_CLUSTER_NAME --output json | jq -r '.[] | select(.namespace=="'$TARGET_NAMESPACE'" and .name=="'$INGRESS_SECRET'").name')
+if [ "$INGRESS_SECRET" == "$INGRESS_SECRET_IN_NAMESPACE" ] ; then
+  echo "Ingress secret exists in namespace"
+else
+  echo "copying Ingress secret to namespace $TARGET_NAMESPACE"
+  INGRESS_SECRET_CRN=$(ibmcloud ks ingress secret get -c $PIPELINE_KUBERNETES_CLUSTER_NAME -n default --name $INGRESS_SECRET --output json | jq -r .crn)
+  if [ "$INGRESS_SECRET_CRN" != "" ] ; then
+    echo "Ingress secret has CRN"
+    ibmcloud ks ingress secret create -c $PIPELINE_KUBERNETES_CLUSTER_NAME -n $TARGET_NAMESPACE --name $INGRESS_SECRET --cert-crn $INGRESS_SECRET_CRN
+  else
+    echo "Ingress secret without CRN, copying with kubectl"
+    kubectl get secret $INGRESS_SECRET --namespace=ibm-cert-store -oyaml | grep -v '^\s*namespace:\s'| kubectl apply  --namespace=$TARGET_NAMESPACE -f -
+fi
+
+
+echo "INGRESS_SECRET=${INGRESS_SECRET}"
+check_value "$INGRESS_SECRET"
 #
 # Create a secret in the cluster holding the credentials for Cloudant, COS, and App ID
 #
