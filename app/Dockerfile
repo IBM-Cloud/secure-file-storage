@@ -12,4 +12,4 @@ WORKDIR /usr/src/app
 COPY . .
 RUN npm install --production --silent
 EXPOSE 8081
-CMD npm start
+CMD node app.js
