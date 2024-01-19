@@ -13,9 +13,9 @@ Refer to [this tutorial](https://cloud.ibm.com/docs/solution-tutorials?topic=sol
 ![Architecture](Architecture.svg)
 
 1. The user connects to the application.
-2. Optionally [Secrets Manager](https://cloud.ibm.com/catalog/services/secrets-manager) is used to store/retrieve certificates.
+2. Optionally [Secrets Manager](https://cloud.ibm.com/catalog/services/secrets-manager) is used to store/retrieve SSL/TLS certificates.
 3. [App ID](https://cloud.ibm.com/catalog/services/AppID) secures the application and redirects the user to the authentication page. Users can sign up from there too.
-4. The application is running in a [Kubernetes cluster](https://cloud.ibm.com/containers-kubernetes/catalog/cluster) from an image stored in the [container registry](https://cloud.ibm.com/containers-kubernetes/launchRegistryView). The image is automatically scanned for vulnerabilities.
+4. The application is running in a Kubernetes cluster (either [IBM Cloud Kubernetes Service](https://cloud.ibm.com/docs/containers?topic=containers-getting-started#getting-started) or [Red Hat OpenShift on IBM Cloud](https://cloud.ibm.com/docs/openshift?topic=openshift-getting-started)) from an image stored in the [container registry](https://cloud.ibm.com/containers-kubernetes/launchRegistryView). The image is automatically scanned for vulnerabilities.
 5. Files uploaded by the user are stored in [Cloud Object Storage](https://cloud.ibm.com/catalog/services/cloud-object-storage).
 6. The bucket where the files are stored is using a user-provided key to encrypt the data.
 7. All activities related to managing the solution are logged by [Cloud Activity Tracker with LogDNA](https://cloud.ibm.com/catalog/services/logdnaat).
@@ -34,7 +34,7 @@ This project comes with a partially automated toolchain capable of deploying the
 
 ### Prerequisites
 
-1. [Create a **standard** Kubernetes cluster](https://cloud.ibm.com/kubernetes/catalog/create) in a VPC (Virtual Private Cloud) with a **Kubernetes version of 1.19** or higher. Make sure to attach a Public Gateway for each of the subnets your worker nodes are deployed into as it is required for App ID.
+1. [Create an IBM Cloud Kubernetes Service](https://cloud.ibm.com/kubernetes/catalog/create) or [Red Hat OpenShift on IBM Cloud](https://cloud.ibm.com/kubernetes/catalog/create?platformType=openshift) cluster in a VPC (Virtual Private Cloud). Make sure to attach a Public Gateway for each of the subnets your worker nodes are deployed into as it is required for App ID.
 2. Have an instance of [Continuous Delivery](https://cloud.ibm.com/catalog/services/continuous-delivery) service to be used by the toolchain.
 3. Have an existing [namespace in the IBM Cloud Container Registry](https://cloud.ibm.com/registry/namespaces).
 4. Optionally create a specific [resource group](https://cloud.ibm.com/account/resource-groups) for this project.
