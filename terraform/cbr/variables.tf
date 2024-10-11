@@ -20,3 +20,6 @@ variable "cos" {
 
 variable "keyprotect" {
 }
+
+variable "toolchain_registry_namespace" {
+}

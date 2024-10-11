@@ -43,7 +43,7 @@ resource "ibm_resource_instance" "cloudant" {
   location          = var.region
   resource_group_id = data.ibm_resource_group.cloud_development.id
   service_endpoints = "private"
-  parameters        = {"legacyCredentials": false}
+  parameters        = { "legacyCredentials" : false }
 }
 
 resource "ibm_resource_instance" "keyprotect" {
@@ -122,8 +122,8 @@ resource "ibm_resource_key" "RKcloudantManager" {
   provisioner "local-exec" {
     command = "./create-database.sh"
     environment = {
-      CLOUDANT_IAM_APIKEY = nonsensitive(ibm_resource_key.RKcloudantManager.credentials.apikey)
-      CLOUDANT_URL        = nonsensitive(ibm_resource_key.RKcloudantManager.credentials.url)
+      CLOUDANT_IAM_APIKEY = nonsensitive(self.credentials.apikey)
+      CLOUDANT_URL        = nonsensitive(self.credentials.url)
       CLOUDANT_DATABASE   = "secure-file-storage-metadata"
     }
   }

@@ -64,7 +64,7 @@ resource "ibm_cbr_rule" "cbr_rule_registry" {
     attributes {
       name     = "resource"
       operator = "stringEquals"
-      value    = "e2esec"
+      value    = var.toolchain_registry_namespace
     }
     attributes {
       name     = "serviceName"
@@ -130,9 +130,9 @@ resource "ibm_cbr_rule" "cbr_rule_k8s_mgmt" {
   description      = "restrict access to Kubernetes management API"
   enforcement_mode = var.cbr_enforcement_mode
   operations {
-        api_types {
-            api_type_id = "crn:v1:bluemix:public:containers-kubernetes::::api-type:management"
-        }
+    api_types {
+      api_type_id = "crn:v1:bluemix:public:containers-kubernetes::::api-type:management"
+    }
   }
   resources {
     attributes {
