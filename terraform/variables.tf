@@ -53,6 +53,7 @@ variable "kp_plan" {
 # deploy the CBR objects? By default false
 variable "deploy_cbr" {
   default = false
+  type    = bool
 }
 
 # configure the enforcement mode for CBR
@@ -78,31 +79,31 @@ variable "toolchain_registry_namespace" {
 
 variable "toolchain_registry_region" {
   description = "region of the Container Registry"
-  default = "us-south"
+  default     = "us-south"
 }
 
 variable "toolchain_image_name" {
   description = "name of the container image"
-  default = "secure-file-storage"
+  default     = "secure-file-storage"
 }
 
 variable "toolchain_git_repository" {
   description = "repository with app source code"
-  default = "https://github.com/IBM-Cloud/secure-file-storage"
+  default     = "https://github.com/IBM-Cloud/secure-file-storage"
 }
 
 variable "toolchain_git_branch" {
   description = "branch with app source code"
-  default = "master"
+  default     = "master"
 }
 
 variable "toolchain_apikey" {
   description = "IBM Cloud API key to build and deploy the app"
-  default = ""
-  sensitive = true
+  default     = ""
+  sensitive   = true
 }
 
 variable "toolchain_failscan" {
   description = "fail when image scan finds issues"
-  default = "true"
+  default     = "true"
 }
